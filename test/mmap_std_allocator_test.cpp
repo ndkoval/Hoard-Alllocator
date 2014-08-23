@@ -2,7 +2,6 @@
 
 #include "gtest/gtest.h"
 #include "mmap_std_allocator.h"
-//#include "dummy_allocator.h"
 
 TEST(mmap_allocator, alloc)
 {
