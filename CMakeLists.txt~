@@ -1,0 +1,6 @@
+project (Hoard-Allocator)
+cmake_minimum_required (VERSION 2.6)
+aux_source_directory (src SRC_LIST)
+add_library (${PROJECT_NAME} SHARED ${SRC_LIST})
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
+set (CMAKE_BUILD_TYPE "Debug")
