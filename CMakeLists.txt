@@ -12,7 +12,7 @@ message(STATUS "SOURCES: ${SRC_LIST}")
 add_library(${PROJECT_NAME} SHARED ${SRC_LIST})
 
 #Tests
-set(PROJECT_TEST_NAME ${PROJECT_NAME}_test)
+set(PROJECT_TEST_NAME ${PROJECT_NAME}-test)
 enable_testing()
 
 add_subdirectory(${EXT_PROJECTS_DIR}/gtest)
