@@ -1,6 +1,3 @@
-#include "internals.h"
-#include "tracing.h"
-
 #include <cstring>
 #include <mutex>
 #include <thread>
@@ -16,11 +13,6 @@
 
 namespace
 {
-    bool is_power_of_2(size_t n)
-    {
-        return ((n != 0) && !(n & (n - 1))); 
-    }
-
     std::mutex big_alloc_mutex;
     std::unordered_map<void*, size_t,
         std::hash<void*>,
