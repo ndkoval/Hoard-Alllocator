@@ -3,7 +3,7 @@
 
 #include <cstdlib>
 
-namespace malloc_intercept
+namespace hoard
 {
     size_t const DEFAULT_ALIGNMENT = 8;
 

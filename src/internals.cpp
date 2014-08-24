@@ -33,7 +33,7 @@ namespace
 
         if (blk->magic != BLOCK_MAGIC)
         {
-            malloc_intercept::print("bad magic in block ", p, "\n");
+            hoard::print("bad magic in block ", p, "\n");
             std::abort();
         }
 
@@ -46,7 +46,7 @@ namespace
     }
 }
 
-void* malloc_intercept::internal_alloc(size_t size, size_t alignment)
+void* hoard::internal_alloc(size_t size, size_t alignment)
 {
     size_t data_start_offset = roundup(sizeof(block_header), alignment);
     size_t header_start_offset = data_start_offset - sizeof(block_header);
@@ -81,7 +81,7 @@ void* malloc_intercept::internal_alloc(size_t size, size_t alignment)
     return (char*)ptr + data_start_offset;
 }
 
-void malloc_intercept::internal_free(void* ptr)
+void hoard::internal_free(void* ptr)
 {
     if (ptr == NULL)
         return;
@@ -90,7 +90,7 @@ void malloc_intercept::internal_free(void* ptr)
     munmap(blk->start_address, blk->total_size);
 }
 
-void* malloc_intercept::internal_realloc(void *ptr, size_t size)
+void* hoard::internal_realloc(void *ptr, size_t size)
 {
     if (ptr == NULL)
         return internal_alloc(size, DEFAULT_ALIGNMENT);
@@ -111,7 +111,7 @@ void* malloc_intercept::internal_realloc(void *ptr, size_t size)
     return new_data;
 }
 
-bool malloc_intercept::is_valid_alignment(size_t alignment)
+bool hoard::is_valid_alignment(size_t alignment)
 {
     if ((alignment % sizeof(void*)) != 0)
         return false;

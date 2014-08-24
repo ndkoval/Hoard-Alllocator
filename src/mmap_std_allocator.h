@@ -3,7 +3,7 @@
 
 namespace hoard {
 
-template<typename T> class mmap_allocator: public std::allocator<T>
+template<typename T> class mmap_std_allocator: public std::allocator<T>
 {
 public:
     typedef size_t size_type;
@@ -13,7 +13,7 @@ public:
     template<typename U>
     struct rebind
     {
-        typedef mmap_allocator<U> other;
+        typedef mmap_std_allocator<U> other;
     };
 
     pointer allocate(size_type n, std::allocator<void>::const_pointer hint=0)

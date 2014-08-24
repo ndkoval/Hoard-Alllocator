@@ -9,7 +9,7 @@
 #include "internals.h"
 #include "tracing.h"
 
-using namespace malloc_intercept;
+using namespace hoard;
 
 namespace
 {

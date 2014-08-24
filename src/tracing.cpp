@@ -3,12 +3,12 @@
 #include <cstring>
 #include <unistd.h>
 
-void malloc_intercept::print_object(char const* message)
+void hoard::print_object(char const* message)
 {
     ::write(2, message, strlen(message));
 }
 
-void malloc_intercept::print_object(void* px)
+void hoard::print_object(void* px)
 {
     char const* hexdigits = "0123456789abcdef";
     
@@ -33,7 +33,7 @@ void malloc_intercept::print_object(void* px)
     print_object(buffer);
 }
 
-void malloc_intercept::print_object(size_t n)
+void hoard::print_object(size_t n)
 {
     char buffer[32];
 
@@ -55,10 +55,10 @@ void malloc_intercept::print_object(size_t n)
     print_object(buffer);
 }
 
-void malloc_intercept::print()
+void hoard::print()
 {}
 
-bool malloc_intercept::trace_enabled()
+bool hoard::trace_enabled()
 {
     static bool enabled = (getenv("MALLOC_INTERCEPT_NO_TRACE") == NULL);
     return enabled;

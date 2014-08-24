@@ -11,7 +11,7 @@
 // This code is known to be incomplet and incorrekt and it lacks
 // support of signed types.
 
-namespace malloc_intercept
+namespace hoard
 {
     void print_object(char const*);
     void print_object(void* px);
