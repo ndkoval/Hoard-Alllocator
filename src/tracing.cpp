@@ -60,6 +60,6 @@ void hoard::print()
 
 bool hoard::trace_enabled()
 {
-    static bool enabled = (getenv("MALLOC_INTERCEPT_NO_TRACE") == NULL);
+    static bool enabled = (getenv("MALLOC_INTERCEPT_NO_TRACE") != NULL);
     return enabled;
 }

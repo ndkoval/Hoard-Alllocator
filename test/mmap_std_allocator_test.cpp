@@ -21,7 +21,7 @@ TEST(mmap_std_allocator, free)
     v.~vector();
 }
 
-TEST(mmap_std_allocator, complex_structures)
+TEST(mmap_std_allocator, complex_structures_vector)
 {
     std::vector<std::vector<int>, hoard::mmap_std_allocator<std::vector<int> > > v;
 

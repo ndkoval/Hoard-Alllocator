@@ -45,7 +45,7 @@ void* malloc(size_t size)
 {
     recuirsion_guard rg;
     
-    void *p = internal_alloc(size, DEFAULT_ALIGNMENT);
+    void *p = internal_alloc(size);
     trace("malloc ", size, " ", p, "\n");
 
     return p;
@@ -56,7 +56,7 @@ void* calloc(size_t n, size_t size)
 {
     recuirsion_guard rg;
 
-    void* p = internal_alloc(n * size, DEFAULT_ALIGNMENT);
+    void* p = internal_alloc(n * size);
     trace("calloc ", n, " ", size, " ", p, "\n");
 
     return p;
