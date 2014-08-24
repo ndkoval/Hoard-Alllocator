@@ -1,15 +1,12 @@
 #include "internals.h"
 #include "tracing.h"
-
 #include <cstring>
 #include <mutex>
 #include <thread>
 #include <unordered_map>
-
 #include <unistd.h>
 #include <sys/mman.h>
 #include <algorithm>
-
 #include <algorithm>
 #include "utils.h"
 #include "mmap_std_allocator.h"
@@ -18,16 +15,11 @@
 
 namespace
 {
-    bool is_power_of_2(size_t n)
-    {
-        return ((n != 0) && !(n & (n - 1))); 
-    }
-
     std::mutex big_alloc_mutex;
     std::unordered_map<size_t, size_t,
-        std::hash<size_t>,
-        std::equal_to<size_t>,
-        std::allocator<std::pair<size_t, size_t> > > big_allocates;
+    std::hash<size_t>,
+    std::equal_to<size_t>,
+    std::allocator<std::pair<size_t, size_t>>> big_allocates;
 }
 
 void* hoard::internal_alloc(size_t size)
