@@ -5,12 +5,10 @@
 #include <mutex>
 #include <thread>
 #include <unordered_map>
-
 #include <unistd.h>
 #include <sys/mman.h>
 #include <algorithm>
 
-#include <algorithm>
 #include "utils.h"
 #include "mmap_std_allocator.h"
 #include "internals.h"
@@ -85,15 +83,4 @@ void* hoard::internal_realloc(void *ptr, size_t size)
     internal_free(ptr);
 
     return new_data;
-}
-
-bool hoard::is_valid_alignment(size_t alignment)
-{
-    if ((alignment % sizeof(void*)) != 0)
-        return false;
-
-    if (!is_power_of_2(alignment))
-        return false;
-
-    return true;
 }
