@@ -19,7 +19,7 @@ namespace
     std::unordered_map<size_t, size_t,
     std::hash<size_t>,
     std::equal_to<size_t>,
-    std::allocator<std::pair<size_t, size_t>>> big_allocates;
+    std::allocator<std::pair<size_t, size_t>> > big_allocates;
 }
 
 void* hoard::internal_alloc(size_t size)
