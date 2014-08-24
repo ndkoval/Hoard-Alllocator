@@ -7,14 +7,8 @@
 #include <sys/mman.h>
 
 #include <algorithm>
+#include "utils.h"
 
-namespace
-{
-    bool is_power_of_2(size_t n)
-    {
-        return ((n != 0) && !(n & (n - 1))); 
-    }
-}
 
 void* hoard::internal_alloc(size_t size)
 {
