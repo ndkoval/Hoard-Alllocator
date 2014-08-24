@@ -16,6 +16,9 @@ public:
         typedef mmap_std_allocator<U> other;
     };
 
+    mmap_std_allocator() {}
+    mmap_std_allocator(const mmap_std_allocator &a) {}
+
     pointer allocate(size_type n, std::allocator<void>::const_pointer hint=0)
     {
         size_t total_size = n * sizeof(T);

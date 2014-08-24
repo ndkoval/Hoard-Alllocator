@@ -1,12 +1,14 @@
-#include "internals.h"
-#include "tracing.h"
-
 #include <cstring>
-
+#include <mutex>
+#include <thread>
+#include <unordered_map>
 #include <unistd.h>
 #include <sys/mman.h>
-
 #include <algorithm>
+
+#include "mmap_std_allocator.h"
+#include "internals.h"
+#include "tracing.h"
 
 namespace
 {
@@ -14,6 +16,12 @@ namespace
     {
         return ((n != 0) && !(n & (n - 1))); 
     }
+
+    std::mutex big_alloc_mutex;
+    std::unordered_map<size_t, size_t,
+        std::hash<size_t>,
+        std::equal_to<size_t>,
+        std::allocator<std::pair<size_t, size_t> > > big_allocates;
 }
 
 void* hoard::internal_alloc(size_t size)
