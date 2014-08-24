@@ -1,5 +1,3 @@
-#include "internals.h"
-#include "tracing.h"
 #include <cstring>
 #include <mutex>
 #include <thread>
@@ -7,7 +5,7 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <algorithm>
-#include <algorithm>
+
 #include "utils.h"
 #include "mmap_std_allocator.h"
 #include "internals.h"
@@ -16,10 +14,10 @@
 namespace
 {
     std::mutex big_alloc_mutex;
-    std::unordered_map<size_t, size_t,
-    std::hash<size_t>,
-    std::equal_to<size_t>,
-    std::allocator<std::pair<size_t, size_t>> > big_allocates;
+    std::unordered_map<void*, size_t,
+        std::hash<void*>,
+        std::equal_to<void*>,
+        std::allocator<std::pair<void*, size_t> > > big_allocates;
 }
 
 void* hoard::internal_alloc(size_t size)
@@ -40,22 +38,25 @@ void hoard::internal_free(void* ptr)
 
 void* hoard::small_alloc(size_t size)
 {
-    return NULL;
+    return mmap(NULL, 4096, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 }
 
 void* hoard::big_alloc(size_t size, size_t alignment)
 {
-
+    void* p = mmap(NULL, size + alignment, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 }
 
 void hoard::small_free(void* ptr)
 {
-
+    munmap(ptr, 4096);
 }
 
 void hoard::big_free(void* ptr)
 {
-
+    auto it = big_allocates.find(ptr);
+    size_t size = (*it).second;
+    big_allocates.erase(it);
+    munmap(ptr, size);
 }
 
 void* hoard::internal_realloc(void *ptr, size_t size)
@@ -74,15 +75,4 @@ void* hoard::internal_realloc(void *ptr, size_t size)
     internal_free(ptr);
 
     return new_data;
-}
-
-bool hoard::is_valid_alignment(size_t alignment)
-{
-    if ((alignment % sizeof(void*)) != 0)
-        return false;
-
-    if (!is_power_of_2(alignment))
-        return false;
-
-    return true;
 }
