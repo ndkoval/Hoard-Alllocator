@@ -1,9 +1,3 @@
-// compile (debug):   g++ --shared -std=c++11 -fPIC -g -o malloc-intercept.so malloc-intercept.cpp internals.cpp tracing.cpp
-// compile (release): g++ --shared -std=c++11 -fPIC -O2 -o malloc-intercept.so malloc-intercept.cpp internals.cpp tracing.cpp
-// run (trace):       LD_PRELOAD=./malloc-intercept.so kreversi
-// run (no trace):    LD_PRELOAD=./malloc-intercept.so MALLOC_INTERCEPT_NO_TRACE=1 kreversi
-// view symbols:      objdump -T --demangle malloc-intercept.so
-
 #include <cerrno>
 
 #include "internals.h"
