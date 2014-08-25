@@ -28,6 +28,11 @@ namespace hoard {
 
         return true;
     }
+
+    char* get_first_aligned_pointer(char* ptr, size_t alignment) {
+        size_t offset = ((size_t) ptr) % alignment;
+        return ptr + offset;
+    }
 }
 
 

@@ -17,23 +17,22 @@ namespace
     std::unordered_map<void*, size_t,
         std::hash<void*>,
         std::equal_to<void*>,
-        std::allocator<std::pair<void*, size_t> > > big_allocates;
+        hoard::mmap_std_allocator<std::pair<void*, size_t> > > big_allocates;
 }
 
 void* hoard::internal_alloc(size_t size)
 {
-    return NULL;
+    big_alloc(size, 8);
 }
 
 void* hoard::internal_alloc(size_t size, size_t alignment)
 {
-    return NULL;
+    big_alloc(size, alignment);
 }
 
 void hoard::internal_free(void* ptr)
 {
-    if (ptr == NULL)
-        return;
+    big_free(ptr);
 }
 
 void* hoard::small_alloc(size_t size)
@@ -43,7 +42,14 @@ void* hoard::small_alloc(size_t size)
 
 void* hoard::big_alloc(size_t size, size_t alignment)
 {
-    void* p = mmap(NULL, size + alignment, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    std::lock_guard<std::mutex> lock(big_alloc_mutex);
+
+    char* p = (char*) mmap(NULL, size + alignment, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    char* ptr = (char*) hoard::get_first_aligned_pointer(p, alignment);
+
+    big_allocates.emplace(p, size + alignment);
+
+    return ptr;
 }
 
 void hoard::small_free(void* ptr)
@@ -53,6 +59,8 @@ void hoard::small_free(void* ptr)
 
 void hoard::big_free(void* ptr)
 {
+    std::lock_guard<std::mutex> lock(big_alloc_mutex);
+
     auto it = big_allocates.find(ptr);
     size_t size = (*it).second;
     big_allocates.erase(it);

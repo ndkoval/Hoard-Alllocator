@@ -17,7 +17,9 @@ public:
     };
 
     mmap_std_allocator() {}
-    mmap_std_allocator(const mmap_std_allocator &a) {}
+    mmap_std_allocator(const mmap_std_allocator& a) {}
+    template <class U>
+    mmap_std_allocator(const mmap_std_allocator<U>& a) {}
 
     pointer allocate(size_type n, std::allocator<void>::const_pointer hint=0)
     {
