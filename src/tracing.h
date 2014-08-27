@@ -16,6 +16,9 @@ namespace hoard
     void print_object(char const*);
     void print_object(void* px);
     void print_object(size_t n);
+    void print_object(bool b);
+    void print_object(long long  l);
+    void print_object(int i);
     
     void print();
 

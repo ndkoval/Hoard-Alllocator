@@ -10,28 +10,30 @@ void hoard::print_object(char const* message)
 
 void hoard::print_object(void* px)
 {
-    char const* hexdigits = "0123456789abcdef";
-    
+ char const* hexdigits = "0123456789abcdef";
+
     char buffer[32];
 
     size_t n = (size_t)px;
-    size_t divisor = std::numeric_limits<size_t>::max() / 2;
 
     char* p = buffer;
     *p++ = '0';
     *p++ = 'x';
-    
+    int shift = sizeof(void *) * 8;
+
     do
     {
-        *p++ = hexdigits[(n / divisor) % 16];
-        divisor /= 16;
+        shift -=4;
+        *p++ = hexdigits[(n >> shift) & 15];
+
     }
-    while (divisor != 0);
+    while (shift != 0);
 
     *p = '\0';
-    
     print_object(buffer);
 }
+
+
 
 void hoard::print_object(size_t n)
 {
@@ -53,6 +55,28 @@ void hoard::print_object(size_t n)
     *p = '\0';
     
     print_object(buffer);
+}
+
+
+//void hoard::print_object(void* px) {
+//    hoard::print_object((size_t) px);
+
+
+//}
+void hoard::print_object(long long l) {
+    hoard::print_object((size_t) l);
+}
+
+void hoard::print_object(int i ) {
+    hoard::print_object((long long) i);
+}
+
+void hoard::print_object(bool b) {
+    if(b) {
+        hoard::print_object("true");
+    } else {
+        print_object("false");
+    }
 }
 
 void hoard::print()
