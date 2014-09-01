@@ -3,6 +3,7 @@
 #include "hoard_constants.h"
 #include "utils.h"
 #include "tracing.h"
+#include <functional>
 
 /*
  * void * -> size_t hashmap
@@ -29,8 +30,10 @@ private:
 
     size_t MINIMUM_TABLE_SIZE = PAGE_SIZE; // multiple PAGE_SIZE
     constexpr static size_t FIXED_POINT_SHIFT = 8;
-    constexpr static size_t FULLNESS_THRESHOLD = (1 << FIXED_POINT_SHIFT) / 2; // talbe with n/2 entryes should be expanded
+    constexpr static size_t FULLNESS_THRESHOLD = (1 << FIXED_POINT_SHIFT) / 2 ; // talbe with n/2 entryes should be expanded
     constexpr static size_t EMPTYNESS_THRESHOLD = (1 << FIXED_POINT_SHIFT) / 8; // talbe with n/8 entryes should be shrinked
+    constexpr static size_t EMPTY_CELLS_THRESHOLD = (1 << FIXED_POINT_SHIFT) / 16; // table with less than n/16 empty cells (deleted != empty) will be rehashed in same size
+    static_assert(EMPTY_CELLS_THRESHOLD <= EMPTYNESS_THRESHOLD, "invalid values");
     constexpr static size_t EXPASION_RATE = 2;//power of 2
     constexpr static size_t SHRINKING_RATE = 2; // power of 2
 
@@ -43,7 +46,7 @@ private:
         table_entry( const table_entry&) = default;
 
         bool empty() {
-            return key == 0 && value == 0;
+            return key == nullptr && value == 0;
         }
         void clear() {
             value = 0;
@@ -61,10 +64,13 @@ private:
     size_t _table_mem_size;
     size_t _deleted_mem_size;
     size_t _hint; // last finded index.
+    // if there are too small empty cells (not full or deleted), find can be too slow, even cycle, if table is full of not empty cells, and there is no such key in table
+    size_t _empty_cells;
 
 
-    constexpr inline static size_t first_hash(key_type key) {
+    inline static size_t first_hash(key_type key) {
         return ((((((size_t)key) ^(((size_t) key) >> (sizeof(key_type) * 4))) * 67867967) + 122949823 ) % 32416190071ll);
+//          return std::hash<size_t>()((size_t) key);
     }
 
     constexpr inline static size_t second_hash(key_type key) {
@@ -85,25 +91,27 @@ private:
     }
 
     void internal_add(const key_type & key, const value_type & value){
-        size_t hash1 = first_hash(key);
-        size_t index = get_index(hash1);
+        size_t current_hash = first_hash(key);
+        size_t index = get_index(current_hash);
         if(_table[index].empty() || _deleted[index]){
+           if(!_deleted[index]) {
+                _empty_cells--;
+           };
             set(index, key, value);
         } else{
             size_t hash2 = second_hash(key);
-            size_t curent_hash = hash1;
             do {
-                curent_hash += hash2;
-                index = get_index(curent_hash);
+                current_hash += hash2;
+                index = get_index(current_hash);
 
-            } while(_table[index].empty() || _deleted[index]);
+            } while(!_table[index].empty() && !_deleted[index]);
             set(index, key, value);
         }
 
     }
     bool internal_remove(const key_type & key) { // true if key was in table
         int index = internal_find(key);
-        if(index == -1) {
+        if(index == NO_SUCH_KEY) {
             return false;
         } else{
             _deleted[index] = true;
@@ -112,22 +120,18 @@ private:
 
     }
 
-    int internal_find(const key_type & key) {
+    size_t internal_find(const key_type & key) {
         if(hint_is_valid(key)) {
             return _hint;
         }
         size_t current_hash = first_hash(key), hash2  = second_hash(key);
-        size_t index = get_index(current_hash);
-        while(!_table[index].empty()) {
+        for(size_t index = get_index(current_hash); !_table[index].empty(); current_hash += hash2, index = get_index(current_hash)){
             if(!_deleted[index] && _table[index].key == key) {
                 _hint = index;
                 return index;
-            } else{
-                current_hash += hash2;
-                index = get_index(current_hash);
             }
         }
-        return -1;
+        return NO_SUCH_KEY;
 
     }
 
@@ -135,6 +139,7 @@ private:
         assert(is_power_of_2(new_table_mem_size));
         _table_mem_size = new_table_mem_size;
         _table_entry_size = _table_mem_size / sizeof(table_entry);
+        _empty_cells = _table_entry_size;
         _deleted_mem_size = round_up(_table_entry_size * sizeof(bool), PAGE_SIZE);
         _deleted =(bool *) mmap_anonymous(_deleted_mem_size);
         _table = (table_entry*) mmap_anonymous(new_table_mem_size);
@@ -151,10 +156,19 @@ private:
         size_t old_deleted_mem_size = _deleted_mem_size;
         bool * old_deleted = _deleted;
         init_new_table(new_table_mem_size);
+        int counter = 0;
         for(int i = 0; i < old_table_entry_size; i++) {
             if(!old_table[i].empty() && !old_deleted[i]) {
+                counter++;
                 internal_add(old_table[i].key, old_table[i].value);
+                assert(contains(old_table[i].key));
             }
+        }
+        if(counter != _table_entry_num) {
+
+            hoard::print("added in resize: ", counter, "added total: ", _table_entry_num);
+            assert(counter == _table_entry_num);
+
         }
 
        assert(munmap(old_table, old_table_mem_size) == 0);
@@ -171,19 +185,21 @@ public:
         _table_entry_num++;
         if(_table_entry_num >= (FULLNESS_THRESHOLD * _table_entry_size) >> FIXED_POINT_SHIFT ) {
             resize(_table_mem_size * EXPASION_RATE);
+        } else  if(_empty_cells < (EMPTY_CELLS_THRESHOLD * _table_entry_size) >> FIXED_POINT_SHIFT){
+            resize(_table_mem_size);
         }
 
 
     }
 
     bool contains(const key_type & key) {
-        return internal_find(key) != -1;
+        return internal_find(key) != NO_SUCH_KEY;
 
     }
 
     value_type get(key_type key) {
         int index = internal_find(key);
-        if(index == -1) {
+        if(index == NO_SUCH_KEY) {
             return NO_SUCH_KEY;
         } else {
             return _table[index].value;
@@ -211,7 +227,11 @@ public:
     void print_state() {
         for(int i = 0; i < _table_entry_size; i++) {
             if(!_table[i].empty()) {
-                print("cell: ", i, " key: ", _table[i].key, " value: ", _table[i].value, " deleted: ", _deleted[i], " hash1: ", first_hash(_table[i].key), " hash2: ", second_hash(_table[i].key), "\n" );
+                size_t hash1 = first_hash(_table[i].key), hash2 = second_hash(_table[i].key);
+                size_t cell_in_chain = 0;
+                for(int k = 0; i != get_index(hash1 + hash2 * k); cell_in_chain++, k++) {};
+                print("cell: ", i, " key: ",(size_t) _table[i].key, " value: ", _table[i].value, " deleted: ", _deleted[i], " hash1: ", hash1 , " hash2: ", hash2, " index 1: ",
+                    get_index(hash1), " index 2: ", get_index(hash1 + hash2), " index 3: ", get_index(hash1 + 2* hash2),  " cell in chain: ", cell_in_chain, "\n" );
             }
         }
     }
