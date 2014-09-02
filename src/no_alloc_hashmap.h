@@ -81,6 +81,10 @@ private:
         return hash & (_table_entry_size -1);
     }
     inline void set(size_t index, const key_type & key, const value_type & value) {
+
+       if(!_deleted[index]) {
+            _empty_cells--;
+       };
         _table[index] = table_entry(key, value);
         _deleted[index] = false;
 
@@ -94,9 +98,6 @@ private:
         size_t current_hash = first_hash(key);
         size_t index = get_index(current_hash);
         if(_table[index].empty() || _deleted[index]){
-           if(!_deleted[index]) {
-                _empty_cells--;
-           };
             set(index, key, value);
         } else{
             size_t hash2 = second_hash(key);
@@ -155,20 +156,27 @@ private:
         size_t old_table_entry_size = _table_entry_size, old_table_mem_size = _table_mem_size;
         size_t old_deleted_mem_size = _deleted_mem_size;
         bool * old_deleted = _deleted;
+        size_t old_empty_cells = _empty_cells;
         init_new_table(new_table_mem_size);
-        int counter = 0;
+        int entry_counter = 0, empty_cell_counter = 0;
         for(int i = 0; i < old_table_entry_size; i++) {
             if(!old_table[i].empty() && !old_deleted[i]) {
-                counter++;
+                entry_counter++;
                 internal_add(old_table[i].key, old_table[i].value);
                 assert(contains(old_table[i].key));
+            } else if(old_table[i].empty()) {
+                empty_cell_counter++;
             }
+
         }
-        if(counter != _table_entry_num) {
+        if(entry_counter != _table_entry_num) {
 
-            hoard::print("added in resize: ", counter, "added total: ", _table_entry_num);
-            assert(counter == _table_entry_num);
+            hoard::print("added in resize: ", entry_counter, "added total: ", _table_entry_num);
+            assert(entry_counter == _table_entry_num);
 
+        } else if(old_empty_cells != empty_cell_counter) {
+            hoard::print("empty cells invariant lost. Expexted: ", old_empty_cells, " founded: ", empty_cell_counter, "\n");
+            assert(old_empty_cells == empty_cell_counter);
         }
 
        assert(munmap(old_table, old_table_mem_size) == 0);
