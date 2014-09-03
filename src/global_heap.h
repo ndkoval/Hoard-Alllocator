@@ -1,16 +1,10 @@
-#ifndef GLOBALHEAP_H
-#define GLOBALHEAP_H
+#ifndef GLOBAL_HEAP_H
+#define GLOBAL_HEAP_H
 
-namespace hoard  {
-
-class GlobalHeap
+class global_heap : public base_heap
 {
 public:
-    GlobalHeap(){};
-    ~GlobalHeap(){};
+    global_heap();
 };
 
-
-}
-
-#endif // GLOBALHEAP_H
+#endif // GLOBAL_HEAP_H
