@@ -4,6 +4,7 @@
 #include<unistd.h>
 namespace hoard {
 
+namespace {
     constexpr size_t BLOCK_FACTOR = 2; // power of 2  and > 1
     constexpr size_t MIN_BLOCK_SIZE = 8;  //power of BLOCK_FACTOR
     static_assert(MIN_BLOCK_SIZE >= sizeof(void *), "too small min block size ");
@@ -15,7 +16,7 @@ namespace hoard {
     size_t NUMBER_OF_HEAPS = NUMBER_OF_CPU * 2;
     constexpr int MAGIC_NUMBER = 0xdeadbeef;
     //static size_t
-
+}
 }
 
 

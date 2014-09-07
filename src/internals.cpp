@@ -10,10 +10,10 @@
 #include "mmap_std_allocator.h"
 #include "internals.h"
 #include "tracing.h"
-//#include "free_superblock_manager.h" // build errors, i'm working on it. Skipor
-//#include "global_heap.h"
-//#include "local_heap.h"
-//#include "superblock.h"
+#include "free_superblock_manager.h" // build errors, i'm working on it. Skipor
+#include "global_heap.h"
+#include "local_heap.h"
+#include "superblock.h"
 
 namespace
 {
@@ -22,9 +22,9 @@ namespace
         std::hash<void*>,
         std::equal_to<void*>,
         hoard::mmap_std_allocator<std::pair<void*, size_t> > > big_allocates;
-   // hoard::free_superblock_manager(); // build errors, i'm working on it. Skipor
-   // hoard::global_heap();
-    //hoard::local_heap();
+    hoard::free_superblock_manager global_free_superblock_manager(); // build errors, i'm working on it. Skipor
+    hoard::global_heap test_global_heap();
+    hoard::local_heap test_local_heap();
 }
 
 

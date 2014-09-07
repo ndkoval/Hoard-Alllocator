@@ -2,7 +2,7 @@
 #include "superblock.h"
 
     void hoard::free_block_stack::push(void * space_for_extra_block) {
-        head = new (space_for_extra_block)  block; // constructs new block in free space
+        _head = new (space_for_extra_block)  block; // constructs new block in free space
     }
     void * hoard::free_block_stack::pop() {
         assert(!empty());
