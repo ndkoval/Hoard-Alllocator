@@ -14,20 +14,14 @@
 
 namespace hoard {
 
-class no_alloc_hashmap
-{
+class no_alloc_hashmap {
 
 public:
-
     typedef void * key_type;
     typedef size_t value_type;
     constexpr static value_type NO_SUCH_KEY = (value_type) -1;
+
 private:
-
-
-
-
-
     size_t MINIMUM_TABLE_SIZE = PAGE_SIZE; // multiple PAGE_SIZE
     constexpr static size_t FIXED_POINT_SHIFT = 8;
     constexpr static size_t FULLNESS_THRESHOLD = (1 << FIXED_POINT_SHIFT) / 2 ; // talbe with n/2 entryes should be expanded
@@ -37,23 +31,16 @@ private:
     constexpr static size_t EXPASION_RATE = 2;//power of 2
     constexpr static size_t SHRINKING_RATE = 2; // power of 2
 
-
     struct table_entry {
         key_type key;
         value_type value;
-
         table_entry(key_type key, value_type value) : key(key), value(value){}
         table_entry( const table_entry&) = default;
 
         bool empty() {
             return key == nullptr && value == 0;
         }
-        void clear() {
-            value = 0;
-            key = nullptr;
-        }
     };
-
 
     static_assert(is_power_of_2(sizeof(table_entry)), "table_entry should be power of 2 size for having power of 2 entryes in table"); // second hashfunction is odd so entry_num will be coprime with it value
 
@@ -64,13 +51,13 @@ private:
     size_t _table_mem_size;
     size_t _deleted_mem_size;
     size_t _hint; // last finded index.
-    // if there are too small empty cells (not full or deleted), find can be too slow, even cycle, if table is full of not empty cells, and there is no such key in table
+    // if there are too small empty cells (not full or deleted), find can be too slow, even cycle,
+    // if table is full of not empty cells, and there is no such key in table
     size_t _empty_cells;
-
 
     inline static size_t first_hash(key_type key) {
         return ((((((size_t)key) ^(((size_t) key) >> (sizeof(key_type) * 4))) * 67867967) + 122949823 ) % 32416190071ll);
-//          return std::hash<size_t>()((size_t) key);
+        //          return std::hash<size_t>()((size_t) key);
     }
 
     constexpr inline static size_t second_hash(key_type key) {
@@ -80,14 +67,13 @@ private:
     inline size_t get_index(size_t hash) {
         return hash & (_table_entry_size -1);
     }
-    inline void set(size_t index, const key_type & key, const value_type & value) {
 
-       if(!_deleted[index]) {
+    inline void set(size_t index, const key_type & key, const value_type & value) {
+        if(!_deleted[index]) {
             _empty_cells--;
-       };
+        };
         _table[index] = table_entry(key, value);
         _deleted[index] = false;
-
     }
 
     inline bool hint_is_valid(key_type key) {
@@ -133,7 +119,6 @@ private:
             }
         }
         return NO_SUCH_KEY;
-
     }
 
     inline void init_new_table(size_t new_table_mem_size) {
@@ -145,8 +130,8 @@ private:
         _deleted =(bool *) mmap_anonymous(_deleted_mem_size);
         _table = (table_entry*) mmap_anonymous(new_table_mem_size);
         if(_table == MAP_FAILED || _deleted == MAP_FAILED) {
-           print("hoard-allocator error: big allocation hashmap resize failed\n");
-           std::abort();
+            print("hoard-allocator error: big allocation hashmap resize failed\n");
+            std::abort();
         }
     }
     inline void resize(size_t new_table_mem_size) {
@@ -179,8 +164,8 @@ private:
             assert(old_empty_cells == empty_cell_counter);
         }
 
-       assert(munmap(old_table, old_table_mem_size) == 0);
-       assert(munmap(old_deleted, old_deleted_mem_size) == 0);
+        assert(munmap(old_table, old_table_mem_size) == 0);
+        assert(munmap(old_deleted, old_deleted_mem_size) == 0);
     }
 
 public:
@@ -197,7 +182,6 @@ public:
             resize(_table_mem_size);
         }
 
-
     }
 
     bool contains(const key_type & key) {
@@ -212,8 +196,6 @@ public:
         } else {
             return _table[index].value;
         }
-
-
     }
 
     bool remove(key_type key) { // true if key was in table
@@ -231,22 +213,19 @@ public:
         return _table_entry_num;
     }
 
-
     void print_state() {
         for(int i = 0; i < _table_entry_size; i++) {
             if(!_table[i].empty()) {
                 size_t hash1 = first_hash(_table[i].key), hash2 = second_hash(_table[i].key);
                 size_t cell_in_chain = 0;
                 for(int k = 0; i != get_index(hash1 + hash2 * k); cell_in_chain++, k++) {};
-                print("cell: ", i, " key: ",(size_t) _table[i].key, " value: ", _table[i].value, " deleted: ", _deleted[i], " hash1: ", hash1 , " hash2: ", hash2, " index 1: ",
-                    get_index(hash1), " index 2: ", get_index(hash1 + hash2), " index 3: ", get_index(hash1 + 2* hash2),  " cell in chain: ", cell_in_chain, "\n" );
+                print("cell: ", i, " key: ",(size_t) _table[i].key, " value: ", _table[i].value,
+                " deleted: ", _deleted[i], " hash1: ", hash1 , " hash2: ", hash2, " index 1: ",
+                      get_index(hash1), " index 2: ", get_index(hash1 + hash2),
+                      " index 3: ", get_index(hash1 + 2* hash2),  " cell in chain: ", cell_in_chain, "\n" );
             }
         }
     }
-
-
-
-
 
 };
 }
