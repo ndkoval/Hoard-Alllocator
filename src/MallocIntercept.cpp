@@ -1,35 +1,35 @@
 #include <cerrno>
 
-#include "internals.h"
+#include "Internals.h"
 #include "tracing.h"
 
 using namespace hoard;
 
 namespace
 {
-    __thread bool inside_malloc = false;
+    __thread bool insideMalloc = false;
 
-    struct recuirsion_guard
+    struct recuirsionGuard
     {
-        recuirsion_guard()
+        recuirsionGuard()
         {
-            if (inside_malloc)
+            if (insideMalloc)
             {
                 print("recursive call\n");
                 std::abort();
             }
             
-            inside_malloc = true;
+            insideMalloc = true;
         }
 
-        ~recuirsion_guard()
+        ~recuirsionGuard()
         {
-            inside_malloc = false;
+            insideMalloc = false;
         }
 
     private:
-        recuirsion_guard(recuirsion_guard const&);
-        recuirsion_guard& operator=(recuirsion_guard const&);
+        recuirsionGuard(recuirsionGuard const&);
+        recuirsionGuard & operator=(recuirsionGuard const&);
     };
 }
 
@@ -37,9 +37,9 @@ namespace
 extern "C"
 void* malloc(size_t size)
 {
-    recuirsion_guard rg;
+    recuirsionGuard rg;
     
-    void *p = internal_alloc(size);
+    void *p = internalAlloc(size);
     trace("malloc ", size, " ", p, "\n");
 
     return p;
@@ -48,9 +48,9 @@ void* malloc(size_t size)
 extern "C"
 void* calloc(size_t n, size_t size)
 {
-    recuirsion_guard rg;
+    recuirsionGuard rg;
 
-    void* p = internal_alloc(n * size);
+    void* p = internalAlloc(n * size);
     trace("calloc ", n, " ", size, " ", p, "\n");
 
     return p;
@@ -59,18 +59,18 @@ void* calloc(size_t n, size_t size)
 extern "C"
 void free(void *ptr)
 {
-    recuirsion_guard rg;
+    recuirsionGuard rg;
 
-    internal_free(ptr);
+    internalFree(ptr);
     trace("free ", ptr, "\n");
 }
 
 extern "C"
 void* realloc(void *ptr, size_t size)
 {
-    recuirsion_guard rg;
+    recuirsionGuard rg;
 
-    void* p = internal_realloc(ptr, size);
+    void* p = internalRealloc(ptr, size);
     trace("realloc ", ptr, " ", size, " ", p, "\n");
 
     return p;
@@ -79,14 +79,14 @@ void* realloc(void *ptr, size_t size)
 extern "C"
 int posix_memalign(void** memptr, size_t alignment, size_t size)
 {
-    recuirsion_guard rg;
+    recuirsionGuard rg;
 
     *memptr = 0;
 
-    if (!is_valid_alignment(alignment))
+    if (!isValidAlignment(alignment))
         return EINVAL;
 
-    void* p = internal_alloc(size, alignment);
+    void* p = internalAlloc(size, alignment);
 
     trace("posix_memalign ", alignment, " ", size, " ", p, "\n");
 
@@ -101,7 +101,7 @@ int posix_memalign(void** memptr, size_t alignment, size_t size)
 extern "C"
 void *valloc(size_t size)
 {
-    recuirsion_guard rg;
+    recuirsionGuard rg;
 
     print("deprecated function valloc is not supported\n");
     std::abort();
@@ -110,7 +110,7 @@ void *valloc(size_t size)
 extern "C"
 void *memalign(size_t boundary, size_t size)
 {
-    recuirsion_guard rg;
+    recuirsionGuard rg;
 
     print("deprecated function memalign is not supported\n");
     std::abort();

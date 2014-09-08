@@ -3,7 +3,7 @@
 
 #include <mutex>
 #include <assert.h>
-#include "hoard_constants.h"
+#include "HoardConstants.h"
 
 namespace hoard {
 

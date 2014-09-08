@@ -1,12 +1,12 @@
 #ifndef LOCAL_HEAP_H
 #define LOCAL_HEAP_H
-#include "base_heap.h"
+#include "BaseHeap.h"
 namespace hoard {
 
-class local_heap : public base_heap
+class Local_heap : public BaseHeap
 {
 public:
-    local_heap();
+    Local_heap();
 };
 }
 

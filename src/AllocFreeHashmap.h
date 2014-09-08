@@ -1,6 +1,7 @@
 #ifndef NO_ALLOC_HASHMAP_H
 #define NO_ALLOC_HASHMAP_H
-#include "hoard_constants.h"
+
+#include "HoardConstants.h"
 #include "utils.h"
 #include "tracing.h"
 #include <functional>
@@ -14,7 +15,7 @@
 
 namespace hoard {
 
-class no_alloc_hashmap
+class AllocFreeHashmap
 {
 
 public:
@@ -55,7 +56,7 @@ private:
     };
 
 
-    static_assert(is_power_of_2(sizeof(table_entry)), "table_entry should be power of 2 size for having power of 2 entryes in table"); // second hashfunction is odd so entry_num will be coprime with it value
+    static_assert(isPowerOf2(sizeof(table_entry)), "table_entry should be power of 2 size for having power of 2 entryes in table"); // second hashfunction is odd so entry_num will be coprime with it value
 
     table_entry * _table;
     bool * _deleted;
@@ -137,13 +138,13 @@ private:
     }
 
     inline void init_new_table(size_t new_table_mem_size) {
-        assert(is_power_of_2(new_table_mem_size));
+        assert(isPowerOf2(new_table_mem_size));
         _table_mem_size = new_table_mem_size;
         _table_entry_size = _table_mem_size / sizeof(table_entry);
         _empty_cells = _table_entry_size;
         _deleted_mem_size = round_up(_table_entry_size * sizeof(bool), PAGE_SIZE);
-        _deleted =(bool *) mmap_anonymous(_deleted_mem_size);
-        _table = (table_entry*) mmap_anonymous(new_table_mem_size);
+        _deleted =(bool *) mmapAnonymous(_deleted_mem_size);
+        _table = (table_entry*) mmapAnonymous(new_table_mem_size);
         if(_table == MAP_FAILED || _deleted == MAP_FAILED) {
            print("hoard-allocator error: big allocation hashmap resize failed\n");
            std::abort();
@@ -184,7 +185,7 @@ private:
     }
 
 public:
-    no_alloc_hashmap() : _table_entry_num(0), _hint(0) {
+    AllocFreeHashmap() : _table_entry_num(0), _hint(0) {
         init_new_table(MINIMUM_TABLE_SIZE);
     }
 
