@@ -18,7 +18,7 @@ namespace
                 print("recursive call\n");
                 std::abort();
             }
-            
+
             insideMalloc = true;
         }
 
@@ -38,7 +38,7 @@ extern "C"
 void* malloc(size_t size)
 {
     recuirsionGuard rg;
-    
+
     void *p = internalAlloc(size);
     trace("malloc ", size, " ", p, "\n");
 

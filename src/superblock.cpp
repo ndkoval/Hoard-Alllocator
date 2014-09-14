@@ -1,16 +1,16 @@
 
 #include "superblock.h"
 
-    void hoard::free_block_stack::push(void * space_for_extra_block) {
-        _head = new (space_for_extra_block)  block; // constructs new block in free space
+    void hoard::FreeBlockStack::push(void *spaceForExtraBlock) {
+        _head = new (spaceForExtraBlock)  Block; // constructs new Block in free space
     }
-    void * hoard::free_block_stack::pop() {
+    void * hoard::FreeBlockStack::pop() {
         assert(!empty());
-        block * result = _head;
+        Block * result = _head;
         _head = _head->next;
         return reinterpret_cast<void *> (result);
     }
 
-    bool hoard::free_block_stack::empty() {
+    bool hoard::FreeBlockStack::empty() {
         return _head == nullptr;
     }

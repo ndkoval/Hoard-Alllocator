@@ -47,7 +47,7 @@ void hoard::print_object(size_t n)
     char* p = buffer;
     do
     {
-        *p++ = ((n / divisor) % 10) + '0';
+        *p++ = (char) (((n / divisor) % 10) + '0');
         divisor /= 10;
     }
     while (divisor != 0);

@@ -22,12 +22,15 @@ namespace hoard
     
     void print();
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "InfiniteRecursion"
     template <typename T, typename ... Ts>
     void print(T obj, Ts ... objs)
     {
         print_object(obj);
         print(objs...);
     }
+#pragma clang diagnostic pop
 
     bool trace_enabled();
 
