@@ -1,27 +1,10 @@
 project(Hoard-Allocator)
-cmake_minimum_required(VERSION 2.6.4)
+cmake_minimum_required(VERSION 2.8.11)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
-set(CMAKE_BUILD_TYPE "Debug")
-set(EXT_PROJECTS_DIR ${PROJECT_SOURCE_DIR}/ext)
-set(SRC_DIR "src")
-set(DUMMY_DIR ${SRC_DIR}/dummy)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -fPIC -Wall -pedantic")
+set(CMAKE_BUILD_TYPE "debug")
 
-file(GLOB SRC_LIST ${SRC_DIR}/*.h ${SRC_DIR}/*.cpp)
-message(STATUS "SOURCES: ${SRC_LIST}")
-add_library(${PROJECT_NAME} SHARED ${SRC_LIST})
-
-#Tests
 enable_testing()
-set(TEST_DIR ${PROJECT_SOURCE_DIR}/test)
-add_subdirectory(${EXT_PROJECTS_DIR}/gtest)
-include_directories(${GTEST_INCLUDE_DIRS} ${SRC_DIR})
+add_subdirectory(src/)
 
-##Test AllocFreeHashmap
-add_executable(custom_hashmap_test ${TEST_DIR}/custom_hashmap_test.cpp ${SRC_DIR}/tracing.cpp)
-add_dependencies(custom_hashmap_test googletest)
-target_link_libraries(custom_hashmap_test ${GTEST_LIBS_DIR}/libgtest.a  ${GTEST_LIBS_DIR}/libgtest_main.a pthread)
-add_test(custom_hashmap_test custom_hashmap_test)
 
-##Dummy allocator
-add_library("dummy_malloc_intercept" SHARED ${DUMMY_DIR}/dummy_malloc_intercept.cpp)
