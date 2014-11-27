@@ -28,3 +28,7 @@ target_include_directories(hoard_core PUBLIC
 add_library(malloc_intercept SHARED
   MallocIntercept.cpp
 )
+
+target_link_libraries(malloc_intercept
+  hoard_core
+)
