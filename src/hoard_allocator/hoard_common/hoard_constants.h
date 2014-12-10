@@ -1,7 +1,7 @@
 #ifndef HOARDALLOCATOR_H
 #define HOARDALLOCATOR_H
 
-#include<cstdlib>
+#include<stdlib.h>
 #include<unistd.h>
 
 namespace hoard {

@@ -3,7 +3,7 @@
 
 #include "hoard_constants.h"
 #include <assert.h>
-#include<sys/mman.h>
+#include <sys/mman.h>
 
 namespace hoard {
 
