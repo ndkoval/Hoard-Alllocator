@@ -2,7 +2,6 @@ add_library(hoard_common
   hoard_constants.h
   hoard_constants.cpp
   utils.h
-  utils.cpp
   tracing.h
   tracing.cpp
 )
