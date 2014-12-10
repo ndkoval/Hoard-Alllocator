@@ -4,6 +4,10 @@
 #include<cstdlib>
 #include<unistd.h>
 
+#ifndef __THROW
+#define __THROW
+#endif
+
 namespace hoard {
 
 namespace {
