@@ -1,5 +1,3 @@
-#include <cstdlib>
-
 #include "tracing.h"
 
 extern "C"
