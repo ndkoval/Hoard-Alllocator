@@ -32,7 +32,7 @@ private:
 
 
 extern "C"
-void *malloc(size_t size) {
+void *malloc(size_t size) __THROW {
   recuirsionGuard rg;
 
   void *p = InternalAlloc(size);
@@ -42,7 +42,7 @@ void *malloc(size_t size) {
 }
 
 extern "C"
-void *calloc(size_t n, size_t size) {
+void *calloc(size_t n, size_t size) __THROW {
   recuirsionGuard rg;
 
   void *p = InternalAlloc(n * size);
@@ -52,7 +52,7 @@ void *calloc(size_t n, size_t size) {
 }
 
 extern "C"
-void free(void *ptr) {
+void free(void *ptr) __THROW {
   recuirsionGuard rg;
 
   InternalFree(ptr);
@@ -60,7 +60,7 @@ void free(void *ptr) {
 }
 
 extern "C"
-void *realloc(void *ptr, size_t size) {
+void *realloc(void *ptr, size_t size) __THROW {
   recuirsionGuard rg;
 
   void *p = InternalRealloc(ptr, size);
@@ -70,7 +70,7 @@ void *realloc(void *ptr, size_t size) {
 }
 
 extern "C"
-int posix_memalign(void **memptr, size_t alignment, size_t size) {
+int posix_memalign(void **memptr, size_t alignment, size_t size) __THROW {
   recuirsionGuard rg;
 
   *memptr = 0;
@@ -91,7 +91,7 @@ int posix_memalign(void **memptr, size_t alignment, size_t size) {
 }
 
 extern "C"
-void *valloc(size_t size) {
+void *valloc(size_t size) __THROW {
   recuirsionGuard rg;
 
   print("deprecated function valloc is not supported\n");
@@ -99,7 +99,7 @@ void *valloc(size_t size) {
 }
 
 extern "C"
-void *memalign(size_t boundary, size_t size) {
+void *memalign(size_t boundary, size_t size) __THROW {
   recuirsionGuard rg;
 
   print("deprecated function memalign is not supported\n");
