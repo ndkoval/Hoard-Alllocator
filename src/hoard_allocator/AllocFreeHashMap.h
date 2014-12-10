@@ -160,8 +160,8 @@ private:
     bool *old_deleted = deleted_;
     size_t old_empty_cells = empty_cells_;
     InitNewTable(new_table_mem_size);
-    int entry_counter = 0, empty_cell_counter = 0;
-    for (int i = 0; i < old_table_entry_size; i++) {
+    size_t  entry_counter = 0, empty_cell_counter = 0;
+    for (size_t i = 0; i < old_table_entry_size; i++) {
       if (!old_table[i].empty() && !old_deleted[i]) {
         entry_counter++;
         InternalAdd(old_table[i].key, old_table[i].value);
@@ -236,11 +236,11 @@ public:
 
 
   void PrintState() {
-    for (int i = 0; i < table_entry_size_; i++) {
+    for (size_t i = 0; i < table_entry_size_; i++) {
       if (!table_[i].empty()) {
         size_t hash1 = FirstHash(table_[i].key), hash2 = SecondHash(table_[i].key);
         size_t cell_in_chain = 0;
-        for (int k = 0; i != Index(hash1 + hash2 * k); cell_in_chain++, k++) {};
+        for (size_t k = 0; i != Index(hash1 + hash2 * k); cell_in_chain++, k++) {};
         print("cell: ", i, " key: ", (size_t) table_[i].key, " value: ", table_[i].value, " deleted: ", deleted_[i], " hash1: ", hash1, " hash2: ", hash2, " Index 1: ",
             Index(hash1), " Index 2: ", Index(hash1 + hash2), " Index 3: ", Index(hash1 + 2 * hash2), " cell in chain: ", cell_in_chain, "\n");
       }
