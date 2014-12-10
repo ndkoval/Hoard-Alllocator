@@ -6,6 +6,7 @@ function(add_gtest name)
   add_test(${name} ${name})
 endfunction()
 
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/test)
 
 
 add_gtest(custom_hashmap_test
