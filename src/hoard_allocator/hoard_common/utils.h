@@ -12,10 +12,7 @@ constexpr bool isPowerOf2(size_t n) {
 }
 
 constexpr bool IsValidAlignment(size_t alignment) {
-  if ((alignment % sizeof(void *)) != 0)
-    return false;
-
-  return isPowerOf2(alignment);
+  return (alignment % sizeof(void *)) != 0 ? false :  isPowerOf2(alignment);
 }
 
 inline char* get_first_aligned_pointer(char *ptr, size_t alignment) {
