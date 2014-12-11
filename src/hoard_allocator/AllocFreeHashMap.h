@@ -141,12 +141,13 @@ private:
     assert(isPowerOf2(new_table_mem_size));
     table_mem_size_ = new_table_mem_size;
     table_entry_size_ = table_mem_size_ / sizeof(TableEntry);
+    assert(table_entry_size_ > 0);
     empty_cells_ = table_entry_size_;
     deleted_mem_size_ = round_up(table_entry_size_ * sizeof(bool), PAGE_SIZE);
     deleted_ = (bool *) mmapAnonymous(deleted_mem_size_);
     table_ = (TableEntry *) mmapAnonymous(new_table_mem_size);
     if (table_ == MAP_FAILED || deleted_ == MAP_FAILED) {
-      print("hoard-allocator error: big allocation hashmap Resize failed\n");
+      trace("hoard-allocator error: big allocation hashmap Resize failed\n");
       std::abort();
     }
   }
@@ -236,15 +237,17 @@ public:
 
 
   void PrintState() {
+    trace("AllocFreeHashMap{\n");
     for (size_t i = 0; i < table_entry_size_; i++) {
       if (!table_[i].empty()) {
         size_t hash1 = FirstHash(table_[i].key), hash2 = SecondHash(table_[i].key);
         size_t cell_in_chain = 0;
         for (size_t k = 0; i != Index(hash1 + hash2 * k); cell_in_chain++, k++) {};
-        print("cell: ", i, " key: ", (size_t) table_[i].key, " value: ", table_[i].value, " deleted: ", deleted_[i], " hash1: ", hash1, " hash2: ", hash2, " Index 1: ",
+        trace("cell: ", i, " key: ", (size_t) table_[i].key, " value: ", table_[i].value, " deleted: ", deleted_[i], " hash1: ", hash1, " hash2: ", hash2, " Index 1: ",
             Index(hash1), " Index 2: ", Index(hash1 + hash2), " Index 3: ", Index(hash1 + 2 * hash2), " cell in chain: ", cell_in_chain, "\n");
       }
     }
+    trace("}\n");
   }
 
 

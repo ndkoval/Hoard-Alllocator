@@ -2,7 +2,6 @@
 #include <utils.h>
 
 #include "Internals.h"
-#include "tracing.h"
 
 using namespace hoard;
 
@@ -35,6 +34,7 @@ extern "C"
 void *malloc(size_t size) __THROW {
   recuirsionGuard rg;
 
+  trace("try malloc ", size, "\n");
   void *p = InternalAlloc(size);
   trace("malloc ", size, " ", p, "\n");
 
@@ -45,6 +45,7 @@ extern "C"
 void *calloc(size_t n, size_t size) __THROW {
   recuirsionGuard rg;
 
+  trace("try calloc ", n, " ", size, "\n");
   void *p = InternalAlloc(n * size);
   trace("calloc ", n, " ", size, " ", p, "\n");
 
@@ -55,6 +56,7 @@ extern "C"
 void free(void *ptr) __THROW {
   recuirsionGuard rg;
 
+  trace("try free ", ptr, "\n");
   InternalFree(ptr);
   trace("free ", ptr, "\n");
 }
@@ -63,6 +65,7 @@ extern "C"
 void *realloc(void *ptr, size_t size) __THROW {
   recuirsionGuard rg;
 
+  trace("try realloc ", ptr, " ", size, "\n");
   void *p = InternalRealloc(ptr, size);
   trace("realloc ", ptr, " ", size, " ", p, "\n");
 

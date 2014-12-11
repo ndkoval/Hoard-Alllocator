@@ -6,16 +6,15 @@
 
 #include "utils.h"
 #include "Internals.h"
-#include "tracing.h"
 #include "FreeSuperblockManager.h"
 #include "GlobalHeap.h"
 #include "LocalHeap.h"
 #include "superblock.h"
-#include "AllocFreeHashMap.h"
 
 namespace {
 std::mutex bigAllocMutex;
-hoard::AllocFreeHashMap bigAllocates;
+
+hoard::AllocFreeHashMap bigAllocates{};
 
 hoard::FreeSuperblockManager globalFreeSuperblockManager;
 
@@ -44,13 +43,17 @@ void *hoard::SmallAlloc(size_t size) {
 void *hoard::BigAlloc(size_t size, size_t alignment) {
 	std::lock_guard<std::mutex> lock(bigAllocMutex);
 
-	size_t total_size = round_up(size, alignment);
+	hoard::AllocFreeHashMap bigAllocates{};
 
-	void* ptr = mmap(NULL, total_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-	if (ptr == nullptr)
-		return nullptr;
-
-	bigAllocates.Add(ptr, total_size);
+//	size_t total_size = round_up(size, alignment);
+//
+//	void *ptr = mmap(nullptr, total_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+//	if (ptr == nullptr)
+//		return nullptr;
+//
+//	trace("kakak");
+//	bigAllocates.Add(ptr, total_size);
+//	bigAllocates.PrintState();
 
 	return nullptr;
 }

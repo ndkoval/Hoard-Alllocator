@@ -3,8 +3,10 @@
 
 #include <cstdlib>
 #include "hoard_constants.h"
+#include "AllocFreeHashMap.h"
 
 namespace hoard {
+
 void *InternalAlloc(size_t size, size_t alignment = DEFAULT_ALIGNMENT);
 
 void InternalFree(void *ptr);
