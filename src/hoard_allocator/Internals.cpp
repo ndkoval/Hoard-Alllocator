@@ -45,7 +45,7 @@ void *hoard::BigAlloc(size_t size, size_t alignment) {
 
 	hoard::AllocFreeHashMap bigAllocates{};
 
-//	size_t total_size = round_up(size, alignment);
+//	size_t total_size = RoundUp(size, alignment);
 //
 //	void *ptr = mmap(nullptr, total_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 //	if (ptr == nullptr)

@@ -54,7 +54,7 @@ private:
   };
 
 
-  static_assert(isPowerOf2(sizeof(TableEntry)), "TableEntry should be power of 2 size for having power of 2 entryes in table"); // second hashfunction is odd so entry_num will be coprime with it value
+  static_assert(IsPowerOf2(sizeof(TableEntry)), "TableEntry should be power of 2 size for having power of 2 entryes in table"); // second hashfunction is odd so entry_num will be coprime with it value
 
   TableEntry *table_;
   bool *deleted_;
@@ -138,12 +138,12 @@ private:
   }
 
   inline void InitNewTable(size_t new_table_mem_size) {
-    assert(isPowerOf2(new_table_mem_size));
+    assert(IsPowerOf2(new_table_mem_size));
     table_mem_size_ = new_table_mem_size;
     table_entry_size_ = table_mem_size_ / sizeof(TableEntry);
     assert(table_entry_size_ > 0);
     empty_cells_ = table_entry_size_;
-    deleted_mem_size_ = round_up(table_entry_size_ * sizeof(bool), PAGE_SIZE);
+    deleted_mem_size_ = RoundUp(table_entry_size_ * sizeof(bool), PAGE_SIZE);
     deleted_ = (bool *) mmapAnonymous(deleted_mem_size_);
     table_ = (TableEntry *) mmapAnonymous(new_table_mem_size);
     if (table_ == MAP_FAILED || deleted_ == MAP_FAILED) {
