@@ -23,7 +23,7 @@ public:
   constexpr static value_type NO_SUCH_KEY = (value_type) -1;
 private:
 
-  const size_t MINIMUM_TABLE_SIZE = PAGE_SIZE; // multiple PAGE_SIZE, can't be static;
+  const size_t MINIMUM_TABLE_SIZE = kPageSize; // multiple kPageSize, can't be static;
   constexpr static size_t FIXED_POINT_SHIFT = 8;
   constexpr static size_t FULLNESS_THRESHOLD = (1 << FIXED_POINT_SHIFT) / 2; // talbe with n/2 entryes should be expanded
   constexpr static size_t EMPTYNESS_THRESHOLD = (1 << FIXED_POINT_SHIFT) / 8; // talbe with n/8 entryes should be shrinked
@@ -143,7 +143,7 @@ private:
     table_entry_size_ = table_mem_size_ / sizeof(TableEntry);
     assert(table_entry_size_ > 0);
     empty_cells_ = table_entry_size_;
-    deleted_mem_size_ = RoundUp(table_entry_size_ * sizeof(bool), PAGE_SIZE);
+    deleted_mem_size_ = RoundUp(table_entry_size_ * sizeof(bool), kPageSize);
     deleted_ = (bool *) mmapAnonymous(deleted_mem_size_);
     table_ = (TableEntry *) mmapAnonymous(new_table_mem_size);
     if (table_ == MAP_FAILED || deleted_ == MAP_FAILED) {

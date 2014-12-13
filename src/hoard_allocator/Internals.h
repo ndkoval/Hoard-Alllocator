@@ -1,5 +1,5 @@
-#ifndef INTERNALS_H
-#define INTERNALS_H
+#ifndef HOARD_HOARD_INTERNALS_H
+#define HOARD_HOARD_INTERNALS_H
 
 #include <cstdlib>
 #include "hoard_constants.h"
@@ -7,21 +7,22 @@
 
 namespace hoard {
 
-void *InternalAlloc(size_t size, size_t alignment = DEFAULT_ALIGNMENT);
+void *InternalAlloc(size_t size, size_t alignment = kDefaultAllignment);
 
 void InternalFree(void *ptr);
 
 void *InternalRealloc(void *ptr, size_t size);
 
-//    bool IsValidAlignment(size_t alignment);
-
 void *SmallAlloc(size_t size);
 
-void *BigAlloc(size_t size, size_t alignment);
+void *BigAlloc(size_t size, size_t alignment = kPageSize);
 
 void SmallFree(void *ptr);
 
-void BigFree(void *ptr);
+void *SmallAlloc(size_t size, size_t alignment = kDefaultAllignment);
+
+bool BigFree(void *ptr);
+
 }
 
-#endif
+#endif // HOARD_HOARD_INTERNALS_H

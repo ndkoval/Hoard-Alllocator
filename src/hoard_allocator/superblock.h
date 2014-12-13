@@ -11,7 +11,7 @@ struct Block {
   Block *next;
 };
 
-static_assert(sizeof(Block) >= MIN_BLOCK_SIZE, "size of Block struct should be more of equal than MIN_SIZE");
+static_assert(sizeof(Block) >= kMinBlockSize, "size of Block struct should be more of equal than MIN_SIZE");
 
 
 struct FreeBlockStack {
@@ -58,7 +58,7 @@ public:
 
 };
 
-using superblock = BaseSuperblock<SUPERBLOCK_SIZE>;
-static_assert(sizeof(superblock) == SUPERBLOCK_SIZE, "ivalid superblock struct size");
+using superblock = BaseSuperblock<kSuperblockSize>;
+static_assert(sizeof(superblock) == kSuperblockSize, "ivalid superblock struct size");
 }
 #endif // SUPERBLOCK_H

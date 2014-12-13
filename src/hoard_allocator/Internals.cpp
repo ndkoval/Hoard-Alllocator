@@ -12,9 +12,9 @@
 #include "superblock.h"
 
 namespace {
-std::mutex bigAllocMutex;
+std::mutex big_alloc_mutex;
 
-hoard::AllocFreeHashMap bigAllocates{};
+hoard::AllocFreeHashMap big_allocates_map;
 
 hoard::FreeSuperblockManager globalFreeSuperblockManager;
 
@@ -23,27 +23,44 @@ hoard::GlobalHeap testGlobalHeap;
 hoard::LocalHeap testLocalHeap;
 }
 
-void *hoard::InternalAlloc(size_t size, size_t alignment) {
-	assert (alignment <= size);
+namespace hoard {
+void* InternalAlloc(size_t size, size_t alignment) {
 	assert (IsValidAlignment(alignment));
-
-	void *p = BigAlloc(size, alignment);
-	//TODO
-	return p;
+	void *result;
+	if (size >= kMaxBlockSize) {
+		result = BigAlloc(size, alignment);
+    } else {
+		result = SmallAlloc(size, alignment);
+	}
+	return result;
 }
 
-void hoard::InternalFree(void *ptr) {
-	BigFree(ptr);
-}
 
-void *hoard::SmallAlloc(size_t size) {
+void* SmallAlloc(size_t size, size_t alignment) {
+	assert(!"small allocations needed");
 	return nullptr;
 }
 
-void *hoard::BigAlloc(size_t size, size_t alignment) {
-	std::lock_guard<std::mutex> lock(bigAllocMutex);
+void InternalFree(void *ptr) {
+	if (!BigFree(ptr)) {
+		SmallFree(ptr);
+	}
+}
 
-	hoard::AllocFreeHashMap bigAllocates{};
+void SmallFree(void *ptr) {
+	assert(!"small allocations needed");
+}
+
+void* BigAlloc(size_t size, size_t alignment) {
+
+	assert(IsValidAlignment(alignment));
+
+	if(alignment > kPageSize) {
+
+	}
+
+
+	std::lock_guard<std::mutex> lock(big_alloc_mutex);
 
 //	size_t total_size = RoundUp(size, alignment);
 //
@@ -52,22 +69,33 @@ void *hoard::BigAlloc(size_t size, size_t alignment) {
 //		return nullptr;
 //
 //	trace("kakak");
-//	bigAllocates.Add(ptr, total_size);
-//	bigAllocates.PrintState();
+//	big_allocates_map.Add(ptr, total_size);
+//	big_allocates_map.PrintState();
 
 	return nullptr;
 }
 
-void hoard::SmallFree(void *ptr) {
+
+//returns true if ptr was big allocation
+bool BigFree(void *ptr) {
+	std::lock_guard<std::mutex> lock(big_alloc_mutex);
+	size_t size = big_allocates_map.Get(ptr);
+	if(size == AllocFreeHashMap::NO_SUCH_KEY) {
+		return false;
+	}
+	auto unmap_result = munmap(ptr, size);
+	if (unmap_result == 0) {
+		big_allocates_map.Remove(ptr);
+		return true;
+	} else {
+		hoard::println("Big free unmap failed on adress: ", ptr);
+		std::abort();
+	}
 }
 
-void hoard::BigFree(void *ptr) {
-	std::lock_guard<std::mutex> lock(bigAllocMutex);
-	size_t size = bigAllocates.Get(ptr);
-	munmap(ptr, size);
-}
-
-void *hoard::InternalRealloc(void *ptr, size_t size) {
+void *InternalRealloc(void *ptr, size_t size) { // TODO optimize realloc before release
 	InternalFree(ptr);
-	return InternalAlloc(size, 0);
+	return InternalAlloc(size);
 }
+
+}// hoard
