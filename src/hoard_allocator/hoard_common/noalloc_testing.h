@@ -41,7 +41,7 @@ void PrintlnAssertionFailureMessage(
     PrintlnAssertionFailureMessage(\
         text, #actual, #expected);\
     fail();\
-  }
+  } true
 
 #define EXPECT_TRUE(condition) \
   NOALLOCTEST_TEST_BOOLEAN_(condition, #condition, false, true, \
