@@ -1,9 +1,10 @@
 add_library(hoard_common
   hoard_constants.h
-  hoard_constants.cpp
   utils.h
   tracing.h
+  noalloc_testing.h
   tracing.cpp
+  AllocFreeHashMap.h
 )
 target_include_directories(hoard_common PUBLIC
  ${CMAKE_CURRENT_SOURCE_DIR}

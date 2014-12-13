@@ -58,11 +58,6 @@ void hoard::print_object(size_t n)
 }
 
 
-//void hoard::print_object(void* px) {
-//    hoard::print_object((size_t) px);
-
-
-//}
 void hoard::print_object(long long l) {
     hoard::print_object((size_t) l);
 }
@@ -75,7 +70,7 @@ void hoard::print_object(bool b) {
     if(b) {
         hoard::print_object("true");
     } else {
-        print_object("false");
+        hoard::print_object("false");
     }
 }
 
@@ -84,6 +79,6 @@ void hoard::print()
 
 bool hoard::trace_enabled()
 {
-    static bool enabled = (getenv("MALLOC_INTERCEPT_NO_TRACE") != NULL);
+    static bool enabled = (getenv("MALLOC_INTERCEPT_NO_TRACE") == NULL);
     return enabled;
 }

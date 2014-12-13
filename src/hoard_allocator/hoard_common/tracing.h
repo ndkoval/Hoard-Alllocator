@@ -19,7 +19,7 @@ namespace hoard
     void print_object(bool b);
     void print_object(long long  l);
     void print_object(int i);
-    
+
     void print();
 
     template <typename T, typename ... Ts>
@@ -29,6 +29,11 @@ namespace hoard
         print(objs...);
     }
 
+    template <typename ... Ts>
+    void println(Ts ... objs) {
+        print(objs..., "\n");
+    }
+
     bool trace_enabled();
 
     template <typename ... Ts>
@@ -36,8 +41,8 @@ namespace hoard
     {
         if (!trace_enabled())
             return;
-        
-        print(objs...);
+
+        println(objs...);
     }
 }
 
