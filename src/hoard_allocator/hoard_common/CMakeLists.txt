@@ -2,7 +2,6 @@ add_library(hoard_common
   hoard_constants.h
   utils.h
   tracing.h
-  noalloc_testing.h
   tracing.cpp
   AllocFreeHashMap.h
 )

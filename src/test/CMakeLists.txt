@@ -20,6 +20,7 @@ endfunction()
 
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/test)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_gtest(custom_hashmap_test
  custom_hashmap_test.cpp

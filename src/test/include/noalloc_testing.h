@@ -57,5 +57,6 @@ void PrintlnAssertionFailureMessage(
   NOALLOCTEST_TEST_BOOLEAN_(!(condition), #condition, true, false, \
                       NOALLOCTEST_FATAL_FAILURE_)
 
+
 #endif //HOARD_HOARD_COMMON_NOALLOC_TESTIN_H
 
