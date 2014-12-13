@@ -20,18 +20,18 @@ class AllocFreeHashMap {
 public:
   typedef void *key_type;
   typedef size_t value_type;
-  constexpr static value_type NO_SUCH_KEY = (value_type) -1;
+  constexpr static value_type kNoSuchKey = (value_type) -1;
 private:
 
-  const size_t MINIMUM_TABLE_SIZE = kPageSize; // multiple kPageSize, can't be static;
-  constexpr static size_t FIXED_POINT_SHIFT = 8;
-  constexpr static size_t FULLNESS_THRESHOLD = (1 << FIXED_POINT_SHIFT) / 2; // talbe with n/2 entryes should be expanded
-  constexpr static size_t EMPTYNESS_THRESHOLD = (1 << FIXED_POINT_SHIFT) / 8; // talbe with n/8 entryes should be shrinked
-  constexpr static size_t EMPTY_CELLS_THRESHOLD = (1 << FIXED_POINT_SHIFT) / 16; // table with less than n/16 empty cells (deleted != empty) will be rehashed in same size
-  static_assert(EMPTY_CELLS_THRESHOLD <= EMPTYNESS_THRESHOLD, "invalid values");
-  constexpr static size_t EXPASION_RATE = 2;
+  const size_t kMinimumTableSize = kPageSize; // multiple kPageSize, can't be static;
+  constexpr static size_t kFixedPointShift = 8;
+  constexpr static size_t kFullnesThreshold = (1 << kFixedPointShift) / 2; // talbe with n/2 entryes should be expanded
+  constexpr static size_t kEmptynesThreshold = (1 << kFixedPointShift) / 8; // talbe with n/8 entryes should be shrinked
+  constexpr static size_t kEmptyCellsThreshold = (1 << kFixedPointShift) / 16; // table with less than n/16 empty cells (deleted != empty) will be rehashed in same size
+  static_assert(kEmptyCellsThreshold <= kEmptynesThreshold, "invalid values");
+  constexpr static size_t kExpansionRate = 2;
   //power of 2
-  constexpr static size_t SHRINKING_RATE = 2; // power of 2
+  constexpr static size_t kShrinkingRate = 2; // power of 2
 
 
   struct TableEntry {
@@ -113,7 +113,7 @@ private:
 
   bool InternalRemove(const key_type &key) { // true if key was in table
     size_t index = InternalFind(key);
-    if (index == NO_SUCH_KEY) {
+    if (index == kNoSuchKey) {
       return false;
     } else {
       deleted_[index] = true;
@@ -133,7 +133,7 @@ private:
         return index;
       }
     }
-    return NO_SUCH_KEY;
+    return kNoSuchKey;
 
   }
 
@@ -188,15 +188,15 @@ private:
 
 public:
   AllocFreeHashMap() : table_entry_num_(0), hint_(0) {
-    InitNewTable(MINIMUM_TABLE_SIZE);
+    InitNewTable(kMinimumTableSize);
   }
 
   void Add(key_type key, value_type value) {
     InternalAdd(key, value);
     table_entry_num_++;
-    if (table_entry_num_ >= (FULLNESS_THRESHOLD * table_entry_size_) >> FIXED_POINT_SHIFT) {
-      Resize(table_mem_size_ * EXPASION_RATE);
-    } else if (empty_cells_ < (EMPTY_CELLS_THRESHOLD * table_entry_size_) >> FIXED_POINT_SHIFT) {
+    if (table_entry_num_ >= (kFullnesThreshold * table_entry_size_) >> kFixedPointShift) {
+      Resize(table_mem_size_ * kExpansionRate);
+    } else if (empty_cells_ < (kEmptyCellsThreshold * table_entry_size_) >> kFixedPointShift) {
       Resize(table_mem_size_);
     }
 
@@ -204,14 +204,14 @@ public:
   }
 
   bool Contains(const key_type &key) {
-    return InternalFind(key) != NO_SUCH_KEY;
+    return InternalFind(key) != kNoSuchKey;
 
   }
 
   value_type Get(key_type key) {
     size_t index = InternalFind(key);
-    if (index == NO_SUCH_KEY) {
-      return NO_SUCH_KEY;
+    if (index == kNoSuchKey) {
+      return kNoSuchKey;
     } else {
       return table_[index].value;
     }
@@ -223,8 +223,8 @@ public:
     bool result = InternalRemove(key);
     if (result) {
       table_entry_num_--;
-      if ((table_entry_num_ <= (EMPTYNESS_THRESHOLD * table_entry_size_) >> FIXED_POINT_SHIFT) && table_mem_size_ > MINIMUM_TABLE_SIZE) {
-        Resize(table_mem_size_ / SHRINKING_RATE);
+      if ((table_entry_num_ <= (kEmptynesThreshold * table_entry_size_) >> kFixedPointShift) && table_mem_size_ > kMinimumTableSize) {
+        Resize(table_mem_size_ / kShrinkingRate);
       }
     }
     return result;
