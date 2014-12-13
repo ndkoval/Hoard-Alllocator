@@ -73,7 +73,7 @@ private:
   }
 
   inline static size_t SecondHash(key_type key) {
-    return ((((((size_t) key) ^ (((size_t) key) >> (sizeof(key_type) * 4))) * 179426339) + 6461350277) % 32416190071ll) | 0b1; // always odd
+    return ((((((size_t) key) ^ (((size_t) key) >> (sizeof(key_type) * 4))) * 179426339) + 6461350277) % 32416190071ll) | 1; // always odd
   }
 
   inline size_t Index(size_t hash) {
