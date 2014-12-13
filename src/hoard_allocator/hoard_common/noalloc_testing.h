@@ -17,7 +17,7 @@ int TestResult() {
 
 void SetTestsFailed() {
     no_alloc_test_result = EXIT_FAILURE;
-};
+}
 
 #define NOALLOCTEST_NONFATAL_FAILURE_ SetTestsFailed
 #define NOALLOCTEST_FATAL_FAILURE_ std::abort
