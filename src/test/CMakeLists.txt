@@ -16,16 +16,22 @@ endfunction()
 function(add_dummy_alloc_test name)
   add_executable(${name} ${ARGN} )
   get_target_property(VAR dummy_malloc_intercept LOCATION)
+  add_test(NAME ${name} COMMAND ${name})
   if(APPLE)
-      add_test(NAME ${name} COMMAND DYLD_FORCE_FLAT_NAMESPACE=1 DYLD_PRINT_LIBRARIES=1 DYLD_INSERT_LIBRARIES=${VAR} ${name})
+      SET_TESTS_PROPERTIES(${name} PROPERTIES ENVIRONMENT "DYLD_FORCE_FLAT_NAMESPACE=1 DYLD_PRINT_LIBRARIES=1 DYLD_INSERT_LIBRARIES=${VAR}")
+      SET_TESTS_PROPERTIES(${name} PROPERTIES ENVIRONMENT "DYLD_INSERT_LIBRARIES=${VAR}")
   else(APPLE)
-      add_test(NAME ${name} COMMAND LD_PRELOAD=${VAR} ${name})
+      SET_TESTS_PROPERTIES(${name} PROPERTIES ENVIRONMENT "LD_PRELOAD=${VAR}")
   endif(APPLE)
+
 
   #target_link_libraries(${name} dummy_malloc_intercept)
   target_link_libraries(${name} hoard_common)
 endfunction()
 
+SET (CTEST_ENVIRONMENT
+  "DYLD_FORCE_FLAT_NAMESPACE=1 DYLD_PRINT_LIBRARIES=1 DYLD_INSERT_LIBRARIES=${VAR}"
+)
 
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/test)
