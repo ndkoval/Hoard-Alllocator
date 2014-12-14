@@ -10,9 +10,9 @@ void hoard::print_object(char const* message)
 
 void hoard::print_object(void* px)
 {
- char const* hexdigits = "0123456789abcdef";
+ static char const* hexdigits = "0123456789abcdef";
 
-    char buffer[32];
+    static char buffer[32];
 
     size_t n = (size_t)px;
 
