@@ -2,8 +2,9 @@
 #define UTILS_H
 
 #include "hoard_constants.h"
+#include "tracing.h"
 #include <assert.h>
-#include<sys/mman.h>
+#include <sys/mman.h>
 
 namespace hoard {
 
@@ -20,12 +21,13 @@ constexpr size_t RoundUp(size_t what, size_t to) {
 }
 
 inline void * GetFirstAllignedPointer(void *ptr, size_t alignment) {
-  return reinterpret_cast<void *> (RoundUp(reinterpret_cast<size_t> (ptr), alignment));
+  void * result = reinterpret_cast<void *> (RoundUp(reinterpret_cast<size_t> (ptr), alignment));
+  assert(result >= ptr );
+  return result;
 }
 
 
 inline void *mmapAnonymous(void *addr, size_t size) {
-  assert(size % kPageSize == 0);
   return mmap(addr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
 }
 
@@ -46,12 +48,12 @@ inline void* mmapAligned(size_t size, size_t alignment) {
       return nullptr;
     }
     void *result_ptr = GetFirstAllignedPointer(mmaped_ptr, alignment);
-    const size_t size_to_unmap_before = reinterpret_cast<size_t>(mmaped_ptr) - reinterpret_cast<size_t>(result_ptr);
+    const size_t size_to_unmap_before = reinterpret_cast<size_t>(result_ptr) - reinterpret_cast<size_t>(mmaped_ptr);
     const size_t size_to_unmap_after = reinterpret_cast<size_t>(mmaped_size) - size_to_unmap_before - rounded_size;
-    if (size_to_unmap_before) {
+    if (size_to_unmap_before != 0) {
       assert(munmap(mmaped_ptr, size_to_unmap_before) != -1);
     }
-    if (size_to_unmap_after) {
+    if (size_to_unmap_after != 0) {
       assert(munmap(reinterpret_cast<char *>(result_ptr) + rounded_size, size_to_unmap_after) != -1);
     }
     return result_ptr;

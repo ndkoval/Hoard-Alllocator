@@ -4,6 +4,7 @@
 function(add_test_macro name)
   add_executable(${name} ${ARGN} )
   add_test(NAME ${name} COMMAND ${name})
+  target_link_libraries(${name} hoard_common)
 endfunction()
 
 function(set_test_preload test_name lib_name)
@@ -19,13 +20,11 @@ endfunction()
 function(add_noalloc_test name)
   add_test_macro(${name} ${ARGN} )
   set_test_preload(${name} die_malloc_intercept)
-  target_link_libraries(${name} hoard_common)
 endfunction()
 
 function(add_dummy_alloc_test name)
   add_test_macro(${name} ${ARGN})
   set_test_preload(${name} dummy_malloc_intercept)
-  target_link_libraries(${name} hoard_common)
 endfunction()
 
 #####################################################################
@@ -33,6 +32,17 @@ endfunction()
 #####################################################################
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/test)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+add_custom_target(testlog
+  COMMAND cat ./Testing/Temporary/LastTest.log
+  WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+)
+
+add_custom_target(check
+  COMMAND make all
+  COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+  WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+)
 
 #####################################################################
 # Tests
@@ -48,10 +58,11 @@ target_link_libraries(shared_malloc_test shared_malloc die_malloc_intercept)
 add_dummy_alloc_test(no_alloc_file_preload_test noalloc_file_preload_test.cpp)
 
 add_gtest(custom_hashmap_test custom_hashmap_test.cpp)
-target_link_libraries(custom_hashmap_test hoard_common)
 add_noalloc_test(noalloc_testing_test noalloc_testing_test.cpp)
 
 add_noalloc_test(hashmap_noalloc_test hashmap_noalloc_test.cpp)
+
+add_gtest(utils_test utils_test.cpp)
 
 
 
