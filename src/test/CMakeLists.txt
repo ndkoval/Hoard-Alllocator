@@ -61,5 +61,5 @@ add_dummy_alloc_test(shared_malloc_test shared_malloc_test.cpp)
 target_link_libraries(shared_malloc_test shared_malloc)
 
 add_executable(ld_preload_test ld_preload_test.cpp)
-#target_link_libraries(ld_preload_test hoard_common)
+target_link_libraries(ld_preload_test hoard_common)
 
