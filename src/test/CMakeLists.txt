@@ -18,9 +18,9 @@ function(add_dummy_alloc_test name)
   get_target_property(VAR dummy_malloc_intercept LOCATION)
   if(APPLE)
       add_test(NAME ${name} COMMAND DYLD_FORCE_FLAT_NAMESPACE=1 DYLD_PRINT_LIBRARIES=1 DYLD_INSERT_LIBRARIES=${VAR} ${name})
-  else
+  else(APPLE)
       add_test(NAME ${name} COMMAND LD_PRELOAD=${VAR} ${name})
-  endif
+  endif(APPLE)
 
   #target_link_libraries(${name} dummy_malloc_intercept)
   target_link_libraries(${name} hoard_common)
