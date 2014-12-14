@@ -25,7 +25,7 @@ target_include_directories(hoard_core PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_library(malloc_intercept
+add_library(malloc_intercept SHARED
   MallocIntercept.cpp
 )
 

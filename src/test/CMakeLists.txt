@@ -1,6 +1,14 @@
+#####################################################################
+# Helper functions
+#####################################################################
 function(add_test_macro name)
   add_executable(${name} ${ARGN} )
   add_test(NAME ${name} COMMAND ${name})
+endfunction()
+
+function(set_test_preload test_name lib_name)
+  get_target_property(LIB_PATH ${lib_name} LOCATION)
+  SET_PROPERTY(TEST ${test_name} PROPERTY ENVIRONMENT "LD_PRELOAD=${LIB_PATH}")
 endfunction()
 
 function(add_gtest name)
@@ -10,56 +18,41 @@ endfunction()
 
 function(add_noalloc_test name)
   add_test_macro(${name} ${ARGN} )
-  target_link_libraries(${name} die_malloc_intercept)
-endfunction()
-
-function(add_dummy_alloc_test name)
-  add_executable(${name} ${ARGN} )
-  get_target_property(VAR dummy_malloc_intercept LOCATION)
-  add_test(NAME ${name} COMMAND ${name})
-  if(APPLE)
-      SET_PROPERTY(TEST ${name} PROPERTY ENVIRONMENT "DYLD_FORCE_FLAT_NAMESPACE=1 DYLD_PRINT_LIBRARIES=1 DYLD_INSERT_LIBRARIES=${VAR}")
-      SET_PROPERTY(TEST ${name} PROPERTY ENVIRONMENT "DYLD_INSERT_LIBRARIES=${VAR}")
-      set(ENV{DYLD_INSERT_LIBRARIES} "${VAR}" )
-  else(APPLE)
-      SET_PROPERTY(TEST ${name} PROPERTY ENVIRONMENT "LD_PRELOAD=${VAR}")
-  endif(APPLE)
-
-
-  #target_link_libraries(${name} dummy_malloc_intercept)
+  set_test_preload(${name} die_malloc_intercept)
   target_link_libraries(${name} hoard_common)
 endfunction()
 
-SET (CTEST_ENVIRONMENT
-  "DYLD_FORCE_FLAT_NAMESPACE=1 DYLD_PRINT_LIBRARIES=1 DYLD_INSERT_LIBRARIES=${VAR}"
-)
+function(add_dummy_alloc_test name)
+  add_test_macro(${name} ${ARGN})
+  set_test_preload(${name} dummy_malloc_intercept)
+  target_link_libraries(${name} hoard_common)
+endfunction()
 
-  get_target_property(VAR dummy_malloc_intercept LOCATION)
-  message(${VAR})
-  message("HI!!! $<TARGET_FILE:dummy_malloc_intercept>")
-
+#####################################################################
+# Basic setings
+#####################################################################
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/test)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ./../hoard_allocator/hoard_common)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-add_gtest(custom_hashmap_test
- custom_hashmap_test.cpp
-)
-target_link_libraries(custom_hashmap_test
-  hoard_common
-)
+#####################################################################
+# Tests
+#####################################################################
 
-add_noalloc_test(noalloc_testing_test
-  noalloc_testing_test.cpp
-)
+add_noalloc_test(noalloc_file_preload_test  noalloc_file_preload_test.cpp)
 
-add_noalloc_test(hashmap_noalloc_test
-  hashmap_noalloc_test.cpp
-)
-
-add_library(shared_malloc SHARED shared_malloc.cpp)
+#if dummy is not in LD_PRELOAD, test will crashed
 add_dummy_alloc_test(shared_malloc_test shared_malloc_test.cpp)
-target_link_libraries(shared_malloc_test shared_malloc)
+add_library(shared_malloc SHARED shared_malloc.cpp)
+target_link_libraries(shared_malloc_test shared_malloc die_malloc_intercept)
 
-add_executable(ld_preload_test ld_preload_test.cpp)
-target_link_libraries(ld_preload_test hoard_common)
+add_dummy_alloc_test(no_alloc_file_preload_test noalloc_file_preload_test.cpp)
+
+add_gtest(custom_hashmap_test custom_hashmap_test.cpp)
+target_link_libraries(custom_hashmap_test hoard_common)
+add_noalloc_test(noalloc_testing_test noalloc_testing_test.cpp)
+
+add_noalloc_test(hashmap_noalloc_test hashmap_noalloc_test.cpp)
+
+
+
 
