@@ -20,18 +20,16 @@ constexpr size_t kMinBlockSize = 8;  //power of kBlockFactor
 constexpr size_t kMaxBlockSize = kSuperblockSize / 4;
 static_assert(kMinBlockSize >= sizeof(void *), "too small min Block size");
 constexpr size_t kEmptynessFactor = 4; // power of 2
-constexpr int kMagicNumber = 0xdeadbeef;
+constexpr size_t kMagicNumber = 0xdeadbeef;
 constexpr size_t kDefaultAllignment = 8;
 
 //must be initialized in .cpp that using them
-const size_t kRealPageSize = sysconf(_SC_PAGESIZE);
-const size_t kNumberOfCPU = sysconf(_SC_NPROCESSORS_ONLN);
+const size_t kRealPageSize = (size_t const) sysconf(_SC_PAGESIZE);
+const size_t kNumberOfCPU = (size_t const) sysconf(_SC_NPROCESSORS_ONLN);
 const size_t kNumberOfHeaps = kNumberOfCPU * 2;
 
 }
 
-
 }
-
 
 #endif // HOARDALLOCATOR_H

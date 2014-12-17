@@ -48,11 +48,13 @@ void *InternalAlloc(size_t size, size_t alignment) {
 
 void *SmallAlloc(size_t size, size_t alignment) {
     //TODO small allocations
-    assert(!"small allocations needed");
-    return nullptr;
+    return BigAlloc(size, alignment);
 }
 
 void InternalFree(void *ptr) {
+    if (ptr == nullptr)
+        return;
+
     //big allocations always have page size alignment
     if (((size_t) ptr % kPageSize) || !BigFree(ptr)) {
         SmallFree(ptr);
@@ -65,7 +67,7 @@ void SmallFree(void *ptr) {
 
 
     //TODO small allocations
-    assert(!"small allocations needed");
+    BigFree(ptr);
 }
 
 void *BigAlloc(size_t size, size_t alignment) {
@@ -74,6 +76,8 @@ void *BigAlloc(size_t size, size_t alignment) {
     if(!result_ptr) {
         return nullptr;
     }
+
+    trace("map size:", big_allocates_map.size());
 
     std::lock_guard<std::mutex> lock(big_alloc_mutex);
     big_allocates_map.Add(result_ptr, size);

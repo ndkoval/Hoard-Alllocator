@@ -58,7 +58,6 @@ inline void* mmapAligned(size_t size, size_t alignment) {
     }
     return result_ptr;
   }
-
 }
 
 }
