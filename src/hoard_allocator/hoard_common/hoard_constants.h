@@ -12,7 +12,7 @@ namespace hoard {
 
 namespace {
 
-constexpr size_t kPageSize = 4 * 1024; //need to be constexpr for perfomance reason
+constexpr size_t kPageSize = 4 * 1024; //need to be constexpr for performance reason
 constexpr size_t kSuperblockSize = 4 * 1024 * 8; // power of 2
 constexpr size_t kPagesInSuperblock = kSuperblockSize / kPageSize; // power of 2
 constexpr size_t kBlockFactor = 2; // power of 2  and > 1
@@ -21,7 +21,7 @@ constexpr size_t kMaxBlockSize = kSuperblockSize / 4;
 static_assert(kMinBlockSize >= sizeof(void *), "too small min Block size");
 constexpr size_t kEmptynessFactor = 4; // power of 2
 constexpr size_t kMagicNumber = 0xdeadbeef;
-constexpr size_t kDefaultAllignment = 8;
+constexpr size_t kDefaultAlignment = 8;
 
 //must be initialized in .cpp that using them
 const size_t kRealPageSize = (size_t const) sysconf(_SC_PAGESIZE);

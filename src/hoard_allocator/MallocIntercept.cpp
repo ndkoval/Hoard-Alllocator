@@ -8,8 +8,8 @@ using namespace hoard;
 namespace {
 __thread bool insideMalloc = false;
 
-struct recuirsionGuard {
-	recuirsionGuard() {
+struct recursionGuard {
+	recursionGuard() {
 		if (insideMalloc) {
 			print("recursive call\n");
 			std::abort();
@@ -18,21 +18,21 @@ struct recuirsionGuard {
 		insideMalloc = true;
 	}
 
-	~recuirsionGuard() {
+	~recursionGuard() {
 		insideMalloc = false;
 	}
 
 private:
-	recuirsionGuard(recuirsionGuard const &);
+	recursionGuard(recursionGuard const &);
 
-	recuirsionGuard &operator=(recuirsionGuard const &);
+	recursionGuard &operator=(recursionGuard const &);
 };
 }
 
 
 extern "C"
 void *malloc(size_t size) __THROW {
-	recuirsionGuard rg;
+	recursionGuard rg;
 
 	trace("try malloc ", size, "\n");
 	void *p = InternalAlloc(size);
@@ -43,7 +43,7 @@ void *malloc(size_t size) __THROW {
 
 extern "C"
 void *calloc(size_t n, size_t size) __THROW {
-	recuirsionGuard rg;
+	recursionGuard rg;
 
 	trace("try calloc ", n, " ", size, "\n");
 	void *p = InternalAlloc(n * size);
@@ -54,7 +54,7 @@ void *calloc(size_t n, size_t size) __THROW {
 
 extern "C"
 void free(void *ptr) __THROW {
-	recuirsionGuard rg;
+	recursionGuard rg;
 
 	trace("try free ", ptr, "\n");
 	InternalFree(ptr);
@@ -63,7 +63,7 @@ void free(void *ptr) __THROW {
 
 extern "C"
 void *realloc(void *ptr, size_t size) __THROW {
-	recuirsionGuard rg;
+	recursionGuard rg;
 
 	trace("try realloc ", ptr, " ", size, "\n");
 	void *p = InternalRealloc(ptr, size);
@@ -74,7 +74,7 @@ void *realloc(void *ptr, size_t size) __THROW {
 
 extern "C"
 int posix_memalign(void **memptr, size_t alignment, size_t size) __THROW {
-	recuirsionGuard rg;
+	recursionGuard rg;
 
 	*memptr = 0;
 
@@ -95,7 +95,7 @@ int posix_memalign(void **memptr, size_t alignment, size_t size) __THROW {
 
 extern "C"
 void *valloc(size_t size) __THROW {
-	recuirsionGuard rg;
+	recursionGuard rg;
 
 	print("deprecated function valloc is not supported\n");
 	std::abort();
@@ -103,7 +103,7 @@ void *valloc(size_t size) __THROW {
 
 extern "C"
 void *memalign(size_t boundary, size_t size) __THROW {
-	recuirsionGuard rg;
+	recursionGuard rg;
 
 	print("deprecated function memalign is not supported\n");
 	std::abort();

@@ -8,9 +8,9 @@
 
 /*
  * void * -> size_t hashmap
- * uses no malloc, but mmap for entery table allocating
+ * uses no malloc, but mmap for entry table allocating
  * used double hashing for collision resolution
- * can store multple values for one key, but order of get and Remove not defined
+ * can store multiply values for one key, but order of get and Remove not defined
  */
 
 namespace hoard {
@@ -25,10 +25,10 @@ private:
 
   const size_t kMinimumTableSize = kPageSize; // multiple kPageSize, can't be static;
   constexpr static size_t kFixedPointShift = 8;
-  constexpr static size_t kFullnesThreshold = (1 << kFixedPointShift) / 2; // talbe with n/2 entryes should be expanded
-  constexpr static size_t kEmptynesThreshold = (1 << kFixedPointShift) / 8; // talbe with n/8 entryes should be shrinked
+  constexpr static size_t kFullnessThreshold = (1 << kFixedPointShift) / 2; // table with n/2 entries should be expanded
+  constexpr static size_t kEmptynessThreshold = (1 << kFixedPointShift) / 8; // table with n/8 entries should be shrinked
   constexpr static size_t kEmptyCellsThreshold = (1 << kFixedPointShift) / 16; // table with less than n/16 empty cells (deleted != empty) will be rehashed in same size
-  static_assert(kEmptyCellsThreshold <= kEmptynesThreshold, "invalid values");
+  static_assert(kEmptyCellsThreshold <= kEmptynessThreshold, "invalid values");
   constexpr static size_t kExpansionRate = 2;
   //power of 2
   constexpr static size_t kShrinkingRate = 2; // power of 2
@@ -53,8 +53,8 @@ private:
     }
   };
 
-
-  static_assert(IsPowerOf2(sizeof(TableEntry)), "TableEntry should be power of 2 size for having power of 2 entryes in table"); // second hashfunction is odd so entry_num will be coprime with it value
+  // second hashf unction is odd so entry_num will be coprime with it value
+  static_assert(IsPowerOf2(sizeof(TableEntry)), "TableEntry should be power of 2 size for having power of 2 entryes in table");
 
   TableEntry *table_;
   bool *deleted_;
@@ -62,7 +62,7 @@ private:
   size_t table_entry_size_;
   size_t table_mem_size_;
   size_t deleted_mem_size_;
-  size_t hint_; // last finded Index.
+  size_t hint_; // last founded Index.
   // if there are too small empty cells (not full or deleted), find can be too slow, even cycle, if table is full of not empty cells, and there is no such key in table
   size_t empty_cells_;
 
@@ -196,7 +196,7 @@ public:
   void Add(key_type key, value_type value) {
     InternalAdd(key, value);
     table_entry_num_++;
-    if (table_entry_num_ >= (kFullnesThreshold * table_entry_size_) >> kFixedPointShift) {
+    if (table_entry_num_ >= (kFullnessThreshold * table_entry_size_) >> kFixedPointShift) {
       Resize(table_mem_size_ * kExpansionRate);
     } else if (empty_cells_ < (kEmptyCellsThreshold * table_entry_size_) >> kFixedPointShift) {
       Resize(table_mem_size_);
@@ -225,7 +225,7 @@ public:
     bool result = InternalRemove(key);
     if (result) {
       table_entry_num_--;
-      if ((table_entry_num_ <= (kEmptynesThreshold * table_entry_size_) >> kFixedPointShift) && table_mem_size_ > kMinimumTableSize) {
+      if ((table_entry_num_ <= (kEmptynessThreshold * table_entry_size_) >> kFixedPointShift) && table_mem_size_ > kMinimumTableSize) {
         Resize(table_mem_size_ / kShrinkingRate);
       }
     }

@@ -20,7 +20,7 @@ constexpr size_t RoundUp(size_t what, size_t to) {
 	return (what + to - 1) / to * to;
 }
 
-inline void *GetFirstAllignedPointer(void *ptr, size_t alignment) {
+inline void *GetFirstAlignedPointer(void *ptr, size_t alignment) {
 	void *result = reinterpret_cast<void *> (RoundUp(reinterpret_cast<size_t> (ptr), alignment));
 	assert(result >= ptr);
 	return result;
@@ -41,13 +41,13 @@ inline void *mmapAligned(size_t size, size_t alignment) {
 	const size_t rounded_size = RoundUp(size, kPageSize);
 	if (alignment <= kPageSize) {
 		return mmapAnonymous(rounded_size);
-	} else { //big allignment case
+	} else { //big alignment case
 		const size_t mmaped_size = alignment + rounded_size - kPageSize;
 		void *mmaped_ptr = mmapAnonymous(mmaped_size);
 		if (mmaped_ptr == MAP_FAILED) {
 			return nullptr;
 		}
-		void *result_ptr = GetFirstAllignedPointer(mmaped_ptr, alignment);
+		void *result_ptr = GetFirstAlignedPointer(mmaped_ptr, alignment);
 		const size_t size_to_unmap_before = reinterpret_cast<size_t>(result_ptr) - reinterpret_cast<size_t>(mmaped_ptr);
 		const size_t size_to_unmap_after = reinterpret_cast<size_t>(mmaped_size) - size_to_unmap_before - rounded_size;
 		if (size_to_unmap_before != 0) {

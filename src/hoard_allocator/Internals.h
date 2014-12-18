@@ -7,7 +7,7 @@
 
 namespace hoard {
 
-void *InternalAlloc(size_t size, size_t alignment = kDefaultAllignment);
+void *InternalAlloc(size_t size, size_t alignment = kDefaultAlignment);
 
 void InternalFree(void *ptr);
 
@@ -19,7 +19,7 @@ void *BigAlloc(size_t size, size_t alignment = kPageSize);
 
 void SmallFree(void *ptr);
 
-void *SmallAlloc(size_t size, size_t alignment = kDefaultAllignment);
+void *SmallAlloc(size_t size, size_t alignment = kDefaultAlignment);
 
 bool BigFree(void *ptr);
 

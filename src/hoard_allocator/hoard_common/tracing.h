@@ -8,7 +8,7 @@
 // if they call malloc we will end up with an infinite recursion.
 // This file Contains simple tracing functions which don't use malloc.
 // You can use them instead of std::cerr or fprintf.
-// This code is known to be incomplet and incorrekt and it lacks
+// This code is known to be incomplete and incorrect and it lacks
 // support of signed types.
 
 namespace hoard {
