@@ -11,39 +11,41 @@
 // This code is known to be incomplet and incorrekt and it lacks
 // support of signed types.
 
-namespace hoard
-{
-    void print_object(char const*);
-    void print_object(void* px);
-    void print_object(size_t n);
-    void print_object(bool b);
-    void print_object(long long  l);
-    void print_object(int i);
+namespace hoard {
+void print_object(char const *);
 
-    void print();
+void print_object(void *px);
 
-    template <typename T, typename ... Ts>
-    void print(T obj, Ts ... objs)
-    {
-        print_object(obj);
-        print(objs...);
-    }
+void print_object(size_t n);
 
-    template <typename ... Ts>
-    void println(Ts ... objs) {
-        print(objs..., "\n");
-    }
+void print_object(bool b);
 
-    bool trace_enabled();
+void print_object(long long l);
 
-    template <typename ... Ts>
-    void trace(Ts ... objs)
-    {
-        if (!trace_enabled())
-            return;
+void print_object(int i);
 
-        println(objs...);
-    }
+void print();
+
+template<typename T, typename ... Ts>
+void print(T obj, Ts ... objs) {
+	print_object(obj);
+	print(objs...);
+}
+
+template<typename ... Ts>
+void println(Ts ... objs) {
+	print(objs..., "\n");
+}
+
+bool trace_enabled();
+
+template<typename ... Ts>
+void trace(Ts ... objs) {
+	if (!trace_enabled())
+		return;
+
+	println(objs...);
+}
 }
 
 #endif

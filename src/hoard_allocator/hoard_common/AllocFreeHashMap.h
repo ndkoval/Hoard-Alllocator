@@ -95,6 +95,9 @@ private:
   }
 
   void InternalAdd(const key_type &key, const value_type &value) {
+    if (size() == 0) {
+      InitNewTable(4096);
+    }
     size_t current_hash = FirstHash(key);
     size_t index = Index(current_hash);
     if (table_[index].empty() || deleted_[index]) {
@@ -108,7 +111,6 @@ private:
       } while (!table_[index].empty() && !deleted_[index]);
       Set(index, key, value);
     }
-
   }
 
   bool InternalRemove(const key_type &key) { // true if key was in table
@@ -161,7 +163,7 @@ private:
     bool *old_deleted = deleted_;
     size_t old_empty_cells = empty_cells_;
     InitNewTable(new_table_mem_size);
-    size_t  entry_counter = 0, empty_cell_counter = 0;
+    size_t entry_counter = 0, empty_cell_counter = 0;
     for (size_t i = 0; i < old_table_entry_size; i++) {
       if (!old_table[i].empty() && !old_deleted[i]) {
         entry_counter++;

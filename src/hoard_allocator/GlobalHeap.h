@@ -7,7 +7,7 @@ namespace hoard {
 
 class GlobalHeap : public BaseHeap {
 public:
-  GlobalHeap();
+	GlobalHeap();
 };
 
 }

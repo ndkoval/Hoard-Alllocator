@@ -7,7 +7,7 @@ namespace hoard {
 
 class LocalHeap : public BaseHeap {
 public:
-  LocalHeap();
+	LocalHeap();
 };
 }
 

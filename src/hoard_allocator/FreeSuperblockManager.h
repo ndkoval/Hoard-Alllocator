@@ -6,7 +6,7 @@
 namespace hoard {
 class FreeSuperblockManager : public BaseHeap {
 public:
-  FreeSuperblockManager();
+	FreeSuperblockManager();
 };
 
 }

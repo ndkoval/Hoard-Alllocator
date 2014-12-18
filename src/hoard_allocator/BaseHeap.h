@@ -5,7 +5,7 @@
 
 class BaseHeap {
 public:
-  std::mutex lock;
+	std::mutex lock;
 };
 
 #endif // BASE_HEAP_H
