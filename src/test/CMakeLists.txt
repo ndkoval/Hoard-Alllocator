@@ -8,6 +8,7 @@ function(add_test_macro name)
 endfunction()
 
 function(set_test_preload test_name lib_name)
+  add_dependencies(${test_name} ${lib_name})
   get_target_property(LIB_PATH ${lib_name} LOCATION)
   SET_PROPERTY(TEST ${test_name} PROPERTY ENVIRONMENT "LD_PRELOAD=${LIB_PATH}")
 endfunction()
