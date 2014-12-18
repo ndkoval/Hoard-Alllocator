@@ -27,6 +27,11 @@ function(add_dummy_alloc_test name)
   set_test_preload(${name} dummy_malloc_intercept)
 endfunction()
 
+function(add_malloc_intercept_test name)
+  add_test_macro(${name} ${ARGN})
+  set_test_preload(${name} die_malloc_intercept)
+endfunction()
+
 #####################################################################
 # Basic setings
 #####################################################################
@@ -63,3 +68,5 @@ add_noalloc_test(noalloc_testing_test noalloc_testing_test.cpp)
 add_noalloc_test(hashmap_noalloc_test hashmap_noalloc_test.cpp)
 
 add_gtest(utils_test utils_test.cpp)
+
+add_malloc_intercept_test(big_alloc_test big_alloc_test.cpp)

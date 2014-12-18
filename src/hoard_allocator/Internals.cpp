@@ -14,6 +14,8 @@
 namespace {
 
 int _CheckPageSize() {
+	hoard::trace("Page size is: ", hoard::kRealPageSize);
+
 	assert(hoard::kPageSize == hoard::kRealPageSize && "change kPageSize and recompile lib for your machine");
 	return hoard::kPageSize == hoard::kRealPageSize;
 }
@@ -62,8 +64,8 @@ void InternalFree(void *ptr) {
 }
 
 void SmallFree(void *ptr) {
-	SuperblockHeader *superblock = SuperblockHeader::Get(ptr);
-	assert(superblock->valid());
+//	SuperblockHeader *superblock = SuperblockHeader::Get(ptr);
+//	assert(superblock->valid());
 
 
 	//TODO small allocations

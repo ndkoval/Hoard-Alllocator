@@ -95,9 +95,8 @@ private:
   }
 
   void InternalAdd(const key_type &key, const value_type &value) {
-    if (size() == 0) {
-      InitNewTable(4096);
-    }
+    hoard::trace("Page size is: ", hoard::kRealPageSize);
+    trace("table_entry_size: ", table_entry_size_);
     size_t current_hash = FirstHash(key);
     size_t index = Index(current_hash);
     if (table_[index].empty() || deleted_[index]) {
@@ -175,10 +174,8 @@ private:
 
     }
     if (entry_counter != table_entry_num_) {
-
       hoard::print("added in Resize: ", entry_counter, "added total: ", table_entry_num_);
       assert(entry_counter == table_entry_num_);
-
     } else if (old_empty_cells != empty_cell_counter) {
       hoard::print("empty cells invariant lost. Expexted: ", old_empty_cells, " founded: ", empty_cell_counter, "\n");
       assert(old_empty_cells == empty_cell_counter);
