@@ -24,8 +24,8 @@ constexpr size_t kMagicNumber = 0xdeadbeef;
 constexpr size_t kDefaultAlignment = 8;
 
 //must be initialized in .cpp that using them
-const size_t kRealPageSize = (size_t const) sysconf(_SC_PAGESIZE);
-const size_t kNumberOfCPU = (size_t const) sysconf(_SC_NPROCESSORS_ONLN);
+const size_t kRealPageSize = static_cast<size_t >(sysconf(_SC_PAGESIZE));
+const size_t kNumberOfCPU = static_cast<size_t>(sysconf(_SC_NPROCESSORS_ONLN));
 const size_t kNumberOfHeaps = kNumberOfCPU * 2;
 
 }
