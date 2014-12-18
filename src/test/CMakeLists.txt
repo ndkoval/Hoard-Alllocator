@@ -29,7 +29,7 @@ endfunction()
 
 function(add_malloc_intercept_test name)
   add_test_macro(${name} ${ARGN})
-  set_test_preload(${name} die_malloc_intercept)
+  set_test_preload(${name} malloc_intercept)
 endfunction()
 
 #####################################################################
