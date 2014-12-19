@@ -1,17 +1,20 @@
 #include <string.h>
-#include "noalloc_testing.h"
+#include "../hoard_allocator/Internals.h"
+#include "../gtest/include/gtest/gtest.h"
 
-int main() {
-	void *ptr = malloc(1024);
-	EXPECT_FALSE(ptr == nullptr);
+TEST(big_alloc, alloc_and_free) {
+	char *ptr = (char *) hoard::BigAlloc(hoard::kMaxBlockSize, hoard::kDefaultAlignment);
+	ASSERT_NE(ptr, nullptr);
+	ptr[0] = 'c';
+	ASSERT_EQ(ptr[0], 'c');
+	ASSERT_TRUE(hoard::BigFree(ptr));
+}
 
-	void *ptr2 = malloc(1024);
-	memcpy(ptr, ptr2, 1024);
-
-	ptr = realloc(ptr, 2048);
-
-	free(ptr2);
-	free(ptr);
-
-	return TestResult();
+TEST(big_alloc, realloc) {
+	char *ptr = (char *) hoard::BigAlloc(hoard::kMaxBlockSize, hoard::kDefaultAlignment);
+	ptr[0] = 'c';
+	ptr = (char *) hoard::InternalRealloc(ptr, hoard::kMaxBlockSize * 2);
+	ASSERT_EQ(ptr[0], 'c');
+	ptr[hoard::kMaxBlockSize * 2 - 1] = 'c';
+	ASSERT_TRUE(hoard::BigFree(ptr));
 }

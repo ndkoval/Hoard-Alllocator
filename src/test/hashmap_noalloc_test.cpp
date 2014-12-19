@@ -1,5 +1,5 @@
 #include "cstdlib"
-#include "noalloc_testing.h"
+#include "ldpreload_testing.h"
 #include "AllocFreeHashMap.h"
 
 int main() {
