@@ -95,8 +95,8 @@ private:
   }
 
   void InternalAdd(const key_type &key, const value_type &value) {
-    hoard::trace("Page size is: ", hoard::kRealPageSize);
-    trace("table_entry_size: ", table_entry_size_);
+//    hoard::trace("Page size is: ", hoard::kRealPageSize);
+//    trace("table_entry_size: ", table_entry_size_);
     size_t current_hash = FirstHash(key);
     size_t index = Index(current_hash);
     if (table_[index].empty() || deleted_[index]) {
@@ -139,6 +139,7 @@ private:
   }
 
   inline void InitNewTable(size_t new_table_mem_size) {
+    trace("Table init: ", new_table_mem_size);
     assert(IsPowerOf2(new_table_mem_size));
     table_mem_size_ = new_table_mem_size;
     table_entry_size_ = table_mem_size_ / sizeof(TableEntry);
@@ -187,6 +188,7 @@ private:
 
 public:
   AllocFreeHashMap() : table_entry_num_(0), hint_(0) {
+    trace("Table construct");
     InitNewTable(kMinimumTableSize);
   }
 
