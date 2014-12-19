@@ -28,8 +28,8 @@ int _CheckPageSize() {
 
 bool is_inited;
 
-std::mutex init_mutex;
-std::mutex big_alloc_mutex;
+hoard::lock_t init_mutex;
+hoard::lock_t big_alloc_mutex;
 
 struct HoardState {
 
@@ -40,13 +40,14 @@ struct HoardState {
 	hoard::GlobalHeap testGlobalHeap;
 
 	hoard::LocalHeap testLocalHeap;
+	hoard::Superblock testSuperblock;
 
 } state;
 
 
 void Init() {
 	if (!is_inited) {
-		std::lock_guard<std::mutex> guard(init_mutex);
+		hoard::lock_guard guard(init_mutex);
 		if(!is_inited){
 			_CheckPageSize();
 			new (&state) HoardState();
@@ -103,7 +104,7 @@ void *BigAlloc(size_t size, size_t alignment) {
 		return nullptr;
 	}
 
-	std::lock_guard<std::mutex> lock(big_alloc_mutex);
+	hoard::lock_guard guard(big_alloc_mutex);
 	state.big_allocates_map.Add(result_ptr, size);
 	return result_ptr;
 }
@@ -111,7 +112,7 @@ void *BigAlloc(size_t size, size_t alignment) {
 
 //returns true if ptr was big allocation
 bool BigFree(void *ptr) {
-	std::lock_guard<std::mutex> lock(big_alloc_mutex);
+	hoard::lock_guard guard(big_alloc_mutex);
 	size_t size = state.big_allocates_map.Get(ptr);
 	if (size == AllocFreeHashMap::kNoSuchKey) {
 		return false;
@@ -140,7 +141,7 @@ void *InternalRealloc(void *ptr, size_t size) { // TODO optimize realloc before 
 	}
 	size_t old_size;
 	{
-		std::lock_guard<std::mutex> lock(big_alloc_mutex);
+		hoard::lock_guard lock(big_alloc_mutex);
 		old_size = state.big_allocates_map.Get(ptr);
 	}
 	memcpy(result, ptr, std::min(size, old_size));
