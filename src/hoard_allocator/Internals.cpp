@@ -11,16 +11,18 @@
 #include "LocalHeap.h"
 #include "superblock.h"
 
+namespace hoard {
 namespace {
 
-using namespace hoard;
-
-
 int _CheckPageSize() {
-	hoard::trace("Page size is: ", hoard::kRealPageSize);
+  //must be initialized in .cpp that using them
+	const size_t kRealPageSize = static_cast<size_t >(sysconf(_SC_PAGESIZE));
+	const size_t kNumberOfCPU = static_cast<size_t>(sysconf(_SC_NPROCESSORS_ONLN));
+	const size_t kNumberOfHeaps = kNumberOfCPU * 2;
 
-	assert(hoard::kPageSize == hoard::kRealPageSize && "change kPageSize and recompile lib for your machine");
-	return hoard::kPageSize == hoard::kRealPageSize;
+	hoard::trace("Page size is: ", kRealPageSize);
+	assert(hoard::kPageSize == kRealPageSize && "change kPageSize and recompile lib for your machine");
+	return hoard::kPageSize == kRealPageSize;
 }
 
 
@@ -53,9 +55,7 @@ void Init() {
 	}
 }
 
-}
-
-namespace hoard {
+} // namespace
 
 
 void *InternalAlloc(size_t size, size_t alignment) {

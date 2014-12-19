@@ -50,6 +50,11 @@ add_custom_target(check
   WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
 )
 
+add_custom_target(kreversi
+  COMMAND LD_PRELOAD=./lib/libmalloc_intercept.so kreversi
+  WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+)
+
 #####################################################################
 # Tests
 #####################################################################
