@@ -2,6 +2,7 @@
 #define SUPERBLOCK_H
 
 #include <mutex>
+#include <atomic>
 #include <assert.h>
 #include "hoard_constants.h"
 #include "BaseHeap.h"
@@ -21,7 +22,7 @@ public:
     return reinterpret_cast<BaseSuperblockHeader<kSuperblockSize> *>(reinterpret_cast<size_t>(ptr) % kSuperblockSize);
   }
 
-  BaseHeap *owner;
+  std::atomic<BaseHeap *> owner;
   hoard::lock_t lock;
   BaseSuperblock<kSuperblockSize> *prev;
   BaseSuperblock<kSuperblockSize> *next;
