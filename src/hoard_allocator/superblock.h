@@ -19,7 +19,7 @@ class BaseSuperblockHeader {
 
 public:
   static BaseSuperblockHeader<kSuperblockSize> *Get(void *ptr) {
-    return reinterpret_cast<BaseSuperblockHeader<kSuperblockSize> *>(reinterpret_cast<size_t>(ptr) % kSuperblockSize);
+    return reinterpret_cast<BaseSuperblockHeader<kSuperblockSize> *>(reinterpret_cast<size_t>(ptr) &  (kSuperblockSize - 1));
   }
 
   std::atomic<BaseHeap *> owner;
@@ -77,7 +77,7 @@ public:
   };
 
   static BaseSuperblock<kSuperblockSize> *Get(void *ptr) {
-    return reinterpret_cast<BaseSuperblock<kSuperblockSize> *>(reinterpret_cast<size_t>(ptr) % kSuperblockSize);
+    return reinterpret_cast<BaseSuperblock<kSuperblockSize> *>(reinterpret_cast<size_t>(ptr) &  (kSuperblockSize - 1));
   }
 
 private:
