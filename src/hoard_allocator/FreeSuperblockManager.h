@@ -8,15 +8,24 @@
 namespace hoard {
 
 template<size_t kSuperblockSize>
-class FreeSuperblockManager {
+class FreeSuperblockManager : virtual BaseHeap<kSuperblockSize> {
 
 public:
 	FreeSuperblockManager() : superblock_count_(0) {
 		MapNewSuperblocks(kDefaultMapNewSuperblocksCount);
 	}
 
-	Superblock<kSuperblockSize> *GetSuperblock() {
-		hoard::lock_guard guard(lock_);
+
+	virtual ~FreeSuperblockManager() {
+		lock_guard guard(BaseHeap<kSuperblockSize>::lock_);
+		while (!superblockStack.empty()) {
+			Superblock<kSuperblockSize> *ptr = superblockStack.Pop();
+			munmap(ptr, sizeof(Superblock<kSuperblockSize>));
+		}
+	}
+
+	Superblock<kSuperblockSize> *GetSuperblock() override {
+		lock_guard guard(BaseHeap<kSuperblockSize>::lock_);
 		if (superblockStack.empty()) {
 			MapNewSuperblocks(kDefaultMapNewSuperblocksCount);
 		}
@@ -25,8 +34,9 @@ public:
 		return superblockStack.Pop();
 	}
 
-	void ReturnSuperblock(Superblock<kSuperblockSize> *superblock) {
-		hoard::lock_guard guard(lock_);
+
+	void AddSuperblock(Superblock<kSuperblockSize> *superblock) override {
+		lock_guard guard(BaseHeap<kSuperblockSize>::lock_);
 
 		if (superblock_count_ < kMaxFreeSuperblocks) {
 			superblockStack.Push(superblock);
@@ -37,6 +47,7 @@ public:
 	}
 
 private:
+
 	struct FreeSuperblockStack {
 	private:
 		Superblock<kSuperblockSize> *head_;
@@ -71,8 +82,6 @@ private:
 		}
 		superblock_count_ += count;
 	}
-
-	lock_t lock_;
 };
 
 }

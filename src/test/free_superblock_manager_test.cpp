@@ -15,7 +15,7 @@ TEST(free_superblock_manager, return_superblock_overflow) {
 	for (size_t i = 0; i < 2 * kMaxFreeSuperblocks; i++) {
 		Superblock<kSuperblockSize> *ptr =
 				reinterpret_cast<Superblock<kSuperblockSize> *> (mmapAnonymous(sizeof(Superblock<kSuperblockSize>)));
-		freeSuperblockManager.ReturnSuperblock(new(ptr) Superblock<kSuperblockSize>);
+		freeSuperblockManager.AddSuperblock(new(ptr) Superblock<kSuperblockSize>);
 	}
 	ASSERT_EQ(freeSuperblockManager.superblock_count_, kMaxFreeSuperblocks);
 }
