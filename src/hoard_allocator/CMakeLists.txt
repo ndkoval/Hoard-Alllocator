@@ -14,8 +14,8 @@ add_library(hoard_core
   Internals.cpp
   LocalHeap.h
   LocalHeap.cpp
-  BaseSuperblockHeader.h
-  BaseSuperblock.h
+  SuperblockHeader.h
+  Superblock.h
 )
 target_link_libraries(hoard_core
   hoard_common

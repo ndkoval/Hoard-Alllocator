@@ -2,19 +2,19 @@
 #define FREE_SUPERBLOCK_MANAGER_H
 
 #include "BaseHeap.h"
-#include "BaseSuperblock.h"
+#include "Superblock.h"
 
 namespace hoard {
 
 template<size_t kSuperblockSize>
-class BaseFreeSuperblockManager : public BaseHeap {
+class FreeSuperblockManager : public BaseHeap {
 
 public:
-	BaseFreeSuperblockManager() {
+	FreeSuperblockManager() {
 		MapNewSuperblocks(kDefaultMapNewSuperblocksCount);
 	}
 
-	BaseSuperblock<kSuperblockSize> *GetSuperblock() {
+	Superblock<kSuperblockSize> *GetSuperblock() {
 		hoard::lock_guard guard(lock_);
 		if (superblockStack.empty()) {
 			MapNewSuperblocks(kDefaultMapNewSuperblocksCount);
@@ -24,7 +24,7 @@ public:
 		return superblockStack.Pop();
 	}
 
-	void ReturnSuperblock(BaseSuperblock<kSuperblockSize> *superblock) {
+	void ReturnSuperblock(Superblock<kSuperblockSize> *superblock) {
 		hoard::lock_guard guard(lock_);
 
 		if (superblock_count_ < kMaxFreeSuperblocks) {
@@ -38,7 +38,7 @@ public:
 private:
 	struct FreeSuperblockStack {
 	private:
-		BaseSuperblock<kSuperblockSize> *head_;
+		Superblock<kSuperblockSize> *head_;
 	public:
 		FreeSuperblockStack() : head_(nullptr) {
 		}
@@ -47,14 +47,14 @@ private:
 			return head_ == nullptr;
 		}
 
-		void Push(BaseSuperblock<kSuperblockSize> *superblock) {
+		void Push(Superblock<kSuperblockSize> *superblock) {
 			superblock->header().setNext(head_);
 			head_ = superblock;
 		}
 
-		BaseSuperblock<kSuperblockSize> *Pop() {
+		Superblock<kSuperblockSize> *Pop() {
 			assert(!empty());
-			BaseSuperblock<kSuperblockSize> *result = head_;
+			Superblock<kSuperblockSize> *result = head_;
 			head_ = head_->header().next();
 			return result;
 		}
@@ -65,16 +65,14 @@ private:
 	size_t superblock_count_;
 
 	void MapNewSuperblocks(size_t count) {
-		char *newSuperBlocksMemory = (char *) mmapAnonymous(count * sizeof(BaseSuperblock<kSuperblockSize>));
-		for (int i = 0; i < count; i++, newSuperBlocksMemory += sizeof(BaseSuperblock<kSuperblockSize>)) {
-			superblockStack.Push(new(newSuperBlocksMemory) BaseSuperblock<kSuperblockSize>);
+		char *newSuperBlocksMemory = (char *) mmapAnonymous(count * sizeof(Superblock<kSuperblockSize>));
+		for (int i = 0; i < count; i++, newSuperBlocksMemory += sizeof(Superblock<kSuperblockSize>)) {
+			superblockStack.Push(new(newSuperBlocksMemory) Superblock<kSuperblockSize>);
 		}
 		superblock_count_ += count;
 	}
 
 };
-
-using FreeSuperblockManager = BaseFreeSuperblockManager<hoard::kSuperblockSize>;
 
 }
 #endif // FREE_SUPERBLOCK_MANAGER_H

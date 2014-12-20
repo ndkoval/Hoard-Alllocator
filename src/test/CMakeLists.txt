@@ -76,3 +76,4 @@ add_noalloc_test(hashmap_noalloc_test hashmap_noalloc_test.cpp)
 add_gtest(utils_test utils_test.cpp)
 
 add_malloc_intercept_gtest(big_alloc_test big_alloc_test.cpp)
+add_malloc_intercept_gtest(free_superblock_manager_test free_superblock_manager_test.cpp)

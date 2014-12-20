@@ -1,32 +1,30 @@
-#ifndef BASE_SUPERBLOCK_HEADER_H
-#define BASE_SUPERBLOCK_HEADER_H
-
-#include "BaseSuperblock.h"
+#ifndef SUPERBLOCK_HEADER_H
+#define SUPERBLOCK_HEADER_H
 
 namespace hoard {
 
-// BaseSuperblock.h
+//Superblock.h
 template<size_t kSuperblockSize>
-class BaseSuperblock;
+class Superblock;
 
 template<size_t kSuperblockSize>
-class BaseSuperblockHeader {
+class SuperblockHeader {
 
 public:
-	static BaseSuperblockHeader<kSuperblockSize> *Get(void *ptr) {
-		return reinterpret_cast<BaseSuperblockHeader<kSuperblockSize> *>(reinterpret_cast<size_t>(ptr) & (kSuperblockSize - 1));
+	static SuperblockHeader<kSuperblockSize> *Get(void *ptr) {
+		return reinterpret_cast<SuperblockHeader<kSuperblockSize> *>(reinterpret_cast<size_t>(ptr) & (kSuperblockSize - 1));
 	}
 
-	BaseSuperblock<kSuperblockSize> *next() const {
+	Superblock<kSuperblockSize> *next() const {
 		return next_;
 	}
 
-	void setNext(BaseSuperblock<kSuperblockSize> *next) {
+	void setNext(Superblock<kSuperblockSize> *next) {
 		next_ = next;
 	}
 
-	BaseSuperblock<kSuperblockSize> *Superblock() {
-		return reinterpret_cast<BaseSuperblock<kSuperblockSize> *>(this);
+	Superblock<kSuperblockSize> *GetSuperblock() {
+		return reinterpret_cast<Superblock <kSuperblockSize> *>(this);
 	}
 
 	bool Valid() {
@@ -34,11 +32,11 @@ public:
 	}
 
 private:
-	BaseSuperblock<kSuperblockSize> *next_;
+	Superblock <kSuperblockSize> *next_;
 	std::atomic<BaseHeap *> owner_;
 	lock_t lock_;
 
-	BaseSuperblock<kSuperblockSize> *prev_;
+	Superblock <kSuperblockSize> *prev_;
 
 	struct Block {
 		Block *next_block_;
@@ -57,7 +55,7 @@ private:
 		}
 
 		void Push(void *spaceForExtraBlock) {
-			Block *new_block =  new(spaceForExtraBlock)  Block; // constructs new Block in free space
+			Block *new_block = new(spaceForExtraBlock)  Block; // constructs new Block in free space
 			new_block->next_block_ = head_;
 			head_ = new_block;
 		}
@@ -79,12 +77,10 @@ private:
 	size_t magic_number_; // equals kMagicNumber xor *this if valid
 
 	size_t NoninitedFreeBlocks() {
-		return blocks_start_ - reinterpret_cast<Block *>(Superblock() + 1);
+		return blocks_start_ - reinterpret_cast<Block *>(GetSuperblock() + 1);
 	};
 
 };
 
-using SuperblockHeader = BaseSuperblockHeader<kSuperblockSize>;
-
 }
-#endif // BASE_SUPERBLOCK_HEADER
+#endif // SUPERBLOCK_HEADER
