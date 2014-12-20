@@ -9,7 +9,6 @@
 #include "FreeSuperblockManager.h"
 #include "GlobalHeap.h"
 #include "LocalHeap.h"
-#include "BaseSuperblock.h"
 
 namespace hoard {
 namespace {
@@ -40,7 +39,6 @@ struct HoardState {
 	hoard::GlobalHeap testGlobalHeap;
 
 	hoard::LocalHeap testLocalHeap;
-	hoard::Superblock testSuperblock;
 
 } state;
 

@@ -12,7 +12,6 @@ namespace hoard {
 
 template<size_t kSuperblockSize>
 class BaseSuperblock {
-	using header_t = BaseSuperblockHeader<kSuperblockSize>;
 
 public:
 	BaseSuperblock() {
@@ -24,7 +23,7 @@ public:
 
 private:
 	BaseSuperblockHeader<kSuperblockSize> header_;
-	constexpr static size_t kDataSize = kSuperblockSize - sizeof(header_t);
+	constexpr static size_t kDataSize = kSuperblockSize - sizeof(BaseSuperblockHeader<kSuperblockSize>);
 	char data[kDataSize];
 
 public:
@@ -34,7 +33,6 @@ public:
 
 };
 
-using Superblock = BaseSuperblock<kSuperblockSize>;
-static_assert(sizeof(Superblock) == kSuperblockSize, "ivalid superblock struct size");
+static_assert(sizeof(BaseSuperblock<kSuperblockSize>) == kSuperblockSize, "ivalid superblock struct size");
 }
 #endif // BASE_SUPERBLOCK_H
