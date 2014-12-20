@@ -6,7 +6,6 @@ TEST(alloc_free_hashmap, no_alloc) {
 	constexpr size_t max_val = 1023;
 	hoard::AllocFreeHashMap my_map{};
 
-
 	for (int k = 0; k < 3; k++) {
 
 		for (size_t i = 0; i < max_val; i++) {

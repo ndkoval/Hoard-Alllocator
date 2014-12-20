@@ -8,15 +8,14 @@ add_library(hoard_core
   BaseHeap.h
   BaseHeap.cpp
   FreeSuperblockManager.h
-  FreeSuperblockManager.cpp
   GlobalHeap.h
   GlobalHeap.cpp
   Internals.h
   Internals.cpp
   LocalHeap.h
   LocalHeap.cpp
-  superblock.h
-  superblock.cpp
+  BaseSuperblockHeader.h
+  BaseSuperblock.h
 )
 target_link_libraries(hoard_core
   hoard_common

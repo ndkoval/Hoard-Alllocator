@@ -9,7 +9,7 @@
 #include "FreeSuperblockManager.h"
 #include "GlobalHeap.h"
 #include "LocalHeap.h"
-#include "superblock.h"
+#include "BaseSuperblock.h"
 
 namespace hoard {
 namespace {

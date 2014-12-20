@@ -1,10 +1,8 @@
 #include "ldpreload_testing.h"
 
-
 namespace hoard {
 void *SharedMalloc(size_t);
 }
-
 
 int main() {
 	hoard::println("malloc result: ", malloc(32));
