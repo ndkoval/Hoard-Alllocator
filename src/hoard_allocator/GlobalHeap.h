@@ -5,9 +5,12 @@
 
 namespace hoard {
 
-class GlobalHeap : public BaseHeap {
+template<size_t kSuperblockSize>
+class GlobalHeap : public BaseHeap<kSuperblockSize> {
 public:
-	GlobalHeap();
+	GlobalHeap() {
+
+	}
 };
 
 }

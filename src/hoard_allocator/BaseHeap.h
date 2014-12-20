@@ -6,15 +6,27 @@
 
 namespace hoard {
 
+//Superblock.h
+template<size_t kSuperblockSize>
+class Superblock;
+
+template<size_t kSuperblockSize>
 class BaseHeap {
 public:
 
-	bool operator==(const BaseHeap& another) {
+	lock_t lock() {
+		return lock_;
+	}
+
+//	virtual Superblock<kSuperblockSize> *getSuperblock() = 0;
+//	virtual void addSuperblock(Superblock<kSuperblockSize> *superblock) = 0;
+
+	bool operator==(const BaseHeap &another) {
 		return this == &another;
 	}
 
 protected:
-	hoard::lock_t lock_;
+	lock_t lock_;
 };
 
 }

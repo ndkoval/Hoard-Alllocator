@@ -34,12 +34,7 @@ struct HoardState {
 
 	hoard::AllocFreeHashMap big_allocates_map;
 
-	hoard::FreeSuperblockManager<kSuperblockSize> globalFreeSuperblockManager;
-
-	hoard::GlobalHeap testGlobalHeap;
-
-	hoard::LocalHeap testLocalHeap;
-
+	hoard::FreeSuperblockManager<kSuperblockSize> freeSuperblockManager;
 } state;
 
 

@@ -1,6 +1,8 @@
 #ifndef SUPERBLOCK_HEADER_H
 #define SUPERBLOCK_HEADER_H
 
+#include "BaseHeap.h"
+
 namespace hoard {
 
 //Superblock.h
@@ -33,7 +35,7 @@ public:
 
 private:
 	Superblock <kSuperblockSize> *next_;
-	std::atomic<BaseHeap *> owner_;
+	std::atomic<BaseHeap<kSuperblockSize> *> owner_;
 	lock_t lock_;
 
 	Superblock <kSuperblockSize> *prev_;

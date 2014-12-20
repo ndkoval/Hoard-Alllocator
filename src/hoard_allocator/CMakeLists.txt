@@ -6,14 +6,11 @@ include_directories(hoard_common/)
 add_library(hoard_core
   hoard_common/AllocFreeHashMap.h
   BaseHeap.h
-  BaseHeap.cpp
   FreeSuperblockManager.h
   GlobalHeap.h
-  GlobalHeap.cpp
   Internals.h
   Internals.cpp
   LocalHeap.h
-  LocalHeap.cpp
   SuperblockHeader.h
   Superblock.h
 )
