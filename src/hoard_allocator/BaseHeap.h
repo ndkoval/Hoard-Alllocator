@@ -8,11 +8,13 @@ namespace hoard {
 
 class BaseHeap {
 public:
-	hoard::lock_t lock;
 
 	bool operator==(const BaseHeap& another) {
 		return this == &another;
 	}
+
+protected:
+	hoard::lock_t lock_;
 };
 
 }

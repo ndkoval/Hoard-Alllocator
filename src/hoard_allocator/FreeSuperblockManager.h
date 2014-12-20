@@ -1,16 +1,17 @@
 #ifndef FREE_SUPERBLOCK_MANAGER_H
 #define FREE_SUPERBLOCK_MANAGER_H
 
+#include <utils.h>
 #include "BaseHeap.h"
 #include "Superblock.h"
 
 namespace hoard {
 
 template<size_t kSuperblockSize>
-class FreeSuperblockManager : public BaseHeap {
+class FreeSuperblockManager {
 
 public:
-	FreeSuperblockManager() {
+	FreeSuperblockManager() : superblock_count_(0) {
 		MapNewSuperblocks(kDefaultMapNewSuperblocksCount);
 	}
 
@@ -60,7 +61,6 @@ private:
 		}
 	};
 
-	hoard::lock_t lock_;
 	FreeSuperblockStack superblockStack;
 	size_t superblock_count_;
 
@@ -72,6 +72,7 @@ private:
 		superblock_count_ += count;
 	}
 
+	lock_t lock_;
 };
 
 }
