@@ -23,5 +23,4 @@ protected:
 };
 
 }
-
 #endif // BLOCK_STACK_H

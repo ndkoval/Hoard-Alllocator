@@ -258,7 +258,6 @@ public:
 
 
 };
+
 }
-
-
 #endif // NO_ALLOC_HASHMAP_H

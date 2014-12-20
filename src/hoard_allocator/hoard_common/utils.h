@@ -61,6 +61,4 @@ inline void *mmapAligned(size_t size, size_t alignment) {
 }
 
 }
-
-
 #endif // UTILS_H

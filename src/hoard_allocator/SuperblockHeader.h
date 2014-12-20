@@ -38,6 +38,10 @@ public:
 		return reinterpret_cast<Superblock<kSuperblockSize> *>(this);
 	}
 
+	bool IsFree() {
+		return noninited_blocks_start_ == nullptr;
+	}
+
 	bool Valid() {
 		return (magic_number_ ^ reinterpret_cast<size_t>(&this)) == kMagicNumber;
 	}

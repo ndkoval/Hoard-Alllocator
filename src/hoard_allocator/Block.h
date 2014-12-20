@@ -23,5 +23,4 @@ private:
 static_assert(sizeof(Block) >= kMinBlockSize, "size of Block struct should be more of equal than MIN_SIZE");
 
 }
-
 #endif // BLOCK_H

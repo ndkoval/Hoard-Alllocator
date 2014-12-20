@@ -24,5 +24,4 @@ protected:
 };
 
 }
-
 #endif // SUPERBLOCK_STACK_H

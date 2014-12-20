@@ -13,23 +13,28 @@ public:
 		parentHeap_ = parentHeap;
 	}
 
-	virtual ~GlobalHeap() {
-	}
-
-
 	Superblock<kSuperblockSize> *GetSuperblock() override {
-		return nullptr;
+		lock_guard guard(BaseHeap<kSuperblockSize>::lock_);
+		if (superblockStack.IsEmpty()) {
+			return parentHeap_->GetSuperblock();
+		} else {
+			return superblockStack.Pop();
+		}
 	}
 
 	void AddSuperblock(Superblock<kSuperblockSize> *superblock) override {
-
+		lock_guard guard(BaseHeap<kSuperblockSize>::lock_);
+		if (superblock->header().IsFree()) {
+			parentHeap_->AddSuperblock(superblock);
+		} else {
+			superblockStack.Push(superblock);
+		}
 	}
 
 private:
 	BaseHeap<kSuperblockSize> *parentHeap_;
+	SuperblockStack<kSuperblockSize> superblockStack;
 };
 
 }
-
-
 #endif // GLOBAL_HEAP_H

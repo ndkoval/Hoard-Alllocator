@@ -33,5 +33,4 @@ constexpr size_t kMaxFreeSuperblocks = 64;
 }
 
 }
-
 #endif // HOARDALLOCATOR_H

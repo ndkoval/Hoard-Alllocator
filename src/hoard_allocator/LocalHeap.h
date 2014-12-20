@@ -13,5 +13,4 @@ public:
 	}
 };
 }
-
 #endif // LOCAL_HEAP_H

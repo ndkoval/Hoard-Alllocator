@@ -46,6 +46,6 @@ void trace(Ts ... objs) {
 
 	println(objs...);
 }
-}
 
+}
 #endif

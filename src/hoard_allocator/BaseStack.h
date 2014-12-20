@@ -44,5 +44,4 @@ private:
 };
 
 }
-
 #endif // BASE_STACK_H

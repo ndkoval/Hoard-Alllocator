@@ -24,5 +24,4 @@ void *SmallAlloc(size_t size, size_t alignment = kDefaultAlignment);
 bool BigFree(void *ptr);
 
 }
-
 #endif // HOARD_HOARD_INTERNALS_H

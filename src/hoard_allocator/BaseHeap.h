@@ -25,5 +25,4 @@ public:
 };
 
 }
-
 #endif // BASE_HEAP_H
