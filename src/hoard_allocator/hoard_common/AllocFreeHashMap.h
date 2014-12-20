@@ -192,6 +192,11 @@ public:
     InitNewTable(kMinimumTableSize);
   }
 
+  virtual ~AllocFreeHashMap() {
+    assert(munmap(table_, table_mem_size_) == 0);
+    assert(munmap(deleted_, deleted_mem_size_) == 0);
+  }
+
   void Add(key_type key, value_type value) {
     InternalAdd(key, value);
     table_entry_num_++;
