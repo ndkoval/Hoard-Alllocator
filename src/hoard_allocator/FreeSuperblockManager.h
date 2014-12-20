@@ -4,6 +4,7 @@
 #include <utils.h>
 #include "BaseHeap.h"
 #include "Superblock.h"
+#include "SuperblockStack.h"
 
 namespace hoard {
 
@@ -15,10 +16,9 @@ public:
 		MapNewSuperblocks(kDefaultMapNewSuperblocksCount);
 	}
 
-
 	virtual ~FreeSuperblockManager() {
 		lock_guard guard(BaseHeap<kSuperblockSize>::lock_);
-		while (!superblockStack.empty()) {
+		while (!superblockStack.IsEmpty()) {
 			Superblock<kSuperblockSize> *ptr = superblockStack.Pop();
 			munmap(ptr, sizeof(Superblock<kSuperblockSize>));
 		}
@@ -26,14 +26,13 @@ public:
 
 	Superblock<kSuperblockSize> *GetSuperblock() override {
 		lock_guard guard(BaseHeap<kSuperblockSize>::lock_);
-		if (superblockStack.empty()) {
+		if (superblockStack.IsEmpty()) {
 			MapNewSuperblocks(kDefaultMapNewSuperblocksCount);
 		}
 		superblock_count_--;
 
 		return superblockStack.Pop();
 	}
-
 
 	void AddSuperblock(Superblock<kSuperblockSize> *superblock) override {
 		lock_guard guard(BaseHeap<kSuperblockSize>::lock_);
@@ -47,32 +46,7 @@ public:
 	}
 
 private:
-
-	struct FreeSuperblockStack {
-	private:
-		Superblock<kSuperblockSize> *head_;
-	public:
-		FreeSuperblockStack() : head_(nullptr) {
-		}
-
-		bool empty() {
-			return head_ == nullptr;
-		}
-
-		void Push(Superblock<kSuperblockSize> *superblock) {
-			superblock->header().setNext(head_);
-			head_ = superblock;
-		}
-
-		Superblock<kSuperblockSize> *Pop() {
-			assert(!empty());
-			Superblock<kSuperblockSize> *result = head_;
-			head_ = head_->header().next();
-			return result;
-		}
-	};
-
-	FreeSuperblockStack superblockStack;
+	SuperblockStack<kSuperblockSize> superblockStack;
 	size_t superblock_count_;
 
 	void MapNewSuperblocks(size_t count) {

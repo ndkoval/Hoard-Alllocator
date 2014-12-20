@@ -6,6 +6,9 @@ include_directories(hoard_common/)
 add_library(hoard_core
   hoard_common/AllocFreeHashMap.h
   BaseHeap.h
+  BaseStack.h
+  Block.h
+  BlockStack.h
   FreeSuperblockManager.h
   GlobalHeap.h
   Internals.h
@@ -13,6 +16,7 @@ add_library(hoard_core
   LocalHeap.h
   SuperblockHeader.h
   Superblock.h
+  SuperblockStack.h
 )
 target_link_libraries(hoard_core
   hoard_common

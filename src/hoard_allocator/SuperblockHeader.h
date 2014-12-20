@@ -2,6 +2,7 @@
 #define SUPERBLOCK_HEADER_H
 
 #include "BaseHeap.h"
+#include "BlockStack.h"
 
 namespace hoard {
 
@@ -25,8 +26,16 @@ public:
 		next_ = next;
 	}
 
+	Superblock<kSuperblockSize> *prev() const {
+		return prev_;
+	}
+
+	void setPrev(Superblock<kSuperblockSize> *prev) {
+		prev_ = prev;
+	}
+
 	Superblock<kSuperblockSize> *GetSuperblock() {
-		return reinterpret_cast<Superblock <kSuperblockSize> *>(this);
+		return reinterpret_cast<Superblock<kSuperblockSize> *>(this);
 	}
 
 	bool Valid() {
@@ -34,43 +43,13 @@ public:
 	}
 
 private:
-	Superblock <kSuperblockSize> *next_;
+	Superblock<kSuperblockSize> *next_;
 	std::atomic<BaseHeap<kSuperblockSize> *> owner_;
 	lock_t lock_;
 
-	Superblock <kSuperblockSize> *prev_;
+	Superblock<kSuperblockSize> *prev_;
 
-	struct Block {
-		Block *next_block_;
-	};
-	static_assert(sizeof(Block) >= kMinBlockSize, "size of Block struct should be more of equal than MIN_SIZE");
-
-	struct FreeBlockStack {
-	private:
-		Block *head_;
-	public:
-		FreeBlockStack() : head_(nullptr) {
-		}
-
-		bool empty() {
-			return head_ == nullptr;
-		}
-
-		void Push(void *spaceForExtraBlock) {
-			Block *new_block = new(spaceForExtraBlock)  Block; // constructs new Block in free space
-			new_block->next_block_ = head_;
-			head_ = new_block;
-		}
-
-		void *Pop() {
-			assert(!empty());
-			Block *result = head_;
-			head_ = head_->next_block_;
-			return reinterpret_cast<void *> (result);
-		}
-	};
-
-	FreeBlockStack block_stack_;
+	BlockStack block_stack_;
 	size_t block_size_; // power of 2
 	size_t free_blocks_;
 

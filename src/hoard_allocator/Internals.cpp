@@ -124,10 +124,12 @@ void *InternalRealloc(void *ptr, size_t size) { // TODO optimize realloc before 
 	if (ptr == nullptr) {
 		return InternalAlloc(size);
 	}
+
 	if (size == 0) {
 		InternalFree(ptr);
 		return nullptr;
 	}
+
 	void *result = InternalAlloc(size);
 	if (result == nullptr) {
 		return nullptr;
