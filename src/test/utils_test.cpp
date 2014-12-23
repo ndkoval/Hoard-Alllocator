@@ -37,7 +37,7 @@ TEST(mmapAlligned, small_allignment) {
     const size_t mmaped_size = kPageSize * 4 + 13;
     const int alignment = 512;
     void *result;
-    ASSERT_NO_FATAL_FAILURE(result = mmapAligned(mmaped_size, alignment));
+    ASSERT_NO_FATAL_FAILURE(result = mmapAnonymous(mmaped_size, alignment));
     EXPECT_TRUE(reinterpret_cast<size_t>(result) % alignment == 0);
     EXPECT_NE(nullptr, result);
     EXPECT_NO_FATAL_FAILURE(memset(result, 0xAF, mmaped_size));
@@ -48,7 +48,7 @@ TEST(mmapAlligned, big_allignment) {
     const size_t mmaped_size = kPageSize * 4 + 13;
     const int alignment = kPageSize * 16;
     void *result;
-    ASSERT_NO_FATAL_FAILURE(result = mmapAligned(mmaped_size, alignment));
+    ASSERT_NO_FATAL_FAILURE(result = mmapAnonymous(mmaped_size, alignment));
     EXPECT_TRUE(reinterpret_cast<size_t>(result) % alignment == 0);
     EXPECT_NE(nullptr, result);
     EXPECT_NO_FATAL_FAILURE(memset(result, 0xAF, mmaped_size));

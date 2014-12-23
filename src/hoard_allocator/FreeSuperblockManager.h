@@ -50,7 +50,7 @@ private:
 	lock_t lock_;
 
 	void MapNewSuperblocks(size_t count) {
-		char *newSuperBlocksMemory = (char *) mmapAnonymous(count * sizeof(Superblock));
+		char *newSuperBlocksMemory = (char *) mmapAnonymous(count * sizeof(Superblock), sizeof(Superblock));
 		for (size_t i = 0; i < count; i++, newSuperBlocksMemory += sizeof(Superblock)) {
 			superblockStack.Push(new(newSuperBlocksMemory) Superblock);
 		}

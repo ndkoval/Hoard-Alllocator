@@ -35,8 +35,7 @@ inline void *mmapAnonymous(size_t size) {
 	return mmapAnonymous(NULL, size);
 }
 
-inline void *mmapAligned(size_t size, size_t alignment) {
-	//TODO make tests
+inline void *mmapAnonymous(size_t size, size_t alignment) {
 	assert(IsValidAlignment(alignment));
 	const size_t rounded_size = RoundUp(size, kPageSize);
 	if (alignment <= kPageSize) {

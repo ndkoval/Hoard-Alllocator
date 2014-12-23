@@ -92,7 +92,7 @@ void SmallFree(void *ptr) {
 
 void *BigAlloc(size_t size, size_t alignment) {
 	assert(IsValidAlignment(alignment)); //TODO remove before release
-	void *result_ptr = mmapAligned(size, alignment);
+	void *result_ptr = mmapAnonymous(size, alignment);
 	if (!result_ptr) {
 		return nullptr;
 	}
