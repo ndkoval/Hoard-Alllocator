@@ -10,18 +10,18 @@
 namespace hoard {
 
 TEST(free_superblock_manager, return_superblock_overflow) {
-	FreeSuperblockManager<kSuperblockSize> freeSuperblockManager;
+	FreeSuperblockManager freeSuperblockManager;
 
 	for (size_t i = 0; i < 2 * kMaxFreeSuperblocks; i++) {
-		Superblock<kSuperblockSize> *ptr =
-				reinterpret_cast<Superblock<kSuperblockSize> *> (mmapAnonymous(sizeof(Superblock<kSuperblockSize>)));
-		freeSuperblockManager.AddSuperblock(new(ptr) Superblock<kSuperblockSize>);
+		Superblock *ptr =
+				reinterpret_cast<Superblock *> (mmapAnonymous(sizeof(Superblock)));
+		freeSuperblockManager.AddSuperblock(new(ptr) Superblock);
 	}
 	ASSERT_EQ(freeSuperblockManager.superblock_count_, kMaxFreeSuperblocks);
 }
 
 TEST(free_superblock_manager, return_superblock_count) {
-	FreeSuperblockManager<kSuperblockSize> freeSuperblockManager;
+	FreeSuperblockManager freeSuperblockManager;
 
 	size_t old_superblocks_count = freeSuperblockManager.superblock_count_;
 	ASSERT_TRUE(old_superblocks_count < kMaxFreeSuperblocks);
@@ -31,10 +31,10 @@ TEST(free_superblock_manager, return_superblock_count) {
 }
 
 TEST(free_superblock_manager, get_superblock_from_empty) {
-	FreeSuperblockManager<kSuperblockSize> freeSuperblockManager;
+	FreeSuperblockManager freeSuperblockManager;
 	for (size_t i = 0; i < 2 * kMaxFreeSuperblocks; i++) {
-		Superblock<kSuperblockSize> *ptr = freeSuperblockManager.GetSuperblock();
-		munmap(ptr, sizeof(Superblock<kSuperblockSize>));
+		Superblock *ptr = freeSuperblockManager.GetSuperblock();
+		munmap(ptr, sizeof(Superblock));
 	}
 }
 

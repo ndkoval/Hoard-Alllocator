@@ -10,29 +10,28 @@
 
 namespace hoard {
 
-template<size_t kSuperblockSize>
 class Superblock {
 
 public:
 	Superblock() {
 	};
 
-	static Superblock<kSuperblockSize> *Get(void *ptr) {
-		return reinterpret_cast<Superblock<kSuperblockSize> *>(reinterpret_cast<size_t>(ptr) & (kSuperblockSize - 1));
+	static Superblock *Get(void *ptr) {
+		return reinterpret_cast<Superblock *>(reinterpret_cast<size_t>(ptr) & (kSuperblockSize - 1));
 	}
 
 private:
-	SuperblockHeader<kSuperblockSize> header_;
-	constexpr static size_t kDataSize = kSuperblockSize - sizeof(SuperblockHeader<kSuperblockSize>);
+	SuperblockHeader header_;
+	constexpr static size_t kDataSize = kSuperblockSize - sizeof(SuperblockHeader);
 	char data[kDataSize];
 
 public:
-	SuperblockHeader<kSuperblockSize> &header() {
+	SuperblockHeader &header() {
 		return header_;
 	};
 
 };
 
-static_assert(sizeof(Superblock<kSuperblockSize>) == kSuperblockSize, "ivalid superblock struct size");
+static_assert(sizeof(Superblock) == kSuperblockSize, "ivalid superblock struct size");
 }
 #endif // SUPERBLOCK_H

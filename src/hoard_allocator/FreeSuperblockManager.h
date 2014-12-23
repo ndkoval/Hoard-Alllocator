@@ -8,8 +8,7 @@
 
 namespace hoard {
 
-template<size_t kSuperblockSize>
-class FreeSuperblockManager : virtual BaseHeap<kSuperblockSize> {
+class FreeSuperblockManager {
 
 public:
 	FreeSuperblockManager() : superblock_count_(0) {
@@ -17,15 +16,15 @@ public:
 	}
 
 	virtual ~FreeSuperblockManager() {
-		lock_guard guard(BaseHeap<kSuperblockSize>::lock_);
+		lock_guard guard(lock_);
 		while (!superblockStack.IsEmpty()) {
-			Superblock<kSuperblockSize> *ptr = superblockStack.Pop();
-			munmap(ptr, sizeof(Superblock<kSuperblockSize>));
+			Superblock *ptr = superblockStack.Pop();
+			munmap(ptr, sizeof(Superblock));
 		}
 	}
 
-	Superblock<kSuperblockSize> *GetSuperblock() override {
-		lock_guard guard(BaseHeap<kSuperblockSize>::lock_);
+	Superblock *GetSuperblock() {
+		lock_guard guard(lock_);
 		if (superblockStack.IsEmpty()) {
 			MapNewSuperblocks(kDefaultMapNewSuperblocksCount);
 		}
@@ -34,8 +33,8 @@ public:
 		return superblockStack.Pop();
 	}
 
-	void AddSuperblock(Superblock<kSuperblockSize> *superblock) override {
-		lock_guard guard(BaseHeap<kSuperblockSize>::lock_);
+	void AddSuperblock(Superblock *superblock) {
+		lock_guard guard(lock_);
 
 		if (superblock_count_ < kMaxFreeSuperblocks) {
 			superblockStack.Push(superblock);
@@ -46,13 +45,14 @@ public:
 	}
 
 private:
-	SuperblockStack<kSuperblockSize> superblockStack;
+	SuperblockStack superblockStack;
 	size_t superblock_count_;
+	lock_t lock_;
 
 	void MapNewSuperblocks(size_t count) {
-		char *newSuperBlocksMemory = (char *) mmapAnonymous(count * sizeof(Superblock<kSuperblockSize>));
-		for (int i = 0; i < count; i++, newSuperBlocksMemory += sizeof(Superblock<kSuperblockSize>)) {
-			superblockStack.Push(new(newSuperBlocksMemory) Superblock<kSuperblockSize>);
+		char *newSuperBlocksMemory = (char *) mmapAnonymous(count * sizeof(Superblock));
+		for (size_t i = 0; i < count; i++, newSuperBlocksMemory += sizeof(Superblock)) {
+			superblockStack.Push(new(newSuperBlocksMemory) Superblock);
 		}
 		superblock_count_ += count;
 	}

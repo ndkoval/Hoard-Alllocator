@@ -5,8 +5,8 @@
 
 namespace hoard {
 
-template<size_t kSuperblockSize>
-class LocalHeap : public BaseHeap<kSuperblockSize> {
+
+class LocalHeap /*: public BaseHeap*/ {
 public:
 	LocalHeap() {
 

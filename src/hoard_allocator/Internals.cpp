@@ -34,7 +34,7 @@ struct HoardState {
 
 	hoard::AllocFreeHashMap big_allocates_map;
 
-	hoard::FreeSuperblockManager<kSuperblockSize> freeSuperblockManager;
+	hoard::FreeSuperblockManager freeSuperblockManager;
 } state;
 
 

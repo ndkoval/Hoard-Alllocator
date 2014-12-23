@@ -6,19 +6,19 @@
 
 namespace hoard {
 
-template<size_t kSuperblockSize>
-class SuperblockStack : public BaseStack<Superblock<kSuperblockSize> > {
+
+class SuperblockStack : public BaseStack<Superblock > {
 
 protected:
-	virtual void SetNext(Superblock<kSuperblockSize> *superblock, Superblock<kSuperblockSize> *value) override {
+	virtual void SetNext(Superblock *superblock, Superblock *value) override {
 		superblock->header().setNext(value);
 	}
 
-	virtual void SetPrev(Superblock<kSuperblockSize> *superblock, Superblock<kSuperblockSize> *value) override {
+	virtual void SetPrev(Superblock *superblock, Superblock *value) override {
 		superblock->header().setPrev(value);
 	}
 
-	virtual Superblock<kSuperblockSize> *Next(Superblock<kSuperblockSize> *superblock) override {
+	virtual Superblock *Next(Superblock *superblock) override {
 		return superblock->header().next();
 	}
 };
