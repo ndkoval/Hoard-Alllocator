@@ -1,43 +1,40 @@
-#include <hoard_constants.h>
 #include "tracing.h"
 
 extern "C"
-void *malloc(size_t size) __THROW {
-	hoard::trace("malloc: ", size);
-	return nullptr;
+void *malloc(size_t size) {
+  hoard::trace("malloc: ", size);
+  abort();
 }
 
 extern "C"
-void *calloc(size_t n, size_t size) __THROW {
-	hoard::trace("calloc: n=", n, "; size=", size);
-	return nullptr;
+void *calloc(size_t n, size_t size) {
+  hoard::trace("calloc: n=", n, "; size=", size);
+  abort();
 }
 
 extern "C"
-void free(void *ptr) __THROW {
-	hoard::trace("free: ", ptr);
+void free(void *ptr) {
+  hoard::trace("free: ", ptr);
+  abort();
 }
 
 extern "C"
-void *realloc(void *ptr, size_t size) __THROW {
-	hoard::trace("realloc: ptr=", ptr, "; size=", size);
-	return nullptr;
+void *realloc(void *ptr, size_t size) {
+  hoard::trace("realloc: ptr=", ptr, "; size=", size);
+  abort();
 }
 
 extern "C"
-int posix_memalign(void **memptr, size_t alignment, size_t size) __THROW {
-	hoard::trace("posix_memalign");
-	std::abort();
+int posix_memalign(void **memptr, size_t alignment, size_t size) {
+  abort();
 }
 
 extern "C"
-void *valloc(size_t size) __THROW {
-	hoard::trace("valloc: ", size);
-	return nullptr;
+void *valloc(size_t size) {
+  abort();
 }
 
 extern "C"
-void *memalign(size_t boundary, size_t size) __THROW {
-	hoard::trace("memalign: ", boundary, ' ', size);
-	return nullptr;
+void *memalign(size_t boundary, size_t size) {
+  abort();
 }

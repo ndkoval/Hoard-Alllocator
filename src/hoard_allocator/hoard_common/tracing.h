@@ -1,7 +1,7 @@
 #ifndef TRACING_H
 #define TRACING_H
 
-#include <cstdlib>
+#include <stdlib.h>
 #include <limits>
 
 // Generally its a bad idea to call I/O function from malloc
