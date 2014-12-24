@@ -15,6 +15,9 @@ public:
 		MapNewSuperblocks(kDefaultMapNewSuperblocksCount);
 	}
 
+	FreeSuperblockManager(const FreeSuperblockManager &) = delete;
+	FreeSuperblockManager & operator=(const FreeSuperblockManager &) = delete;
+
 	virtual ~FreeSuperblockManager() {
 		lock_guard guard(lock_);
 		while (!superblock_stack_.IsEmpty()) {

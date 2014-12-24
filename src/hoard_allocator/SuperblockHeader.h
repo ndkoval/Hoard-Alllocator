@@ -14,6 +14,21 @@ class Superblock;
 class SuperblockHeader {
 
 public:
+	SuperblockHeader() :
+                       next_(nullptr),
+                       prev_(nullptr),
+											 magic_number_(0),
+											 block_size_(0),
+											 size_(0),
+											 blocks_allocated_(0),
+											 uninited_blocs_left_(0),
+											 blocks_start_(nullptr),
+											 noninited_blocks_start_(nullptr)
+	{}
+
+	SuperblockHeader(const Superblock &) = delete;
+	SuperblockHeader & operator=(const Superblock &) = delete;
+
 	static SuperblockHeader *Get(void *ptr) {
 		return reinterpret_cast<SuperblockHeader *>(reinterpret_cast<size_t>(ptr) & (kSuperblockSize - 1));
 	}
@@ -103,14 +118,14 @@ private:
 	Superblock *prev_;
 
 	BlockStack block_stack_;
-	size_t size_;
+	size_t magic_number_; // equals kMagicNumber xor *this if valid
 	size_t block_size_; // power of 2
+	size_t size_;
 	size_t blocks_allocated_;
 	size_t uninited_blocs_left_;
 
 	char *blocks_start_; // first Block start. Aligned by Block size
 	char *noninited_blocks_start_; // first Block not in stack. Set in nullptr, if no such block
-	size_t magic_number_; // equals kMagicNumber xor *this if valid
 
 	size_t GetSuperblockMagic() {
 		return reinterpret_cast<size_t>(this) ^ kMagicNumber;

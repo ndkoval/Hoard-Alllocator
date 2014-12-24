@@ -10,7 +10,7 @@ class BlockStack : public BaseStack<Block> {
 
 protected:
 	virtual void SetNext(Block *block, Block *value) override {
-		block->setNext(value);
+		block->set_next(value);
 	}
 
 	virtual void SetPrev(Block *block, Block *value) override {
