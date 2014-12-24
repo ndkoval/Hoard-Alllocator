@@ -20,8 +20,8 @@ hoard::lock_t init_mutex;
 
 struct HoardState {
 	HoardState(): freeSuperblockManager(),
-								test_global_heap(&freeSuperblockManager, kMinBlockSize),
-								test_local_heap(&test_global_heap)
+								test_global_heap(freeSuperblockManager, kMinBlockSize),
+								test_local_heap(test_global_heap)
 	{
 		assert(!state_is_inited.load());
 		//do something

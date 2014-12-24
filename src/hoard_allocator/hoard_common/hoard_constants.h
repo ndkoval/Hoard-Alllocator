@@ -29,6 +29,7 @@ constexpr size_t kMagicNumber = 0xdeadbeef;
 constexpr size_t kDefaultAlignment = sizeof(void *);
 constexpr size_t kDefaultMapNewSuperblocksCount = 16;
 constexpr size_t kMaxFreeSuperblocks = 64;
+constexpr size_t kSuperblocsInLocalHeapLowBound = 1;
 
 }
 

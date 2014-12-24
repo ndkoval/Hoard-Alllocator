@@ -14,7 +14,7 @@ constexpr static size_t kAlmostFullBlocksBinNum = 6; // 3/4<  blocks_allocated /
 constexpr static size_t kEmptySuperblocksBinNum = 0; // blocks_allocated / size = 0
 
 public:
-	LocalHeap(GlobalHeap *parent_heap) : parent_heap_(parent_heap), blocks_allocated_(0), blocks_size_(0) {
+	LocalHeap(GlobalHeap & parent_heap) : parent_heap_(parent_heap), blocks_allocated_(0), blocks_size_(0) {
 	}
 
 	void * Alloc() {
@@ -57,13 +57,13 @@ public:
 
 
 private:
-	GlobalHeap * const parent_heap_;
+	GlobalHeap & parent_heap_;
 	std::array<SuperblockStack, kBinCount> bins_;
 	size_t blocks_allocated_;
 	size_t blocks_size_;
 
 	bool BellowEmptynessThreshold() {
-		return (blocks_allocated_ * kEmptynessFactor) / blocks_size_ > 0;
+		return blocks_size_ && (blocks_allocated_ * kEmptynessFactor) / blocks_size_ > 0;
 	}
 
 	void GetSuperblock() {
@@ -71,6 +71,19 @@ private:
 	}
 
 	void TransferSuperblock() {
+		for(size_t i_bin = 0; i_bin < kBinCount; ++i_bin) {
+			SuperblockStack & bin = bins_[i_bin];
+			if (!bin.IsEmpty()) {
+				Superblock *superblock = bin.Pop();
+				SuperblockHeader &header = superblock->header();
+				assert(header.blocks_allocated() * kEmptynessFactor < header.block_size()
+						&& "Transfered superblock, shoul be bellow emptyness threshold");
+				blocks_allocated_ -= header.blocks_allocated();
+				blocks_size_ -= header.block_size();
+				parent_heap_.AddSuperblock(superblock);
+			}
+		}
+		assert(false && "no nonempty bins");
 
 	}
 

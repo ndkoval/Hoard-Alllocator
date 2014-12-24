@@ -16,16 +16,16 @@ public:
 			curent = Next(head_);
 		}
 		assert(curent != nullptr && "no such element in Stack");
-		Superblock * prev = Prev(curent);
-		Superblock *next = Next(curent);
+		Superblock * prev = Prev(superblock);
+		Superblock *next = Next(superblock);
 		if(prev) {
 			SetNext(prev, next);
 		}
 		if(next) {
 			SetPrev(next, prev);
 		}
-		SetNext(curent, nullptr);
-		SetPrev(curent, nullptr);
+		SetNext(superblock, nullptr);
+		SetPrev(superblock, nullptr);
 	}
 
 
