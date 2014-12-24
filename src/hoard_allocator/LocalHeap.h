@@ -14,12 +14,16 @@ constexpr static size_t kAlmostFullBlocksBinNum = 6; // 3/4<  blocks_allocated /
 constexpr static size_t kEmptySuperblocksBinNum = 0; // blocks_allocated / size = 0
 
 public:
-	LocalHeap(GlobalHeap &parent_heap) : parent_heap_(parent_heap), blocks_allocated_(0), blocks_size_(0) {
+	LocalHeap(GlobalHeap &parent_heap)
+			: parent_heap_(parent_heap),
+				block_size_(parent_heap.block_size()),
+				blocks_allocated_(0),
+				size_(0) {
 	}
 
 	void * Alloc() {
 		lock_guard guard(lock);
-		if (blocks_allocated_ == blocks_size_) {
+		if (blocks_allocated_ == size_) {
 			GetSuperblock();
 		}
 
@@ -42,9 +46,10 @@ public:
 	}
 
 	virtual void OnFreeSuperblock(Superblock *superblock) override {
-		assert(blocks_allocated_ > 0);
-		--blocks_allocated_;
 		SuperblockHeader & header = superblock->header();
+		assert(header.owner() == this);
+    assert(blocks_allocated_ > 0);
+		--blocks_allocated_;
 		const size_t old_bin_num = GetBinNum(header.blocks_allocated() + 1, header.block_size());
 		bins_[old_bin_num].Remove(superblock);
 		const size_t new_bin_num = GetBinNum(header.block_size(), header.block_size());
@@ -58,16 +63,35 @@ public:
 
 private:
 	GlobalHeap& parent_heap_;
+	const size_t block_size_;
 	std::array<SuperblockStack, kBinCount> bins_;
 	size_t blocks_allocated_;
-	size_t blocks_size_;
+	size_t size_;
+	size_t superblock_count_;
 
 	bool BellowEmptynessThreshold() {
-		return blocks_size_ && (blocks_allocated_ * kEmptynessFactor) / blocks_size_ > 0;
+		return superblock_count_ > kSuperblocsInLocalHeapLowBound  && BellowEmptynessThreshold(blocks_allocated_, size_);
+	}
+	bool BellowEmptynessThreshold(size_t blocks_allocated, size_t size) {
+		return (blocks_allocated * kEmptynessFactor) / size > 0;
 	}
 
-	void GetSuperblock() {
 
+	void GetSuperblock() {
+		Superblock *superblock;
+		{
+			lock_guard guard(parent_heap_.lock);
+			superblock = parent_heap_.GetSuperblock();
+			SuperblockHeader& header = superblock->header();
+			assert(header.owner() == &parent_heap_);
+			header.set_owner(this);
+		}
+		SuperblockHeader& header = superblock->header();
+		assert(header.block_size() == block_size_);
+		assert(BellowEmptynessThreshold(header.blocks_allocated(), header.block_size()));
+		blocks_allocated_ += header.blocks_allocated();
+		size_ += header.size();
+		++superblock_count_;
 	}
 
 	void TransferSuperblock() {
@@ -76,16 +100,21 @@ private:
 			if (!bin.IsEmpty()) {
 				Superblock *superblock = bin.Pop();
 				SuperblockHeader &header = superblock->header();
-				assert(header.blocks_allocated() * kEmptynessFactor < header.block_size()
+				assert(BellowEmptynessThreshold(header.blocks_allocated(), header.size())
 						&& "Transfered superblock, shoul be bellow emptyness threshold");
 				blocks_allocated_ -= header.blocks_allocated();
-				blocks_size_ -= header.block_size();
-				parent_heap_.AddSuperblock(superblock);
+				size_ -= header.size();
+				--superblock_count_;
+				{
+					lock_guard guard(parent_heap_.lock);
+					parent_heap_.AddSuperblock(superblock);
+				}
 			}
 		}
 		assert(false && "no nonempty bins");
 
 	}
+
 
 	size_t GetBinNum(size_t blocs_allocated, size_t blocks_size) {
 		//TODO tests. Test, below emptyness threshhold, and above is in different bins

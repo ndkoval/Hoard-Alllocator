@@ -14,21 +14,19 @@ public:
 			block_size_(block_size) {
 	}
 
-	Superblock *GetSuperblock() {
-		lock_guard guard(BaseHeap::lock);
+	Superblock *GetSuperblock() { // callee must take lock
 		if (superblock_stack_.IsEmpty()) {
 			Superblock * result = free_superblock_manager_.GetSuperblock();
 			result->header().Init(block_size_);
+			result->header().set_owner(this);
 			return result;
 		} else {
 			Superblock *superblock = superblock_stack_.Pop();
-			superblock->header().set_owner(nullptr);
 			return superblock;
 		}
 	}
 
-	void AddSuperblock(Superblock *superblock) {
-		lock_guard guard(BaseHeap::lock);
+	void AddSuperblock(Superblock *superblock) { // callee must take lock
 		assert(superblock->header().block_size() == block_size_);
 		if (superblock->header().empty()) {
 			superblock->header().set_owner(nullptr);
@@ -40,10 +38,15 @@ public:
 	}
 
 	virtual void OnFreeSuperblock(Superblock *superblock) override {
+		assert(superblock->header().owner() == this);
 		if (superblock->header().empty()) {
 			superblock_stack_.Remove(superblock);
 			free_superblock_manager_.AddSuperblock(superblock);
 		}
+	}
+
+	size_t block_size() {
+		return block_size_;
 	}
 
 private:

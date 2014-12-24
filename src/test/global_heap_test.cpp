@@ -18,11 +18,11 @@ TEST(global_heap, get_superblock_from_empty) {
 	ASSERT_NE(superblock, nullptr);
 }
 
-TEST(global_heap, owner_is_nullptr_after_get) {
+TEST(global_heap, owner_is_heap_after_get) {
 	FreeSuperblockManager manager;
 	GlobalHeap globalHeap(manager, kBlockSize);
 	Superblock *superblock = globalHeap.GetSuperblock();
-	ASSERT_EQ(superblock->header().owner(), nullptr);
+	ASSERT_EQ(superblock->header().owner(), &globalHeap);
 }
 
 TEST(global_heap, owner_changed_on_unempty_superblock_after_add) {
