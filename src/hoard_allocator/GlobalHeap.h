@@ -9,25 +9,26 @@ namespace hoard {
 
 class GlobalHeap : public BaseHeap {
 public:
-	GlobalHeap(FreeSuperblockManager *parentHeap) {
-		freeSuperblockManager_ = parentHeap;
+	GlobalHeap(FreeSuperblockManager *parent_heap, size_t block_size) :
+			free_superblock_manager_(parent_heap),
+			block_size_(block_size) {
 	}
 
 	Superblock *GetSuperblock() {
 		lock_guard guard(BaseHeap::lock);
-		if (superblockStack_.IsEmpty()) {
-			return freeSuperblockManager_->GetSuperblock();
+		if (superblock_stack_.IsEmpty()) {
+			return free_superblock_manager_->GetSuperblock();
 		} else {
-			return superblockStack_.Pop();
+			return superblock_stack_.Pop();
 		}
 	}
 
 	void AddSuperblock(Superblock *superblock) {
 		lock_guard guard(BaseHeap::lock);
 		if (superblock->header().IsFree()) {
-			freeSuperblockManager_->AddSuperblock(superblock);
+			free_superblock_manager_->AddSuperblock(superblock);
 		} else {
-			superblockStack_.Push(superblock);
+			superblock_stack_.Push(superblock);
 		}
 	}
 
@@ -37,8 +38,9 @@ public:
 	}
 
 private:
-	FreeSuperblockManager *freeSuperblockManager_;
-	SuperblockStack superblockStack_;
+	FreeSuperblockManager *free_superblock_manager_;
+	SuperblockStack superblock_stack_;
+	size_t block_size_;
 };
 
 }
