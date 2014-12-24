@@ -95,7 +95,6 @@ private:
   }
 
   void InternalAdd(const key_type &key, const value_type &value) {
-//    hoard::trace("Page size is: ", hoard::kRealPageSize);
 //    trace("table_entry_size: ", table_entry_size_);
     size_t current_hash = FirstHash(key);
     size_t index = Index(current_hash);

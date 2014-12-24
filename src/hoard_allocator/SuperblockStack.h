@@ -7,15 +7,15 @@
 namespace hoard {
 
 
-class SuperblockStack : public BaseStack<Superblock > {
+class SuperblockStack : public BaseStack<Superblock> {
 
 protected:
 	virtual void SetNext(Superblock *superblock, Superblock *value) override {
-		superblock->header().setNext(value);
+		superblock->header().set_next(value);
 	}
 
 	virtual void SetPrev(Superblock *superblock, Superblock *value) override {
-		superblock->header().setPrev(value);
+		superblock->header().set_prev(value);
 	}
 
 	virtual Superblock *Next(Superblock *superblock) override {

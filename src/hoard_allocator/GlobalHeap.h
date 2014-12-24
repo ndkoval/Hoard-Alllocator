@@ -17,7 +17,9 @@ public:
 	Superblock *GetSuperblock() {
 		lock_guard guard(BaseHeap::lock);
 		if (superblock_stack_.IsEmpty()) {
-			return free_superblock_manager_->GetSuperblock();
+			Superblock * result = free_superblock_manager_->GetSuperblock();
+			result->header().Init(block_size_);
+			return result;
 		} else {
 			return superblock_stack_.Pop();
 		}
@@ -25,7 +27,8 @@ public:
 
 	void AddSuperblock(Superblock *superblock) {
 		lock_guard guard(BaseHeap::lock);
-		if (superblock->header().IsFree()) {
+		assert(superblock->header().block_size() == block_size_);
+		if (superblock->header().empty()) {
 			free_superblock_manager_->AddSuperblock(superblock);
 		} else {
 			superblock_stack_.Push(superblock);
