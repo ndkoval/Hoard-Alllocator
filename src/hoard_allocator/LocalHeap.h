@@ -14,7 +14,7 @@ constexpr static size_t kAlmostFullBlocksBinNum = 6; // 3/4<  blocks_allocated /
 constexpr static size_t kEmptySuperblocksBinNum = 0; // blocks_allocated / size = 0
 
 public:
-	LocalHeap(GlobalHeap & parent_heap) : parent_heap_(parent_heap), blocks_allocated_(0), blocks_size_(0) {
+	LocalHeap(GlobalHeap *parent_heap) : parent_heap_(parent_heap), blocks_allocated_(0), blocks_size_(0) {
 	}
 
 	void * Alloc() {
@@ -57,7 +57,7 @@ public:
 
 
 private:
-	GlobalHeap & parent_heap_;
+	GlobalHeap * const parent_heap_;
 	std::array<SuperblockStack, kBinCount> bins_;
 	size_t blocks_allocated_;
 	size_t blocks_size_;

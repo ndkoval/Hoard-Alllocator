@@ -1,6 +1,7 @@
 #ifndef SUPERBLOCK_HEADER_H
 #define SUPERBLOCK_HEADER_H
 
+#include <utils.h>
 #include "BaseHeap.h"
 #include "BlockStack.h"
 #include "Superblock.h"
@@ -88,8 +89,12 @@ public:
 		return owner_;
 	}
 
-	Superblock * superblock() const {
-		return reinterpret_cast<Superblock *>(const_cast<SuperblockHeader *>(this));
+	void set_owner(BaseHeap *owner) {
+		owner_ = owner;
+	}
+
+	Superblock *GetSuperblock() {
+		return reinterpret_cast<Superblock *>(this);
 	}
 
 	size_t size() {

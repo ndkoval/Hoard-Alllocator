@@ -8,7 +8,6 @@ class BigAlloc : public ::testing::Test {
 	};
 };
 
-
 TEST_F(BigAlloc, alloc_and_free) {
 }
 

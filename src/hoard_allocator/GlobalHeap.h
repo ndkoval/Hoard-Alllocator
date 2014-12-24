@@ -3,9 +3,9 @@
 
 #include "BaseHeap.h"
 #include "Superblock.h"
+#include "FreeSuperblockManager.h"
 
 namespace hoard {
-
 
 class GlobalHeap : public BaseHeap {
 public:
@@ -21,7 +21,9 @@ public:
 			result->header().Init(block_size_);
 			return result;
 		} else {
-			return superblock_stack_.Pop();
+			Superblock *superblock = superblock_stack_.Pop();
+			superblock->header().set_owner(nullptr);
+			return superblock;
 		}
 	}
 
@@ -29,12 +31,13 @@ public:
 		lock_guard guard(BaseHeap::lock);
 		assert(superblock->header().block_size() == block_size_);
 		if (superblock->header().empty()) {
-			free_superblock_manager_.AddSuperblock(superblock);
+			superblock->header().set_owner(nullptr);
+			free_superblock_manager_->AddSuperblock(superblock);
 		} else {
+			superblock->header().set_owner(this);
 			superblock_stack_.Push(superblock);
 		}
 	}
-
 
 	virtual void OnFreeSuperblock(Superblock *superblock) override {
 		if (superblock->header().empty()) {
