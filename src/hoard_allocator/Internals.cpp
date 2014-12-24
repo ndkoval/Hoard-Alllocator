@@ -13,39 +13,50 @@
 namespace hoard {
 namespace {
 
-int _CheckPageSize() {
-  //must be initialized in .cpp that using them
-	const size_t kRealPageSize = static_cast<size_t >(sysconf(_SC_PAGESIZE));
-	const size_t kNumberOfCPU = static_cast<size_t>(sysconf(_SC_NPROCESSORS_ONLN));
-	const size_t kNumberOfHeaps = kNumberOfCPU * 2;
-
-	hoard::trace("Page size is: ", kRealPageSize);
-	assert(hoard::kPageSize == kRealPageSize && "change kPageSize and recompile lib for your machine");
-	return hoard::kPageSize == kRealPageSize;
-}
-
-
-bool is_inited;
-
+thread_local bool thread_inited = false;
+std::atomic<bool> state_is_inited;
 hoard::lock_t init_mutex;
-hoard::lock_t big_alloc_mutex;
+
 
 struct HoardState {
+	HoardState() {
+		assert(!state_is_inited.load());
+		//do something
+		kRealPageSize_ = static_cast<size_t >(sysconf(_SC_PAGESIZE));
+		kNumberOfCPU_ = static_cast<size_t>(sysconf(_SC_NPROCESSORS_ONLN));
+		kNumberOfHeaps_ = kNumberOfCPU_ * 2;
+		CheckPageSize();
+	}
 
+	hoard::lock_t big_alloc_mutex;
 	hoard::AllocFreeHashMap big_allocates_map;
-
 	hoard::FreeSuperblockManager freeSuperblockManager;
-} state;
+
+private:
+	size_t kRealPageSize_;
+	size_t kNumberOfCPU_;
+	size_t kNumberOfHeaps_;
+	bool CheckPageSize() {
+		hoard::trace("Page size is: ", kRealPageSize_);
+		assert(hoard::kPageSize == kRealPageSize_ && "change kPageSize and recompile lib for your machine");
+		return hoard::kPageSize == kRealPageSize_;
+	}
+};
+
+char state_data[sizeof(HoardState)];
+HoardState & state = *reinterpret_cast<HoardState *>(state_data); //ugly hack. State will initialized manually
 
 
-void Init() {
-	if (!is_inited) {
-		hoard::lock_guard guard(init_mutex);
-		if(!is_inited){
-			_CheckPageSize();
-			new (&state) HoardState();
-			is_inited = true;
+void InitOnce() {
+	if (!thread_inited) {
+		if(!state_is_inited.load()) {
+			hoard::lock_guard guard(init_mutex);
+      if(!state_is_inited.load()) {
+				new (&state) HoardState();
+				state_is_inited.store(true); //after construct!
+			}
 		}
+		thread_inited = true;
 	}
 }
 
@@ -53,7 +64,7 @@ void Init() {
 
 
 void *InternalAlloc(size_t size, size_t alignment) {
-	Init();
+	InitOnce();
 	assert (IsValidAlignment(alignment));
 	void *result;
 	if (size >= kMaxBlockSize) {
@@ -71,7 +82,7 @@ void *SmallAlloc(size_t size, size_t alignment) {
 }
 
 void InternalFree(void *ptr) {
-	Init();
+	InitOnce();
 	if (ptr == nullptr)
 		return;
 
@@ -97,7 +108,7 @@ void *BigAlloc(size_t size, size_t alignment) {
 		return nullptr;
 	}
 
-	hoard::lock_guard guard(big_alloc_mutex);
+	hoard::lock_guard guard(state.big_alloc_mutex);
 	state.big_allocates_map.Add(result_ptr, size);
 	return result_ptr;
 }
@@ -105,7 +116,7 @@ void *BigAlloc(size_t size, size_t alignment) {
 
 //returns true if ptr was big allocation
 bool BigFree(void *ptr) {
-	hoard::lock_guard guard(big_alloc_mutex);
+	hoard::lock_guard guard(state.big_alloc_mutex);
 	size_t size = state.big_allocates_map.Get(ptr);
 	if (size == AllocFreeHashMap::kNoSuchKey) {
 		return false;
@@ -136,7 +147,7 @@ void *InternalRealloc(void *ptr, size_t size) { // TODO optimize realloc before 
 	}
 	size_t old_size;
 	{
-		hoard::lock_guard lock(big_alloc_mutex);
+		lock_guard lock(state.big_alloc_mutex);
 		old_size = state.big_allocates_map.Get(ptr);
 	}
 	memcpy(result, ptr, std::min(size, old_size));
