@@ -3,6 +3,7 @@
 
 #include "BaseHeap.h"
 #include "Superblock.h"
+#include "FreeSuperblockManager.h"
 
 namespace hoard {
 
@@ -33,7 +34,13 @@ public:
 
 
 	virtual void OnFreeSuperblock(Superblock *superblock) override {
+		assert(superblock->header().owner() == this);
 
+		if (superblock->header().prev() != nullptr)
+			superblock->header().prev()->header().setNext(superblock->header().next());
+
+		if (superblock->header().next() != nullptr)
+			superblock->header().next()->header().setPrev(superblock->header().prev());
 	}
 
 private:
