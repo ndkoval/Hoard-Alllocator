@@ -41,7 +41,7 @@ TEST(free_superblock_manager, get_superblock_from_empty) {
 TEST(free_superblock_manager, memory_is_aligned) {
 	FreeSuperblockManager freeSuperblockManager;
 	freeSuperblockManager.MapNewSuperblocks(1);
-	ASSERT_TRUE(reinterpret_cast<size_t>(freeSuperblockManager.superblockStack.Pop()) % sizeof(Superblock) == 0);
+	ASSERT_TRUE(reinterpret_cast<size_t>(freeSuperblockManager.superblock_stack_.Pop()) % sizeof(Superblock) == 0);
 }
 
 }
