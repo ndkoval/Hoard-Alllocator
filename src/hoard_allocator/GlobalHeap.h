@@ -7,7 +7,6 @@
 
 namespace hoard {
 
-
 class GlobalHeap : public BaseHeap {
 public:
 	GlobalHeap(FreeSuperblockManager *parent_heap, size_t block_size) :
@@ -22,7 +21,9 @@ public:
 			result->header().Init(block_size_);
 			return result;
 		} else {
-			return superblock_stack_.Pop();
+			Superblock *superblock = superblock_stack_.Pop();
+			superblock->header().set_owner(nullptr);
+			return superblock;
 		}
 	}
 
@@ -30,21 +31,25 @@ public:
 		lock_guard guard(BaseHeap::lock);
 		assert(superblock->header().block_size() == block_size_);
 		if (superblock->header().empty()) {
+			superblock->header().set_owner(nullptr);
 			free_superblock_manager_->AddSuperblock(superblock);
 		} else {
+			superblock->header().set_owner(this);
 			superblock_stack_.Push(superblock);
 		}
 	}
 
-
 	virtual void OnFreeSuperblock(Superblock *superblock) override {
+		lock_guard guard(BaseHeap::lock);
 		assert(superblock->header().owner() == this);
 
 		if (superblock->header().prev() != nullptr)
-			superblock->header().prev()->header().setNext(superblock->header().next());
+			superblock->header().prev()->header().set_next(superblock->header().next());
 
 		if (superblock->header().next() != nullptr)
-			superblock->header().next()->header().setPrev(superblock->header().prev());
+			superblock->header().next()->header().set_prev(superblock->header().prev());
+
+		superblock->header().set_owner(nullptr);
 	}
 
 private:
