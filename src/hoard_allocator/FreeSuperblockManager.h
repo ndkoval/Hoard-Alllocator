@@ -15,29 +15,32 @@ public:
 		MapNewSuperblocks(kDefaultMapNewSuperblocksCount);
 	}
 
+	FreeSuperblockManager(const FreeSuperblockManager &) = delete;
+	FreeSuperblockManager & operator=(const FreeSuperblockManager &) = delete;
+
 	virtual ~FreeSuperblockManager() {
 		lock_guard guard(lock_);
-		while (!superblockStack.IsEmpty()) {
-			Superblock *ptr = superblockStack.Pop();
+		while (!superblock_stack_.IsEmpty()) {
+			Superblock *ptr = superblock_stack_.Pop();
 			munmap(ptr, sizeof(Superblock));
 		}
 	}
 
 	Superblock *GetSuperblock() {
 		lock_guard guard(lock_);
-		if (superblockStack.IsEmpty()) {
+		if (superblock_stack_.IsEmpty()) {
 			MapNewSuperblocks(kDefaultMapNewSuperblocksCount);
 		}
 		superblock_count_--;
 
-		return superblockStack.Pop();
+		return superblock_stack_.Pop();
 	}
 
 	void AddSuperblock(Superblock *superblock) {
 		lock_guard guard(lock_);
 
 		if (superblock_count_ < kMaxFreeSuperblocks) {
-			superblockStack.Push(superblock);
+			superblock_stack_.Push(superblock);
 			superblock_count_++;
 		} else {
 			munmap(superblock, sizeof(superblock));
@@ -45,14 +48,14 @@ public:
 	}
 
 private:
-	SuperblockStack superblockStack;
+	SuperblockStack superblock_stack_;
 	size_t superblock_count_;
 	lock_t lock_;
 
 	void MapNewSuperblocks(size_t count) {
-		char *newSuperBlocksMemory = (char *) mmapAnonymous(count * sizeof(Superblock), sizeof(Superblock));
-		for (size_t i = 0; i < count; i++, newSuperBlocksMemory += sizeof(Superblock)) {
-			superblockStack.Push(new(newSuperBlocksMemory) Superblock);
+		Superblock *newSuperBlocksMemory = reinterpret_cast<Superblock *>(mmapAnonymous(count * sizeof(Superblock), sizeof(Superblock)));
+		for (size_t i = 0; i < count; i++, newSuperBlocksMemory++) {
+			superblock_stack_.Push(new(newSuperBlocksMemory) Superblock);
 		}
 		superblock_count_ += count;
 	}

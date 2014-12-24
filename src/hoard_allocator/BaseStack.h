@@ -14,6 +14,9 @@ public:
 	BaseStack() : head_(nullptr) {
 	}
 
+	BaseStack(const BaseStack &) = delete;
+	BaseStack & operator=(const BaseStack &) = delete;
+
 	void Push(T *t) {
 		SetNext(t, head_);
 		SetPrev(t, nullptr);
@@ -28,6 +31,11 @@ public:
 		return t;
 	}
 
+	T * Top() {
+		assert(!IsEmpty());
+		return head_;
+	}
+
 	bool IsEmpty() {
 		return head_ == nullptr;
 	}
@@ -39,7 +47,6 @@ protected:
 
 	virtual T *Next(T *t) = 0;
 
-private:
 	T *head_;
 };
 

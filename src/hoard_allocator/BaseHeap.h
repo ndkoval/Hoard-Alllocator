@@ -13,6 +13,9 @@ class BaseHeap {
 public:
 
 	lock_t lock;
+	BaseHeap(){};
+	BaseHeap(const BaseHeap &) = delete;
+	BaseHeap & operator=(const BaseHeap &) = delete;
 
 	virtual void OnFreeSuperblock(Superblock *superblock) = 0;
 

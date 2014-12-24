@@ -95,6 +95,7 @@ private:
   }
 
   void InternalAdd(const key_type &key, const value_type &value) {
+//    trace("table_entry_size: ", table_entry_size_);
     size_t current_hash = FirstHash(key);
     size_t index = Index(current_hash);
     if (table_[index].empty() || deleted_[index]) {

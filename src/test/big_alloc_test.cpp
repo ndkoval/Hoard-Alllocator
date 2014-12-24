@@ -2,7 +2,14 @@
 #include "../hoard_allocator/Internals.h"
 #include "../gtest/include/gtest/gtest.h"
 
-TEST(big_alloc, alloc_and_free) {
+class BigAlloc : public ::testing::Test {
+	void SetUp() {
+		hoard::InternalFree(nullptr);
+	};
+};
+
+
+TEST_F(BigAlloc, alloc_and_free) {
 	char *ptr = (char *) hoard::BigAlloc(hoard::kMaxBlockSize, hoard::kDefaultAlignment);
 	ASSERT_NE(ptr, nullptr);
 	ptr[0] = 'c';
@@ -10,7 +17,7 @@ TEST(big_alloc, alloc_and_free) {
 	ASSERT_TRUE(hoard::BigFree(ptr));
 }
 
-TEST(big_alloc, realloc) {
+TEST_F(BigAlloc, realloc) {
 	char *ptr = (char *) hoard::BigAlloc(hoard::kMaxBlockSize, hoard::kDefaultAlignment);
 	ptr[0] = 'c';
 	ptr = (char *) hoard::InternalRealloc(ptr, hoard::kMaxBlockSize * 2);

@@ -1,12 +1,12 @@
 #include <cerrno>
 #include <utils.h>
-
+#include "hoard_constants.h"
 #include "Internals.h"
 
 using namespace hoard;
 
 namespace {
-__thread bool insideMalloc = false;
+thread_local bool insideMalloc = false;
 
 struct recursionGuard {
 	recursionGuard() {

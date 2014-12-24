@@ -12,7 +12,7 @@ public:
 		return next_;
 	}
 
-	void setNext(Block *next) {
+	void set_next(Block *next) {
 		next_ = next;
 	}
 
