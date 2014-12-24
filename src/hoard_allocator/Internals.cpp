@@ -19,7 +19,10 @@ hoard::lock_t init_mutex;
 
 
 struct HoardState {
-	HoardState() {
+	HoardState(): freeSuperblockManager(),
+								test_global_heap(&freeSuperblockManager, kMinBlockSize),
+								test_local_heap(&test_global_heap)
+	{
 		assert(!state_is_inited.load());
 		//do something
 		kRealPageSize_ = static_cast<size_t >(sysconf(_SC_PAGESIZE));
@@ -31,6 +34,8 @@ struct HoardState {
 	hoard::lock_t big_alloc_mutex;
 	hoard::AllocFreeHashMap big_allocates_map;
 	hoard::FreeSuperblockManager freeSuperblockManager;
+	hoard::GlobalHeap test_global_heap;
+	hoard::LocalHeap test_local_heap;
 
 private:
 	size_t kRealPageSize_;
