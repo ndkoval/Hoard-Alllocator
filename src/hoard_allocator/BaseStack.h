@@ -47,7 +47,6 @@ protected:
 
 	virtual T *Next(T *t) = 0;
 
-private:
 	T *head_;
 };
 
