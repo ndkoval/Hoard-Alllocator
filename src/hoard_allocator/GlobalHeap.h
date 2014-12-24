@@ -32,7 +32,7 @@ public:
 		assert(superblock->header().block_size() == block_size_);
 		if (superblock->header().empty()) {
 			superblock->header().set_owner(nullptr);
-			free_superblock_manager_->AddSuperblock(superblock);
+			free_superblock_manager_.AddSuperblock(superblock);
 		} else {
 			superblock->header().set_owner(this);
 			superblock_stack_.Push(superblock);

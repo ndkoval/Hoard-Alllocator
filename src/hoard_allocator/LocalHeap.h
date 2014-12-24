@@ -14,7 +14,7 @@ constexpr static size_t kAlmostFullBlocksBinNum = 6; // 3/4<  blocks_allocated /
 constexpr static size_t kEmptySuperblocksBinNum = 0; // blocks_allocated / size = 0
 
 public:
-	LocalHeap(GlobalHeap *parent_heap) : parent_heap_(parent_heap), blocks_allocated_(0), blocks_size_(0) {
+	LocalHeap(GlobalHeap &parent_heap) : parent_heap_(parent_heap), blocks_allocated_(0), blocks_size_(0) {
 	}
 
 	void * Alloc() {
@@ -57,7 +57,7 @@ public:
 
 
 private:
-	GlobalHeap * const parent_heap_;
+	GlobalHeap& parent_heap_;
 	std::array<SuperblockStack, kBinCount> bins_;
 	size_t blocks_allocated_;
 	size_t blocks_size_;
@@ -87,9 +87,9 @@ private:
 
 	}
 
-	size_t GetBinNum(size_t blocs_allocated, size_t blocs_size) {
+	size_t GetBinNum(size_t blocs_allocated, size_t blocks_size) {
 		//TODO tests. Test, below emptyness threshhold, and above is in different bins
-		switch (RoundUp(blocs_allocated * 8, blocs_size)) {
+		switch (RoundUp(blocs_allocated * 8, blocks_size) / blocks_size) {
 			case 0: return 0; // e == 0
 			case 1: return 1; // x <= 1/8
 			case 2: return 2; // <= 1/4
@@ -98,7 +98,7 @@ private:
 			case 5:
 			case 6: return 5; // <= 3/4
 			case 7:
-			case 8: return blocs_allocated == blocs_size ? 7 : 6;
+			case 8: return blocs_allocated == blocks_size ? 7 : 6;
 		}
 		assert(false && "invalid bin num");
 	}
