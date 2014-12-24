@@ -27,12 +27,14 @@ public:
 			SuperblockStack & bin = bins_[i_bin];
 			if (!bin.IsEmpty()) {
 				SuperblockHeader & header = bin.Top()->header();
+				assert(header.owner() == this);
 				void * allocated =  header.Alloc();
-				const int new_bin_num = BinNum(header.blocks_allocated(), header.block_size());
+				const int new_bin_num = GetBinNum(header.blocks_allocated(), header.block_size());
 				if (new_bin_num != i_bin) {
 					Superblock *superblock = bin.Pop();
 					bins_[new_bin_num].Push(superblock);
 				}
+				++blocks_allocated_;
 				return allocated;
 			}
 		}
@@ -40,9 +42,16 @@ public:
 	}
 
 	virtual void OnFreeSuperblock(Superblock *superblock) override {
+		assert(blocks_allocated_ > 0);
+		--blocks_allocated_;
 		SuperblockHeader & header = superblock->header();
-//		const size_t old_bin = BinNum(header.a)
-
+		const size_t old_bin_num = GetBinNum(header.blocks_allocated() + 1, header.block_size());
+		bins_[old_bin_num].Remove(superblock);
+		const size_t new_bin_num = GetBinNum(header.block_size(), header.block_size());
+		bins_[new_bin_num].Push(superblock);
+		if(BellowEmptynessThreshold()) {
+			TransferSuperblock();
+		}
 	}
 
 
@@ -53,6 +62,10 @@ private:
 	size_t blocks_allocated_;
 	size_t blocks_size_;
 
+	bool BellowEmptynessThreshold() {
+		return (blocks_allocated_ * kEmptynessFactor) / blocks_size_ > 0;
+	}
+
 	void GetSuperblock() {
 
 	}
@@ -61,7 +74,8 @@ private:
 
 	}
 
-	size_t BinNum(size_t blocs_allocated, size_t blocs_size) {
+	size_t GetBinNum(size_t blocs_allocated, size_t blocs_size) {
+		//TODO tests. Test, below emptyness threshhold, and above is in different bins
 		switch (RoundUp(blocs_allocated * 8, blocs_size)) {
 			case 0: return 0; // e == 0
 			case 1: return 1; // x <= 1/8
