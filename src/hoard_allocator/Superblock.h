@@ -3,7 +3,7 @@
 
 #include <mutex>
 #include <atomic>
-#include <assert.h>
+#include <cassert>
 #include "hoard_constants.h"
 #include "BaseHeap.h"
 #include "SuperblockHeader.h"
@@ -22,9 +22,20 @@ public:
 		return reinterpret_cast<Superblock *>(reinterpret_cast<size_t>(ptr) & (kSuperblockSize - 1));
 	}
 
+  static Superblock *Make() {
+    return reinterpret_cast<Superblock*>(mmapAnonymous(kSuperblockSize, kSuperblockSize));
+  }
+
 	SuperblockHeader &header() {
 		return header_;
 	};
+
+  bool operator==(const Superblock & other) const {
+    return this == &other;
+  }
+  bool operator!=(const Superblock & other) const {
+    return !(*this == other);
+  }
 
 private:
 	SuperblockHeader header_;

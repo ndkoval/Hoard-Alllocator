@@ -45,14 +45,14 @@ public:
 		}
 	}
 
-	size_t block_size() {
+	size_t block_size() const {
 		return block_size_;
 	}
 
 private:
 	FreeSuperblockManager & free_superblock_manager_;
 	SuperblockStack superblock_stack_;
-	size_t block_size_;
+	const size_t block_size_;
 };
 
 }

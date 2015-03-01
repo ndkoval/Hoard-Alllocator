@@ -13,7 +13,7 @@
 namespace hoard {
 namespace {
 
-thread_local bool thread_inited = false;
+__thread bool thread_inited = false;
 std::atomic<bool> state_is_inited;
 hoard::lock_t init_mutex;
 

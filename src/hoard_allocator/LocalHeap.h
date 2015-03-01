@@ -2,6 +2,7 @@
 #define LOCAL_HEAP_H
 
 #include <array>
+#include "GlobalHeap.h"
 #include "BaseHeap.h"
 
 namespace hoard {

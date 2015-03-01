@@ -40,6 +40,10 @@ public:
 		return head_ == nullptr;
 	}
 
+  void Reset() {
+    head_ = nullptr;
+  }
+
 protected:
 	virtual void SetNext(T *t, T *value) = 0;
 
