@@ -156,10 +156,13 @@ protected:
 
 private:
 	lock_t lock_;
+
+  //this fields must be changed only with owner lock taken
 	std::atomic<BaseHeap *> owner_;
 	Superblock *next_;
 	Superblock *prev_;
 
+  //this fields must be changed only with header lock taken
 	BlockStack block_stack_;
 	size_t magic_number_; // equals kMagicNumber xor *this if valid
 	size_t one_block_size_; // power of 2

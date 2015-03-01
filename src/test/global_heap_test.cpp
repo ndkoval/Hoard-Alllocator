@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <GlobalHeap.h>
+#include <superblock_load_test.h>
 
 #define private public
 
@@ -30,6 +31,7 @@ protected:
 TEST_F(GlobalHeapTest, get_superblock_from_empty) {
 	Superblock *superblock = global_heap.GetSuperblock();
 	ASSERT_NE(superblock, nullptr);
+  SuperblockLoadTest(*superblock);
 }
 
 TEST_F(GlobalHeapTest, owner_is_heap_after_get) {
