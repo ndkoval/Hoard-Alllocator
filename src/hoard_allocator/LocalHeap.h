@@ -2,6 +2,7 @@
 #define LOCAL_HEAP_H
 
 #include <array>
+#include <stddef.h>
 #include "GlobalHeap.h"
 #include "BaseHeap.h"
 
@@ -19,9 +20,10 @@ private:
 public:
 	LocalHeap(GlobalHeap &parent_heap)
 			: parent_heap_(parent_heap),
-				block_size_(parent_heap.block_size()),
+				one_block_size_(parent_heap.block_size()),
 				blocks_allocated_(0),
-				size_(0) {
+				size_(0),
+        superblock_count_(0){
 	}
 
 	void * Alloc() {
@@ -53,21 +55,40 @@ public:
 		assert(header.owner() == this);
     assert(blocks_allocated_ > 0);
 		--blocks_allocated_;
-		const size_t old_bin_num = GetBinNum(header.blocks_allocated() + 1, header.block_size());
+		const size_t old_bin_num = GetBinNum(header.blocks_allocated() + 1, header.size());
 		bins_[old_bin_num].Remove(superblock);
-		const size_t new_bin_num = GetBinNum(header.block_size(), header.block_size());
+		const size_t new_bin_num = GetBinNum(header);
 		bins_[new_bin_num].Push(superblock);
 		if(HeapBellowEmptynessThreshold()) {
 			TransferSuperblock();
 		}
 	}
 
+  size_t blocks_allocated() const {
+    return blocks_allocated_;
+  }
+
+  size_t size() const {
+    return size_;
+  }
+
+  size_t superblock_count() const {
+    return superblock_count_;
+  }
+
+  size_t const one_block_size() const {
+    return one_block_size_;
+  }
+
+  GlobalHeap & parent_heap() const {
+    return parent_heap_;
+  }
 
 
 private:
 
 	GlobalHeap& parent_heap_;
-	const size_t block_size_;
+	const size_t one_block_size_;
 	std::array<SuperblockStack, kBinCount> bins_;
 	size_t blocks_allocated_;
 	size_t size_;
@@ -83,7 +104,7 @@ private:
 			header.set_owner(this);
 		}
 		SuperblockHeader& header = superblock->header();
-		assert(header.block_size() == block_size_);
+		assert(header.one_block_size() == one_block_size_);
 		assert(BellowEmptynessThreshold(header));
 		blocks_allocated_ += header.blocks_allocated();
 		size_ += header.size();
@@ -120,11 +141,11 @@ private:
   }
 
   static bool BellowEmptynessThreshold(SuperblockHeader & header) {
-    return BellowEmptynessThreshold(header.blocks_allocated(), header.block_size());
+    return BellowEmptynessThreshold(header.blocks_allocated(), header.size());
   }
 
   static size_t GetBinNum(SuperblockHeader& header) {
-    return GetBinNum(header.blocks_allocated(), header.block_size());
+    return GetBinNum(header.blocks_allocated(), header.size());
   }
 
 	static size_t GetBinNum(size_t blocs_allocated, size_t blocks_size) {

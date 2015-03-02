@@ -27,7 +27,7 @@ public:
 	}
 
 	void AddSuperblock(Superblock *superblock) { // callee must take lock
-		assert(superblock->header().block_size() == block_size_);
+		assert(superblock->header().one_block_size() == block_size_);
 		if (superblock->header().empty()) {
 			superblock->header().set_owner(nullptr);
 			free_superblock_manager_.AddSuperblock(superblock);

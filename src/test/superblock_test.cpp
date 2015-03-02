@@ -56,9 +56,9 @@ TEST_F(SuperblockInitedTest, ValidTest) {
   EXPECT_TRUE(header.valid());
   EXPECT_TRUE(header.empty());
   EXPECT_EQ(superblock, *header.GetSuperblock());
-  EXPECT_EQ(header.block_size(), kBlockSize);
+  EXPECT_EQ(header.one_block_size(), kBlockSize);
   EXPECT_EQ(header.size(),
-      (reinterpret_cast<char *>(&header) + kSuperblockSize - header.blocks_start_) / header.block_size());
+      (reinterpret_cast<char *>(&header) + kSuperblockSize - header.blocks_start_) / header.one_block_size());
 }
 
 TEST_F(SuperblockInitedTest, AllocTest) {

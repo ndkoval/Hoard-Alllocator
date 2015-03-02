@@ -86,7 +86,7 @@ public:
 		assert(blocks_allocated_ == 0 && "only free Superblock can be inited");
     assert(IsPowerOf2(block_size));
     assert(block_size < kSuperblockSize && "Block must bee smaller than Superblock");
-    assert(block_size >= kMinBlockSize && "Too small block_size");
+    assert(block_size >= kMinBlockSize && "Too small one_block_size");
 		one_block_size_ = block_size;
 		size_ = (kSuperblockSize - sizeof(SuperblockHeader)) / one_block_size_;
 		blocks_start_ = reinterpret_cast<char *> (this) + RoundUp(sizeof(SuperblockHeader), one_block_size_);
@@ -134,7 +134,7 @@ public:
 		return blocks_allocated_;
 	}
 
-	size_t block_size() const {
+	size_t one_block_size() const {
 		return one_block_size_;
 	}
 
