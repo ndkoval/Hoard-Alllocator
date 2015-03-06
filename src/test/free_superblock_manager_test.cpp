@@ -13,9 +13,8 @@ TEST(free_superblock_manager, return_superblock_overflow) {
 	FreeSuperblockManager freeSuperblockManager;
 
 	for (size_t i = 0; i < 2 * kMaxFreeSuperblocks; i++) {
-		Superblock *ptr =
-				reinterpret_cast<Superblock *> (mmapAnonymous(sizeof(Superblock)));
-		freeSuperblockManager.AddSuperblock(new(ptr) Superblock);
+		Superblock *superblock = Superblock::Make();
+		freeSuperblockManager.AddSuperblock(new(superblock) Superblock);
 	}
 	ASSERT_EQ(freeSuperblockManager.superblock_count_, kMaxFreeSuperblocks);
 }

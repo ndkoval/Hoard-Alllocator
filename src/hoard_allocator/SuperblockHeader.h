@@ -82,7 +82,6 @@ public:
 
 
 	void Init(size_t block_size) {
-    assert(reinterpret_cast<size_t>(this) % kSuperblockSize == 0 && "Not alligned superblock");
 		assert(blocks_allocated_ == 0 && "only free Superblock can be inited");
     assert(IsPowerOf2(block_size));
     assert(block_size < kSuperblockSize && "Block must bee smaller than Superblock");

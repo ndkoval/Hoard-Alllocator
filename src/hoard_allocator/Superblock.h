@@ -14,7 +14,9 @@ class Superblock {
 
 public:
 	Superblock() {
-	};
+    assert(reinterpret_cast<size_t>(this) % kSuperblockSize == 0 && "Not alligned superblock");
+  };
+  
 	Superblock(Superblock const &) = delete;
 	Superblock & operator=(const Superblock &) = delete;
 
