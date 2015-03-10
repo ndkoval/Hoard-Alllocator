@@ -17,6 +17,7 @@ add_library(hoard_core
   SuperblockHeader.h
   Superblock.h
   SuperblockStack.h
+  HoardState.h
 )
 target_link_libraries(hoard_core
   hoard_common

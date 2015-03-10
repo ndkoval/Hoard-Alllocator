@@ -20,6 +20,14 @@ constexpr size_t RoundUp(size_t what, size_t to) {
 	return (what + to - 1) / to * to;
 }
 
+//constexpr unsigned int FloorLog2(unsigned int x) {
+//  return sizeof(unsigned int) * 8 - 1 - __builtin_clz(x);
+//}
+
+constexpr unsigned long long FloorLog2(unsigned long long x) {
+  return sizeof(unsigned long long) * 8 - 1 - __builtin_clzll(x);
+}
+
 inline void *GetFirstAlignedPointer(void *ptr, size_t alignment) {
 	void *result = reinterpret_cast<void *> (RoundUp(reinterpret_cast<size_t> (ptr), alignment));
 	assert(result >= ptr);

@@ -1,14 +1,9 @@
 #include <cstring>
-#include <mutex>
-#include <thread>
 #include <unordered_map>
 #include <algorithm>
 
-#include "utils.h"
+#include "HoardState.h"
 #include "Internals.h"
-#include "FreeSuperblockManager.h"
-#include "GlobalHeap.h"
-#include "LocalHeap.h"
 
 namespace hoard {
 namespace {
@@ -17,36 +12,6 @@ __thread bool thread_inited = false;
 std::atomic<bool> state_is_inited;
 hoard::lock_t init_mutex;
 
-
-struct HoardState {
-	HoardState(): freeSuperblockManager(),
-								test_global_heap(freeSuperblockManager, kMinBlockSize),
-								test_local_heap(test_global_heap)
-	{
-		assert(!state_is_inited.load());
-		//do something
-		kRealPageSize_ = static_cast<size_t >(sysconf(_SC_PAGESIZE));
-		kNumberOfCPU_ = static_cast<size_t>(sysconf(_SC_NPROCESSORS_ONLN));
-		kNumberOfHeaps_ = kNumberOfCPU_ * 2;
-		CheckPageSize();
-	}
-
-	hoard::lock_t big_alloc_mutex;
-	hoard::AllocFreeHashMap big_allocates_map;
-	hoard::FreeSuperblockManager freeSuperblockManager;
-	hoard::GlobalHeap test_global_heap;
-	hoard::LocalHeap test_local_heap;
-
-private:
-	size_t kRealPageSize_;
-	size_t kNumberOfCPU_;
-	size_t kNumberOfHeaps_;
-	bool CheckPageSize() {
-		hoard::trace("Page size is: ", kRealPageSize_);
-		assert(hoard::kPageSize == kRealPageSize_ && "change kPageSize and recompile lib for your machine");
-		return hoard::kPageSize == kRealPageSize_;
-	}
-};
 
 char state_data[sizeof(HoardState)];
 HoardState & state = *reinterpret_cast<HoardState *>(state_data); //ugly hack. State will initialized manually

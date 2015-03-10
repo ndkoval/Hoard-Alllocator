@@ -22,8 +22,10 @@ constexpr size_t kSuperblockSize = 4 * 1024 * 8; // power of 2
 constexpr size_t kPagesInSuperblock = kSuperblockSize / kPageSize; // power of 2
 constexpr size_t kBlockFactor = 2; // power of 2  and > 1
 constexpr size_t kMinBlockSize = sizeof(void *);  //power of kBlockFactor
-constexpr size_t kMaxBlockSize = kSuperblockSize / 4;
+constexpr size_t kMaxBlockSize = kSuperblockSize / 4; // power of 2, less then kSuperblockSize
 static_assert(kMinBlockSize >= sizeof(void *), "too small min Block size");
+static_assert(kMaxBlockSize < kSuperblockSize, "too big max Block size");
+static_assert(kMaxBlockSize > kMinBlockSize, "illegal block sizes");
 constexpr size_t kEmptynessFactor = 8; // power of 2
 constexpr size_t kMagicNumber = 0xdeadbeef;
 constexpr size_t kDefaultAlignment = sizeof(void *);
