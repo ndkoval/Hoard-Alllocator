@@ -47,8 +47,9 @@ void *InternalAlloc(size_t size, size_t alignment) {
 
 
 void *SmallAlloc(size_t size, size_t alignment) {
-	//TODO small allocations
-	return BigAlloc(size, alignment);
+  size = hoard::RoundUp(size, alignment);
+  LocalHeap &heap = state.GetLocalHeap(size);
+  return heap.Alloc();
 }
 
 void InternalFree(void *ptr) {
@@ -63,12 +64,9 @@ void InternalFree(void *ptr) {
 }
 
 void SmallFree(void *ptr) {
-//	SuperblockHeader *superblock = SuperblockHeader::Get(ptr);
-//	assert(superblock->valid());
-
-
-	//TODO small allocations
-	BigFree(ptr);
+  SuperblockHeader *header = SuperblockHeader::Get(ptr);
+  assert(header->valid());
+  header->Free(ptr);
 }
 
 void *BigAlloc(size_t size, size_t alignment) {
