@@ -78,19 +78,8 @@ TEST_F(LocalHeapTest, HeapGetSuperblockInvariantTest) {
       Superblock* current = bin.Top();
       while (current != nullptr) {
         EXPECT_EQ(current->header().owner(), &local_heap);
+        current = current->header().next();
       }
     }
   }
 }
-//
-//TEST_F(LocalHeapTest, HeapGetSuperblockThresholdTest) {
-//  for (size_t i = 0; i <= kSuperblocsInLocalHeapLowBound ; ++i) {
-//    local_heap.GetSuperblock();
-//    EXPECT_FALSE(local_heap.HeapBellowEmptynessThreshold());
-//  }
-//  for (size_t i = 0; i <= kSuperblocsInLocalHeapLowBound ; ++i) {
-//    local_heap.GetSuperblock();
-//    EXPECT_TRUE(local_heap.HeapBellowEmptynessThreshold());
-//  }
-//}
-

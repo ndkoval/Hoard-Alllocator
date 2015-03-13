@@ -11,9 +11,9 @@ namespace hoard {
 
 class LocalHeap : public BaseHeap {
 private:
-  constexpr static size_t kBinCount = 8; //blocks_allocated / size = 0,  <=1/8, <=1/4, <=2/4, <=3/4, <1, 1
-  constexpr static size_t kAlmostFullBlocksBinNum = kBinCount - 2; // 3/4<  blocks_allocated / size <1
-  constexpr static size_t kBellowThresholdSuperblocksBinNum = 1; // blocks_allocated / size = 0
+  constexpr static size_t kBinCount = 7; //blocks_allocated / size = 0,  <=1/8, <=1/4, <=2/4, <=3/4, <1, 1
+  constexpr static size_t kAlmostFullBlocksBinNum = kBinCount - 2; // 3/4 <  blocks_allocated / size < 1
+  constexpr static size_t kBellowThresholdSuperblocksBinNum = 1; // 0 <  blocks_allocated / size <= 3/4
   constexpr static size_t kEmptySuperblocksBinNum = 0; // blocks_allocated / size = 0
 
 
@@ -38,7 +38,7 @@ public:
 				SuperblockHeader & header = bin.Top()->header();
 				assert(header.owner() == this);
 				void * allocated =  header.Alloc();
-				const int new_bin_num = GetBinNum(header);
+				const size_t new_bin_num = GetBinNum(header);
 				if (new_bin_num != i_bin) {
 					Superblock * const superblock = bin.Pop();
 					bins_[new_bin_num].Push(superblock);
@@ -60,7 +60,7 @@ public:
 		const size_t new_bin_num = GetBinNum(header);
 		bins_[new_bin_num].Push(superblock);
 		if(HeapBellowEmptynessThreshold()) {
-			TransferSuperblock();
+      TransferSuperblockToParent();
 		}
 	}
 
@@ -111,8 +111,9 @@ private:
 		++superblock_count_;
 	}
 
-	void TransferSuperblock() {
-		for(size_t i_bin = 0; i_bin <= kBellowThresholdSuperblocksBinNum; ++i_bin) {
+  // Transfer almost empty superblock to parent
+	void TransferSuperblockToParent() {
+		for(size_t i_bin = kEmptySuperblocksBinNum; i_bin <= kBellowThresholdSuperblocksBinNum; ++i_bin) {
 			SuperblockStack & bin = bins_[i_bin];
 			if (!bin.IsEmpty()) {
 				Superblock *superblock = bin.Pop();
@@ -126,10 +127,10 @@ private:
 					lock_guard guard(parent_heap_.lock);
 					parent_heap_.AddSuperblock(superblock);
 				}
+                return;
 			}
 		}
 		assert(false && "no nonempty bins");
-
 	}
 
   bool HeapBellowEmptynessThreshold() {
@@ -154,11 +155,11 @@ private:
 			case 1: return 1; // x <= 1/8
 			case 2: return 2; // <= 1/4
 			case 3:
-			case 4: return 4; // <= 2/4
+			case 4: return 3; // <= 2/4
 			case 5:
-			case 6: return 5; // <= 3/4
+			case 6: return 4; // <= 3/4
 			case 7:
-			case 8: return blocs_allocated == blocks_size ? 7 : 6;
+			case 8: return blocs_allocated == blocks_size ? 6 : 5;
 		}
 		assert(false && "invalid bin num");
 	}
