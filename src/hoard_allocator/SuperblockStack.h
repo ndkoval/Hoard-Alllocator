@@ -11,13 +11,19 @@ class SuperblockStack : public BaseStack<Superblock> {
 
 public:
 	void Remove(Superblock *superblock) {
-		Superblock * curent = head_;
-		while (curent != nullptr || curent != superblock) {
-			curent = Next(head_);
-		}
-		assert(curent != nullptr && "no such element in Stack");
+#ifndef NDEBUG
+    // O(n) check, that superblock is in this stack
+    Superblock *curent = head_;
+    while (curent != nullptr && curent != superblock) {
+      curent = Next(curent);
+    }
+    assert(curent != nullptr && "no such element in Stack");
+#endif //debug
 		Superblock * prev = Prev(superblock);
 		Superblock *next = Next(superblock);
+    if (head_ == superblock) {
+      head_ =  next;
+    }
 		if(prev) {
 			SetNext(prev, next);
 		}

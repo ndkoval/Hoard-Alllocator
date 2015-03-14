@@ -25,7 +25,7 @@ public:
 	}
 
   static Superblock *Make() {
-    return reinterpret_cast<Superblock*>(mmapAnonymous(kSuperblockSize, kSuperblockSize));
+    return new (mmapAnonymous(kSuperblockSize, kSuperblockSize)) Superblock();
   }
 
 	SuperblockHeader &header() {

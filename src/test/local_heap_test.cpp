@@ -67,7 +67,7 @@ TEST(BinNumTest, GetBinNumMonotony) {
 TEST_F(LocalHeapTest, HeapGetSuperblockInvariantTest) {
   Superblock * superblock_example = Superblock::Make();
   superblock_example->header().Init(kBlockSize);
-  for (size_t i = 0; i <= kSuperblocsInLocalHeapLowBound * 2; ++i) {
+  for (size_t i = 0; i <= kSuperblocksInLocalHeapLowBound * 2; ++i) {
     local_heap.GetSuperblock();
     EXPECT_EQ(local_heap.superblock_count(), i + 1);
     EXPECT_EQ(local_heap.size(), superblock_example->header().size() * (i + 1));

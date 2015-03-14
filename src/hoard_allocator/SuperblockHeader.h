@@ -48,7 +48,7 @@ public:
 		} else {
 			result = block_stack_.Pop();
 
-      #ifdef debug
+      #ifndef NDEBUG
       Block * block = reinterpret_cast<Block*>(result);
       Block *const end_block = block + (one_block_size_ / sizeof(Block));
       ++block;
@@ -57,7 +57,7 @@ public:
       }
       #endif
 		}
-//    CheckBlockValidness(result);
+    CheckBlockValidness(result);
     ++blocks_allocated_;
 		return result;
 	}
@@ -65,12 +65,12 @@ public:
 	void Free(void * ptr) {
     assert(valid());
 		assert(blocks_allocated_ > 0);
-//    CheckBlockValidness(ptr);
+    CheckBlockValidness(ptr);
     Block * block = reinterpret_cast<Block *>(ptr);
     block_stack_.Push(block);
     --blocks_allocated_;
 
-    #ifdef debug
+    #ifndef NDEBUG
     Block *const end_block = block + (one_block_size_ / sizeof(Block));
     ++block;
     for (; block < end_block; ++block) {

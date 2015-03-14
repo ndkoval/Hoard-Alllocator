@@ -134,7 +134,7 @@ private:
 	}
 
   bool HeapBellowEmptynessThreshold() {
-    return superblock_count_ > kSuperblocsInLocalHeapLowBound && BellowEmptynessThreshold(blocks_allocated_, size_);
+    return superblock_count_ > kSuperblocksInLocalHeapLowBound && BellowEmptynessThreshold(blocks_allocated_, size_);
   }
 
   static bool BellowEmptynessThreshold(size_t blocks_allocated, size_t block_size) {
