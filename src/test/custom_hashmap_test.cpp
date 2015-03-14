@@ -8,14 +8,22 @@ TEST(alloc_free_hashmap, no_alloc) {
 
 	for (int k = 0; k < 3; k++) {
 
-		for (size_t i = 0; i < max_val; i++) {
+		for (size_t i = 1; i < max_val; i++) {
 
 			hoard::AllocFreeHashMap::key_type key = reinterpret_cast<hoard::AllocFreeHashMap::key_type>( i);
 //        hoard::print("key is: ", key, "\n");
-			my_map.Add(key, i + 500);
+      if(i % 5 == 0) {
+        my_map.Add(key, i + 500);
+      } else {
+        my_map.Set(key, i + 500);
+      }
+      if(k % 2 == 1) {
+        my_map.Set(key, i + 1);
+        my_map.Set(key, i + 500);
+      }
 			ASSERT_TRUE(my_map.Contains(key));
 
-			for (size_t j = 0; j <= i; j++) {
+			for (size_t j = 1; j <= i; j++) {
 				hoard::AllocFreeHashMap::key_type key2 = reinterpret_cast<hoard::AllocFreeHashMap::key_type>( j);
 				if (!my_map.Contains(key2)) {
 //                hoard::print("after add: ", i, " lost: ", j, "\n");
@@ -36,7 +44,7 @@ TEST(alloc_free_hashmap, no_alloc) {
 
 //        my_map.PrintState();
 //    hoard::print("hi from gtest!!!\n");
-		for (size_t i = 0; i < max_val; i++) {
+		for (size_t i = 1; i < max_val; i++) {
 //        ASSERT_EQ(my_map.size(), max_val - i);
 //        hoard::print("beg\n");
 			hoard::AllocFreeHashMap::key_type key = (hoard::AllocFreeHashMap::key_type) i;
@@ -47,7 +55,7 @@ TEST(alloc_free_hashmap, no_alloc) {
 			ASSERT_TRUE(my_map.Get(key) == i + 500);
 //        hoard::print(i, my_map.get(key));
 			ASSERT_TRUE(my_map.Remove(key));
-			for (size_t j = 0; j <= i; j++) {
+			for (size_t j = 1; j <= i; j++) {
 				hoard::AllocFreeHashMap::key_type key2 = reinterpret_cast<hoard::AllocFreeHashMap::key_type>( j);
 				if (my_map.Contains(key2)) {
 //                hoard::print("after dell: ", i, " added: ", j,  "\n");

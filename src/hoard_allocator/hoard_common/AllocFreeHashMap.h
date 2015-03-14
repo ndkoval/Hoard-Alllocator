@@ -80,7 +80,7 @@ private:
     return hash & (table_entry_size_ - 1);
   }
 
-  inline void Set(size_t index, const key_type &key, const value_type &value) {
+  inline void InternalSet(size_t index, key_type key, value_type value) {
 
     if (!deleted_[index]) {
       empty_cells_--;
@@ -94,12 +94,12 @@ private:
     return table_[hint_].key == key && !deleted_[hint_] && !table_[hint_].empty();
   }
 
-  void InternalAdd(const key_type &key, const value_type &value) {
+  void InternalAdd(key_type key, value_type value) {
 //    trace("table_entry_size: ", table_entry_size_);
     size_t current_hash = FirstHash(key);
     size_t index = Index(current_hash);
     if (table_[index].empty() || deleted_[index]) {
-      Set(index, key, value);
+      InternalSet(index, key, value);
     } else {
       size_t hash2 = SecondHash(key);
       do {
@@ -107,11 +107,11 @@ private:
         index = Index(current_hash);
 
       } while (!table_[index].empty() && !deleted_[index]);
-      Set(index, key, value);
+      InternalSet(index, key, value);
     }
   }
 
-  bool InternalRemove(const key_type &key) { // true if key was in table
+  bool InternalRemove(key_type key) { // true if key was in table
     size_t index = InternalFind(key);
     if (index == kNoSuchKey) {
       return false;
@@ -122,7 +122,7 @@ private:
 
   }
 
-  size_t InternalFind(const key_type &key) {
+  size_t InternalFind(key_type key) {
     if (HintIsValid(key)) {
       return hint_;
     }
@@ -208,11 +208,22 @@ public:
 
   }
 
-  bool Contains(const key_type &key) {
+  bool Contains(key_type key) {
     return InternalFind(key) != kNoSuchKey;
 
   }
 
+  void Set(key_type key, value_type value) {
+    assert(key && "key must not be 0");
+    size_t index = InternalFind(key);
+    if (index == kNoSuchKey) {
+      Add(key, value);
+    } else {
+      table_[index].value = value;
+    }
+  }
+
+  //returns kNoSuchKey, if value not exists
   value_type Get(key_type key) {
     size_t index = InternalFind(key);
     if (index == kNoSuchKey) {
