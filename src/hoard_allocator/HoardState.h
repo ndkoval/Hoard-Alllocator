@@ -13,6 +13,10 @@
 
 namespace hoard {
 
+inline bool CanBeBigAllocation(void * ptr) {
+  return reinterpret_cast<size_t>(ptr) % kPageSize == 0;
+}
+
 class HoardState {
 
 public:
@@ -29,8 +33,8 @@ private:
   constexpr static size_t kDifferntBlockSizes = FloorLog2(kMaxBlockSize / kMinBlockSize) + 1;
 
   static size_t GetHeapIndexByBlockSize(size_t block_size) {
-    assert(IsPowerOf2(block_size));
-    return FloorLog2(block_size / kMinBlockSize);
+//    assert(IsPowerOf2(block_size));
+    return FloorLog2((block_size * 2 - 1) / kMinBlockSize);
   }
 
   class GlobalHeapGroup {

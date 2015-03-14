@@ -20,7 +20,7 @@ private:
 public:
 	LocalHeap(GlobalHeap &parent_heap)
 			: parent_heap_(parent_heap),
-				one_block_size_(parent_heap.block_size()),
+				one_block_size_(parent_heap.one_block_size()),
 				blocks_allocated_(0),
 				size_(0),
         superblock_count_(0){
@@ -76,7 +76,7 @@ public:
     return superblock_count_;
   }
 
-  size_t const one_block_size() const {
+  size_t one_block_size() const {
     return one_block_size_;
   }
 

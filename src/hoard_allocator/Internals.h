@@ -11,8 +11,6 @@ void InternalFree(void *ptr);
 
 void *InternalRealloc(void *ptr, size_t size);
 
-void *SmallAlloc(size_t size);
-
 void *BigAlloc(size_t size, size_t alignment = kPageSize);
 
 void SmallFree(void *ptr);
