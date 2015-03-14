@@ -1,7 +1,7 @@
 #ifndef TRACING_H
 #define TRACING_H
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <limits>
 
 // Generally its a bad idea to call I/O function from malloc
@@ -46,6 +46,12 @@ void trace(Ts ... objs) {
 
 	println(objs...);
 }
+template<typename ... Ts>
+void fatal_error(Ts ... objs) {
+  println(objs...);
+  std::abort();
+}
+
 
 }
 #endif
