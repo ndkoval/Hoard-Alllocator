@@ -145,6 +145,17 @@ public:
 		return magic_number_ == GetSuperblockMagic();
 	}
 
+  std::unique_lock<hoard::lock_t> GetOwnerLock() {
+    BaseHeap *block_owner = owner();
+    std::unique_lock<hoard::lock_t> owner_lock(block_owner->lock, std::defer_lock_t());
+
+    while (block_owner != owner()) {
+      block_owner = owner();
+      owner_lock = std::unique_lock<hoard::lock_t>(block_owner->lock, std::defer_lock_t());
+    }
+    return std::move(owner_lock);
+  }
+
 protected:
   void CheckBlockValidness(void *ptr) {
     char *byte_ptr = reinterpret_cast<char *>(ptr);
