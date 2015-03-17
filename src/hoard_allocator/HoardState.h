@@ -13,6 +13,10 @@
 
 namespace hoard {
 
+inline bool CanBeBigAllocation(void * ptr) {
+  return reinterpret_cast<size_t>(ptr) % kPageSize == 0;
+}
+
 class HoardState {
 
 public:
@@ -29,8 +33,8 @@ private:
   constexpr static size_t kDifferntBlockSizes = FloorLog2(kMaxBlockSize / kMinBlockSize) + 1;
 
   static size_t GetHeapIndexByBlockSize(size_t block_size) {
-    assert(IsPowerOf2(block_size));
-    return FloorLog2(block_size / kMinBlockSize);
+//    assert(IsPowerOf2(block_size));
+    return FloorLog2((block_size * 2 - 1) / kMinBlockSize);
   }
 
   class GlobalHeapGroup {
@@ -90,19 +94,24 @@ private:
   GlobalHeapGroup global_heap_group_;
   LocalHeapGroup *local_heap_groups_; //array initialised and allocated dynamically
 
-  bool CheckPageSize() {
-    hoard::trace("Page size is: ", kRealPageSize_);
-    assert(hoard::kPageSize == kRealPageSize_ && "change kPageSize and recompile lib for your machine");
-    return hoard::kPageSize == kRealPageSize_;
-  }
 };
 
 HoardState::HoardState() : superblock_manager_(),
                            global_heap_group_(superblock_manager_) {
+  trace("HoardState: ", "Construct");
+#ifndef NDEBUG
+  trace("HoardState: ", "DEBUG");
+#else
+  trace("HoardState: ", "non-DEBUG");
+#endif
+
+
   kRealPageSize_ = static_cast<size_t >(sysconf(_SC_PAGESIZE));
   kNumberOfCPU_ = static_cast<size_t>(sysconf(_SC_NPROCESSORS_ONLN));
   kNumberOfHeapGroups_ = kNumberOfCPU_ * 2;
-  CheckPageSize();
+  trace("HoardState: ", "PageSize: ", kRealPageSize_, " CPU num: ", kNumberOfCPU_, " HeapGroupsNum: ", kNumberOfHeapGroups_);
+  assert(kPageSize == kRealPageSize_ && "change kPageSize and recompile lib for your machine");
+
   local_heap_groups_ = static_cast<LocalHeapGroup *>(mmapAnonymous(sizeof(LocalHeapGroup) * kNumberOfHeapGroups_));
   for (size_t i_group = 0; i_group < kNumberOfHeapGroups_; ++i_group) {
     new(local_heap_groups_ + i_group) LocalHeapGroup(global_heap_group_);
@@ -115,6 +124,7 @@ LocalHeap &HoardState::GetLocalHeap(size_t block_size) {
 }
 
 HoardState::~HoardState() {
+  trace("HoardState: ", "Destruct");
   munmap(local_heap_groups_, sizeof(LocalHeapGroup) * kNumberOfHeapGroups_);
 }
 

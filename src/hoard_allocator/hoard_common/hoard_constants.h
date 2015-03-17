@@ -27,11 +27,12 @@ static_assert(kMinBlockSize >= sizeof(void *), "too small min Block size");
 static_assert(kMaxBlockSize < kSuperblockSize, "too big max Block size");
 static_assert(kMaxBlockSize > kMinBlockSize, "illegal block sizes");
 constexpr size_t kEmptynessFactor = 8; // power of 2
-constexpr size_t kMagicNumber = 0xdeadbeef;
+constexpr size_t kMagicNumber = 0xdeadbeefdeadbeef;
 constexpr size_t kDefaultAlignment = sizeof(void *);
 constexpr size_t kDefaultMapNewSuperblocksCount = 16;
 constexpr size_t kMaxFreeSuperblocks = 64;
-constexpr size_t kSuperblocsInLocalHeapLowBound = 1;
+static_assert(kMaxFreeSuperblocks > kDefaultMapNewSuperblocksCount, "illegal constants");
+constexpr size_t kSuperblocksInLocalHeapLowBound = 1;
 
 }
 

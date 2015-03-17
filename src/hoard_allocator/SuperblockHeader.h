@@ -48,7 +48,7 @@ public:
 		} else {
 			result = block_stack_.Pop();
 
-      #ifdef debug
+      #ifndef NDEBUG
       Block * block = reinterpret_cast<Block*>(result);
       Block *const end_block = block + (one_block_size_ / sizeof(Block));
       ++block;
@@ -57,7 +57,7 @@ public:
       }
       #endif
 		}
-//    CheckBlockValidness(result);
+    CheckBlockValidness(result);
     ++blocks_allocated_;
 		return result;
 	}
@@ -65,13 +65,12 @@ public:
 	void Free(void * ptr) {
     assert(valid());
 		assert(blocks_allocated_ > 0);
-
-//    CheckBlockValidness(ptr);
+    CheckBlockValidness(ptr);
     Block * block = reinterpret_cast<Block *>(ptr);
     block_stack_.Push(block);
     --blocks_allocated_;
 
-    #ifdef debug
+    #ifndef NDEBUG
     Block *const end_block = block + (one_block_size_ / sizeof(Block));
     ++block;
     for (; block < end_block; ++block) {
@@ -144,6 +143,17 @@ public:
 	bool valid() const {
 		return magic_number_ == GetSuperblockMagic();
 	}
+
+  std::unique_lock<hoard::lock_t> GetOwnerLock() {
+    BaseHeap *block_owner = owner();
+    std::unique_lock<hoard::lock_t> owner_lock(block_owner->lock, std::defer_lock_t());
+
+    while (block_owner != owner()) {
+      block_owner = owner();
+      owner_lock = std::unique_lock<hoard::lock_t>(block_owner->lock, std::defer_lock_t());
+    }
+    return std::move(owner_lock);
+  }
 
 protected:
   void CheckBlockValidness(void *ptr) {
