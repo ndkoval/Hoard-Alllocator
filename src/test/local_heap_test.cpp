@@ -83,3 +83,24 @@ TEST_F(LocalHeapTest, HeapGetSuperblockInvariantTest) {
     }
   }
 }
+
+TEST_F(LocalHeapTest, TransferToParentTest) {
+  void* ptr = local_heap.Alloc();
+  EXPECT_EQ(local_heap.blocks_allocated_, 1);
+  SuperblockHeader *header = SuperblockHeader::Get(ptr);
+  Superblock *superblock = header->GetSuperblock();
+  EXPECT_TRUE(header->valid());
+  local_heap.OnFreeSuperblock(superblock);
+  EXPECT_EQ(local_heap.blocks_allocated_, 0);
+}
+
+//TEST_F(LocalHeapTest, HeapGetSuperblockThresholdTest) {
+//  for (size_t i = 0; i <= kSuperblocsInLocalHeapLowBound ; ++i) {
+//    local_heap.GetSuperblock();
+//    EXPECT_FALSE(local_heap.HeapBellowEmptynessThreshold());
+//  }
+//  for (size_t i = 0; i <= kSuperblocsInLocalHeapLowBound ; ++i) {
+//    local_heap.GetSuperblock();
+//    EXPECT_TRUE(local_heap.HeapBellowEmptynessThreshold());
+//  }
+//}

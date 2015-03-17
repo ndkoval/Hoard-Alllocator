@@ -33,7 +33,7 @@ public:
 	SuperblockHeader & operator=(const Superblock &) = delete;
 
 	static SuperblockHeader *Get(void *ptr) {
-		return reinterpret_cast<SuperblockHeader *>(reinterpret_cast<size_t>(ptr) & (kSuperblockSize - 1));
+		return reinterpret_cast<SuperblockHeader *>(reinterpret_cast<size_t>(ptr) & ~(kSuperblockSize - 1));
 	}
 
 	void * Alloc() {
@@ -65,6 +65,7 @@ public:
 	void Free(void * ptr) {
     assert(valid());
 		assert(blocks_allocated_ > 0);
+
 //    CheckBlockValidness(ptr);
     Block * block = reinterpret_cast<Block *>(ptr);
     block_stack_.Push(block);
@@ -77,7 +78,6 @@ public:
       block->MakeMagic();
     }
     #endif
-
 	}
 
 

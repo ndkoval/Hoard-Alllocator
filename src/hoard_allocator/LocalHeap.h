@@ -30,20 +30,20 @@ public:
 		lock_guard guard(lock);
 		if (blocks_allocated_ == size_) {
 			GetSuperblock();
-		}
+    }
 
-		for(int i_bin = kAlmostFullBlocksBinNum; i_bin >= 0; --i_bin) {
-			SuperblockStack & bin = bins_[i_bin];
+		for(size_t i_bin = kAlmostFullBlocksBinNum; i_bin >= 0; --i_bin) {
+      SuperblockStack & bin = bins_[i_bin];
 			if (!bin.IsEmpty()) {
 				SuperblockHeader & header = bin.Top()->header();
 				assert(header.owner() == this);
-				void * allocated =  header.Alloc();
-				const size_t new_bin_num = GetBinNum(header);
-				if (new_bin_num != i_bin) {
-					Superblock * const superblock = bin.Pop();
+        void * allocated =  header.Alloc();
+        const size_t new_bin_num = GetBinNum(header);
+        if (new_bin_num != i_bin) {
+          Superblock * const superblock = bin.Pop();
 					bins_[new_bin_num].Push(superblock);
 				}
-				++blocks_allocated_;
+        ++blocks_allocated_;
 				return allocated;
 			}
 		}
@@ -100,8 +100,9 @@ private:
 			lock_guard guard(parent_heap_.lock);
 			superblock = parent_heap_.GetSuperblock();
 			SuperblockHeader& header = superblock->header();
-			assert(header.owner() == &parent_heap_);
-			header.set_owner(this);
+      assert(header.owner() == &parent_heap_);
+      bins_[0].Push(superblock);
+      header.set_owner(this);
 		}
 		SuperblockHeader& header = superblock->header();
 		assert(header.one_block_size() == one_block_size_);

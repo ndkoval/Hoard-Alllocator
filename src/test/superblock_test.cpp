@@ -30,8 +30,6 @@ protected:
 
   }
 
-
-
 };
 
 class SuperblockInitedTest : public SuperblockUninitedTest {

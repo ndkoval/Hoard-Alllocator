@@ -12,7 +12,7 @@ class SuperblockStack : public BaseStack<Superblock> {
 public:
 	void Remove(Superblock *superblock) {
 		Superblock * curent = head_;
-		while (curent != nullptr || curent != superblock) {
+		while (curent != nullptr && curent != superblock) {
 			curent = Next(head_);
 		}
 		assert(curent != nullptr && "no such element in Stack");
