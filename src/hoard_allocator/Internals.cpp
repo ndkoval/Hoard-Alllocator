@@ -1,7 +1,6 @@
 #include <cstring>
 #include <unordered_map>
 #include <algorithm>
-#include <AppKit/AppKit.h>
 
 #include "HoardState.h"
 #include "Internals.h"
