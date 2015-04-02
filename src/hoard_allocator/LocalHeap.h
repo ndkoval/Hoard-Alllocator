@@ -19,12 +19,13 @@ private:
 
 public:
 	LocalHeap(GlobalHeap &parent_heap)
-			: parent_heap_(parent_heap),
-				one_block_size_(parent_heap.one_block_size()),
+			: BaseHeap(parent_heap.one_block_size()),
+        parent_heap_(parent_heap),
 				blocks_allocated_(0),
 				size_(0),
         superblock_count_(0){
-	}
+    trace("LocalHeap: ", this, ". Construct.");
+  }
 
 	void * Alloc() {
 		lock_guard guard(lock);
@@ -43,6 +44,7 @@ public:
           Superblock * const superblock = bin.Pop();
 					bins_[new_bin_num].Push(superblock);
 				}
+        trace("LocalHeap: ", this, ". Alloc ", allocated);
         ++blocks_allocated_;
 				return allocated;
 			}
@@ -51,6 +53,7 @@ public:
 	}
 
 	virtual void OnFreeSuperblock(Superblock *superblock) override {
+    trace("LocalHeap: ", this, ". OnFreeSuperblock: ", superblock);
 		SuperblockHeader & header = superblock->header();
 		assert(header.owner() == this);
     assert(blocks_allocated_ > 0);
@@ -76,10 +79,6 @@ public:
     return superblock_count_;
   }
 
-  size_t one_block_size() const {
-    return one_block_size_;
-  }
-
   GlobalHeap & parent_heap() const {
     return parent_heap_;
   }
@@ -88,7 +87,6 @@ public:
 private:
 
 	GlobalHeap& parent_heap_;
-	const size_t one_block_size_;
 	std::array<SuperblockStack, kBinCount> bins_;
 	size_t blocks_allocated_;
 	size_t size_;
@@ -104,6 +102,9 @@ private:
       bins_[0].Push(superblock);
       header.set_owner(this);
 		}
+
+    trace("LocalHeap: ", this, ". GetSuperblock: ", superblock);
+
 		SuperblockHeader& header = superblock->header();
 		assert(header.one_block_size() == one_block_size_);
 		assert(BellowEmptynessThreshold(header));
@@ -118,6 +119,9 @@ private:
 			SuperblockStack & bin = bins_[i_bin];
 			if (!bin.IsEmpty()) {
 				Superblock *superblock = bin.Pop();
+
+        trace("LocalHeap: ", this, ". TransferSuperblockToParent: ", superblock);
+
 				SuperblockHeader &header = superblock->header();
 				assert(BellowEmptynessThreshold(header)
 						&& "Transfered superblock, shoul be bellow emptyness threshold");

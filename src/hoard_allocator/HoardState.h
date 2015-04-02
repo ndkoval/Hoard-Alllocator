@@ -119,8 +119,12 @@ HoardState::HoardState() : superblock_manager_(),
 }
 
 LocalHeap &HoardState::GetLocalHeap(size_t block_size) {
-  const size_t local_group_id = std::hash<std::thread::id>()(std::this_thread::get_id()) % kNumberOfHeapGroups_;
-  return local_heap_groups_[local_group_id][GetHeapIndexByBlockSize(block_size)];
+  const size_t thread_id = std::hash<std::thread::id>()(std::this_thread::get_id());
+  const size_t local_group_id = thread_id % kNumberOfHeapGroups_;
+  auto& res =  local_heap_groups_[local_group_id][GetHeapIndexByBlockSize(block_size)];
+  trace("GetLocalHeap ", "Thread: ", thread_id, " group_id: ", local_group_id, "got heap: ", &res);
+  
+  return res;
 }
 
 HoardState::~HoardState() {

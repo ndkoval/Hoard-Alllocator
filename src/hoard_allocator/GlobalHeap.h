@@ -9,9 +9,9 @@ namespace hoard {
 
 class GlobalHeap : public BaseHeap {
 public:
-	GlobalHeap(FreeSuperblockManager & parent_heap, size_t block_size) :
-			free_superblock_manager_(parent_heap),
-			one_block_size_(block_size) {
+	GlobalHeap(FreeSuperblockManager & parent_heap, size_t one_block_size) :
+      BaseHeap(one_block_size),
+			free_superblock_manager_(parent_heap) {
     trace("GlobalHeap: ", this, ". Construct.");
 	}
 
@@ -52,14 +52,9 @@ public:
 		}
 	}
 
-	size_t one_block_size() const {
-		return one_block_size_;
-	}
-
 private:
 	FreeSuperblockManager & free_superblock_manager_;
 	SuperblockStack superblock_stack_;
-  const size_t one_block_size_;
 };
 
 }

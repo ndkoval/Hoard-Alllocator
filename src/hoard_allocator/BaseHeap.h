@@ -13,16 +13,23 @@ class BaseHeap {
 public:
 
 	lock_t lock;
-	BaseHeap(){};
+	BaseHeap(size_t one_block_size) : one_block_size_(one_block_size){};
 	BaseHeap(const BaseHeap &) = delete;
 	BaseHeap & operator=(const BaseHeap &) = delete;
 
 	virtual void OnFreeSuperblock(Superblock *superblock) = 0;
-  virtual size_t one_block_size() const = 0; //TODO : push field "one_block_size_" to BaseHeap, and make method non-virtual
+  size_t one_block_size() const {
+    return one_block_size_;
+  }
 
 	bool operator==(const BaseHeap &another) const {
 		return this == &another;
 	}
+
+  virtual ~BaseHeap(){};
+protected:
+  const size_t one_block_size_;
+
 };
 
 }

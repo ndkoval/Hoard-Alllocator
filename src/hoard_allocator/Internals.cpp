@@ -1,6 +1,7 @@
 #include <cstring>
 #include <unordered_map>
 #include <algorithm>
+#include <AppKit/AppKit.h>
 
 #include "HoardState.h"
 #include "Internals.h"
@@ -18,6 +19,7 @@ HoardState & state = *reinterpret_cast<HoardState *>(state_data); //ugly hack. S
 
 
 void InitOnce() {
+  trace("INIT ONCE");
 	if (!thread_inited) {
 		if(!state_is_inited.load()) {
 			hoard::lock_guard guard(init_mutex);
@@ -34,6 +36,7 @@ void InitOnce() {
 
 
 void *InternalAlloc(size_t size, size_t alignment) {
+  trace("InternalAlloc ", "size: ", size, " alignment: ", alignment);
 	InitOnce();
 	assert (IsValidAlignment(alignment));
 	void *result;
@@ -47,12 +50,14 @@ void *InternalAlloc(size_t size, size_t alignment) {
 
 
 void *SmallAlloc(size_t size, size_t alignment) {
+  trace("SmallAlloc ", "size: ", size, " alignment: ", alignment);
   size = hoard::RoundUp(size, alignment);
   LocalHeap &heap = state.GetLocalHeap(size);
   return heap.Alloc();
 }
 
 void InternalFree(void *ptr) {
+  trace("InternalFree: ", ptr);
 	InitOnce();
 	if (ptr == nullptr)
 		return;
@@ -64,6 +69,7 @@ void InternalFree(void *ptr) {
 }
 
 void SmallFree(void *ptr) {
+  trace("SmallFree: ", ptr);
   Superblock *const superblock = Superblock::Get(ptr);
   SuperblockHeader &header = superblock->header();
   auto owner_lock_guard = header.GetOwnerLock();
@@ -74,6 +80,7 @@ void SmallFree(void *ptr) {
 }
 
 void *BigAlloc(size_t size, size_t alignment) {
+  trace("BigAlloc ", "size: ", size, " alignment: ", alignment);
 	assert(IsValidAlignment(alignment)); //TODO remove before release
 	void *result_ptr = mmapAnonymous(size, alignment);
 	if (!result_ptr) {
@@ -100,6 +107,7 @@ bool BigFree(void *ptr) {
 		return true;
 	} else {
 		hoard::fatal_error("Big free unmap failed on adress: ", ptr);
+    return false;
 	}
 }
 
