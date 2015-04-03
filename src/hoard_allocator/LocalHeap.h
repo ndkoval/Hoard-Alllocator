@@ -154,8 +154,8 @@ private:
     return GetBinNum(header.blocks_allocated(), header.size());
   }
 
-	static size_t GetBinNum(size_t blocs_allocated, size_t blocks_size) {
-		switch (RoundUp(blocs_allocated * 8, blocks_size) / blocks_size) {
+	static size_t GetBinNum(size_t allocated_blocks, size_t blocks_count) {
+		switch (RoundUp(allocated_blocks * 8, blocks_count) / blocks_count) {
 			case 0: return 0; // e == 0
 			case 1: return 1; // x <= 1/8
 			case 2: return 2; // <= 1/4
@@ -164,7 +164,7 @@ private:
 			case 5:
 			case 6: return 4; // <= 3/4
 			case 7:
-			case 8: return blocs_allocated == blocks_size ? 6 : 5;
+			case 8: return allocated_blocks == blocks_count ? 6 : 5;
 		}
 		assert(false && "invalid bin num");
 	}

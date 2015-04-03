@@ -71,6 +71,7 @@ public:
     --blocks_allocated_;
 
     #ifndef NDEBUG
+    trace("SuperblockHeader: ", "Free ", ptr);
     Block *const end_block = block + (one_block_size_ / sizeof(Block));
     ++block;
     for (; block < end_block; ++block) {

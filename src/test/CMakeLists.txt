@@ -54,8 +54,13 @@ add_custom_target(kreversi
   COMMAND LD_PRELOAD=./lib/libmalloc_intercept.so kreversi
   WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
 )
-
 add_dependencies(kreversi malloc_intercept)
+
+add_custom_target(nano
+  COMMAND LD_PRELOAD=./lib/libmalloc_intercept.so nano
+  WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+)
+add_dependencies(nano malloc_intercept)
 
 #####################################################################
 # Tests

@@ -31,7 +31,6 @@ protected:
 
 };
 
-
 TEST(BinNumTest, BellowAboveDifferentBins) {
   const int total_blocks = 1024 * 1024;
   const int max_bellow = total_blocks / kEmptynessFactor;
@@ -94,13 +93,39 @@ TEST_F(LocalHeapTest, TransferToParentTest) {
   EXPECT_EQ(local_heap.blocks_allocated_, 0);
 }
 
-//TEST_F(LocalHeapTest, HeapGetSuperblockThresholdTest) {
-//  for (size_t i = 0; i <= kSuperblocsInLocalHeapLowBound ; ++i) {
-//    local_heap.GetSuperblock();
-//    EXPECT_FALSE(local_heap.HeapBellowEmptynessThreshold());
-//  }
-//  for (size_t i = 0; i <= kSuperblocsInLocalHeapLowBound ; ++i) {
-//    local_heap.GetSuperblock();
-//    EXPECT_TRUE(local_heap.HeapBellowEmptynessThreshold());
-//  }
-//}
+TEST_F(LocalHeapTest, HeapGetSuperblockThresholdTest) {
+  for (size_t i = 0; i < kSuperblocksInLocalHeapLowBound; ++i) {
+    local_heap.GetSuperblock();
+    EXPECT_FALSE(local_heap.HeapBellowEmptynessThreshold());
+  }
+  for (size_t i = 0; i < kSuperblocksInLocalHeapLowBound; ++i) {
+    local_heap.GetSuperblock();
+    EXPECT_TRUE(local_heap.HeapBellowEmptynessThreshold());
+  }
+}
+
+TEST_F(LocalHeapTest, TestMoveToNextBin) {
+  SuperblockHeader *header = SuperblockHeader::Get(local_heap.Alloc());
+  for (size_t i = 1; i < header->size(); i++) {
+    size_t bin_num = local_heap.GetBinNum(i, header->size());
+    ASSERT_FALSE(local_heap.bins_[bin_num].IsEmpty());
+    local_heap.Alloc();
+  }
+}
+
+// Slow test
+TEST_F(LocalHeapTest, TestStressAlloc) {
+  SuperblockHeader *header = SuperblockHeader::Get(local_heap.Alloc());
+  size_t blocksInSuperblock = header->size();
+  for (size_t i = 1; i < blocksInSuperblock * 100; i++) {
+    local_heap.Alloc();
+  }
+}
+
+TEST_F(LocalHeapTest, TestBinStateInvalidationOnFree) {
+  void *ptr = local_heap.Alloc();
+  ASSERT_FALSE(local_heap.bins_[1].IsEmpty());
+  SuperblockHeader *header = SuperblockHeader::Get(ptr);
+  header->Free(ptr);
+  ASSERT_FALSE(local_heap.bins_[0].IsEmpty());
+}
