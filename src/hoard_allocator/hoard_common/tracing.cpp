@@ -71,7 +71,17 @@ void hoard::print_object(bool b) {
 void hoard::print() {
 }
 
+static bool enabled = true;
+
 bool hoard::trace_enabled() {
-	static bool enabled = (getenv("MALLOC_INTERCEPT_NO_TRACE") == NULL);
-	return enabled;
+	static bool system_enabled = (getenv("MALLOC_INTERCEPT_NO_TRACE") == NULL);
+	return system_enabled && enabled;
+}
+
+hoard::StopTraceGuard::StopTraceGuard() : initial_value_(enabled) {
+  enabled = false;
+}
+
+hoard::StopTraceGuard::~StopTraceGuard() {
+  enabled = initial_value_;
 }

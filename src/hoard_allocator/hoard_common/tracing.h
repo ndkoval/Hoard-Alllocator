@@ -37,6 +37,17 @@ void println(Ts ... objs) {
 	print(objs..., "\n");
 }
 
+  struct StopTraceGuard {
+    StopTraceGuard();
+    ~StopTraceGuard();
+
+  private:
+    const bool initial_value_;
+
+
+
+  };
+
 bool trace_enabled();
 
 template<typename ... Ts>
