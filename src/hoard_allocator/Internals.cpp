@@ -72,11 +72,11 @@ void SmallFree(void *ptr) {
   Superblock *const superblock = Superblock::Get(ptr);
   SuperblockHeader &header = superblock->header();
   auto owner_lock_guard = header.GetOwnerLock();
-  BaseHeap * owner = header.owner();
   assert(header.valid());
-  header.Free(ptr);
-  owner->OnFreeSuperblock(superblock);
+  BaseHeap * const owner = header.owner();
+  owner->Free(superblock, ptr);
 }
+
 
 void *BigAlloc(size_t size, size_t alignment) {
   trace("BigAlloc ", "size: ", size, " alignment: ", alignment);

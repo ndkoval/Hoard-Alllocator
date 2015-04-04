@@ -13,11 +13,7 @@ public:
 	void Remove(Superblock *superblock) {
 #ifndef NDEBUG
     // O(n) check, that superblock is in this stack
-    Superblock *curent = head_;
-    while (curent != nullptr && curent != superblock) {
-      curent = Next(curent);
-    }
-    assert(curent != nullptr && "no such element in Stack");
+    assert(Contains(superblock) && "no such element in Stack");
 #endif //debug
 		Superblock * prev = Prev(superblock);
 		Superblock *next = Next(superblock);
@@ -32,6 +28,7 @@ public:
 		}
 		SetNext(superblock, nullptr);
 		SetPrev(superblock, nullptr);
+    --size_;
 	}
 
 

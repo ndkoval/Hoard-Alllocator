@@ -17,17 +17,21 @@ public:
 	BaseHeap(const BaseHeap &) = delete;
 	BaseHeap & operator=(const BaseHeap &) = delete;
 
-	virtual void OnFreeSuperblock(Superblock *superblock) = 0;
-  size_t one_block_size() const {
-    return one_block_size_;
-  }
+  void Free(Superblock * superblock, void * ptr);
 
 	bool operator==(const BaseHeap &another) const {
 		return this == &another;
 	}
 
   virtual ~BaseHeap(){};
+
+  size_t one_block_size() const {
+    return one_block_size_;
+  }
+
 protected:
+  virtual void OnFreeSuperblock(Superblock *superblock) = 0;
+
   const size_t one_block_size_;
 
 };

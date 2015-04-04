@@ -21,11 +21,21 @@ public:
 	Superblock & operator=(const Superblock &) = delete;
 
 	static Superblock *Get(void *ptr) {
-		return reinterpret_cast<Superblock *>(reinterpret_cast<size_t>(ptr) & (kSuperblockSize - 1));
+		return reinterpret_cast<Superblock *>(reinterpret_cast<size_t>(ptr) & ~(kSuperblockSize - 1));
 	}
 
   static Superblock *Make() {
     return new (mmapAnonymous(kSuperblockSize, kSuperblockSize)) Superblock();
+  }
+
+  static Superblock *Make(size_t kBlockSize) {
+    auto res = Make();
+    res->header().Init(kBlockSize);
+    return res;
+  }
+
+  static void Destroy(Superblock * superblock )  {
+    assert(!munmap(superblock, sizeof(Superblock)));
   }
 
 	SuperblockHeader &header() {

@@ -16,16 +16,17 @@ public:
 	}
 
 	Superblock *GetSuperblock() { // callee must take lock
-    trace("GlobalHeap: ", this, ". GetSuperblock");
+    Superblock * result = nullptr;
 		if (superblock_stack_.IsEmpty()) {
-			Superblock * result = free_superblock_manager_.GetSuperblock();
+			result = free_superblock_manager_.GetSuperblock();
 			result->header().Init(one_block_size_);
 			result->header().set_owner(this);
 			return result;
 		} else {
-			Superblock *superblock = superblock_stack_.Pop();
-			return superblock;
+			result = superblock_stack_.Pop();
 		}
+    trace("GlobalHeap: ", this, ". GetSuperblock: ", result);
+    return result;
 	}
 
 	void AddSuperblock(Superblock *superblock) { // callee must take lock
@@ -42,6 +43,15 @@ public:
 		}
 	}
 
+  void CheckInvariantsOrDie() {
+    superblock_stack_.CheckInvariantsOrDie();
+  }
+
+  size_t superblock_count() {
+    return superblock_stack_.Size();
+  }
+
+protected:
 	virtual void OnFreeSuperblock(Superblock *superblock) override {
     trace("GlobalHeap: ", this, ". OnFreeSuperblock: ", superblock);
 		assert(superblock->header().owner() == this);

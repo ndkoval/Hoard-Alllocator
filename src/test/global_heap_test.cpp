@@ -70,8 +70,7 @@ TEST_F(GlobalHeapStateTest, SuperblockTransferTest) {
   global_heap1.AddSuperblock(superblock);
   EXPECT_EQ(superblock->header().owner(), &global_heap1);
 
-  superblock->header().Free(ptr);
-  global_heap1.OnFreeSuperblock(superblock);
+  global_heap1.Free(superblock, ptr);
   println("After OnFree");
   EXPECT_EQ(superblock->header().owner(), nullptr);
 //

@@ -18,7 +18,7 @@ void SuperblockLoadTest(Superblock & superblock) {
     //allocate, modify
     for (size_t j_block_iteration = 0; j_block_iteration < header.size(); ++j_block_iteration) {
       EXPECT_EQ(j_block_iteration, header.blocks_allocated());
-      char *block;
+      char *block = nullptr;
       EXPECT_NO_FATAL_FAILURE(block = (char *) header.Alloc());
       blocks.push_back(block);
       EXPECT_NO_FATAL_FAILURE(std::memset(block, 1, header.one_block_size()));

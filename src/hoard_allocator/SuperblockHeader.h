@@ -4,7 +4,6 @@
 #include <utils.h>
 #include "BaseHeap.h"
 #include "BlockStack.h"
-#include "Superblock.h"
 
 
 
@@ -140,6 +139,10 @@ public:
 	bool empty() const {
 		return blocks_allocated_ == 0;
 	}
+
+  bool full() const {
+    return blocks_allocated() == size();
+  }
 
 	bool valid() const {
 		return magic_number_ == GetSuperblockMagic();

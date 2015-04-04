@@ -99,19 +99,24 @@ private:
 			superblock = parent_heap_.GetSuperblock();
 			SuperblockHeader& header = superblock->header();
       assert(header.owner() == &parent_heap_);
-      bins_[0].Push(superblock);
       header.set_owner(this);
 		}
 
     trace("LocalHeap: ", this, ". GetSuperblock: ", superblock);
+		assert(BellowEmptynessThreshold(superblock->header()));
 
-		SuperblockHeader& header = superblock->header();
-		assert(header.one_block_size() == one_block_size_);
-		assert(BellowEmptynessThreshold(header));
-		blocks_allocated_ += header.blocks_allocated();
-		size_ += header.size();
-		++superblock_count_;
-	}
+    AcceptSuperblock(superblock);
+  }
+
+  void AcceptSuperblock(Superblock * superblock) {
+    SuperblockHeader& header = superblock->header();
+    trace("BinNum: ", GetBinNum(header));
+    assert(header.one_block_size() == one_block_size_);
+    bins_[GetBinNum(header)].Push(superblock);
+    blocks_allocated_ += header.blocks_allocated();
+    size_ += header.size();
+    ++superblock_count_;
+  }
 
   // Transfer almost empty superblock to parent
 	void TransferSuperblockToParent() {
@@ -137,6 +142,32 @@ private:
 		}
 		assert(false && "no nonempty bins");
 	}
+
+
+  void CheckInvariantsOrDie() {
+    size_t current_blocks_allocated_ = 0;
+    size_t current_size_ = 0;
+    size_t current_superblock_count_ = 0;
+
+    for (size_t i_bin = 0; i_bin < kBinCount; ++i_bin) {
+      SuperblockStack& bin = bins_[i_bin];
+      for(Superblock * superblock = bin.Top(); superblock != nullptr; superblock = superblock->header().next()) {
+        auto& header = superblock->header();
+        ++current_superblock_count_;
+        current_size_ += header.size();
+        current_blocks_allocated_ += header.blocks_allocated();
+        assert(header.owner() == this);
+        assert(i_bin == GetBinNum(header));
+      }
+      bin.CheckInvariantsOrDie();
+    }
+
+
+    assert(current_superblock_count_ == superblock_count());
+    assert(current_size_ == size());
+    assert(current_blocks_allocated_ == blocks_allocated());
+    assert(!HeapBellowEmptynessThreshold());
+  }
 
   bool HeapBellowEmptynessThreshold() {
     return superblock_count_ > kSuperblocksInLocalHeapLowBound && BellowEmptynessThreshold(blocks_allocated_, size_);

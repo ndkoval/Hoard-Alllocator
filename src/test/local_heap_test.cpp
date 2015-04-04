@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <algorithm>
 
 #define private public
 #include <LocalHeap.h>
@@ -8,6 +9,14 @@ using namespace hoard;
 
 namespace {
 size_t kBlockSize = 16;
+
+void AddSuperblockToHeap(LocalHeap & heap, Superblock * superblock) {
+  superblock->header().set_owner(&heap);
+  heap.AcceptSuperblock(superblock);
+}
+  void AddSuperblockToHeap(GlobalHeap & heap, Superblock * superblock) {
+    heap.AddSuperblock(superblock);
+  }
 }
 
 class LocalHeapTest : public ::testing::Test {
@@ -15,12 +24,15 @@ public:
   FreeSuperblockManager manager;
   GlobalHeap global_heap;
   LocalHeap local_heap;
+  LocalHeap another_local_heap;
+
 protected:
   LocalHeapTest()
       : Test(),
         manager(),
         global_heap(manager, kBlockSize),
-        local_heap(global_heap) {
+        local_heap(global_heap),
+        another_local_heap(global_heap) {
   }
 
   virtual void TearDown() override {
@@ -89,7 +101,7 @@ TEST_F(LocalHeapTest, TransferToParentTest) {
   SuperblockHeader *header = SuperblockHeader::Get(ptr);
   Superblock *superblock = header->GetSuperblock();
   EXPECT_TRUE(header->valid());
-  local_heap.OnFreeSuperblock(superblock);
+  local_heap.Free(superblock, ptr);
   EXPECT_EQ(local_heap.blocks_allocated_, 0);
 }
 
@@ -115,9 +127,10 @@ TEST_F(LocalHeapTest, TestMoveToNextBin) {
 
 // Slow test
 TEST_F(LocalHeapTest, TestStressAlloc) {
+  auto stop_trace = StopTraceGuard();
   SuperblockHeader *header = SuperblockHeader::Get(local_heap.Alloc());
   size_t blocksInSuperblock = header->size();
-  for (size_t i = 1; i < blocksInSuperblock * 100; i++) {
+  for (size_t i = 1; i < blocksInSuperblock * 10; i++) {
     local_heap.Alloc();
   }
 }
@@ -125,7 +138,86 @@ TEST_F(LocalHeapTest, TestStressAlloc) {
 TEST_F(LocalHeapTest, TestBinStateInvalidationOnFree) {
   void *ptr = local_heap.Alloc();
   ASSERT_FALSE(local_heap.bins_[1].IsEmpty());
-  SuperblockHeader *header = SuperblockHeader::Get(ptr);
-  header->Free(ptr);
+  auto * superblock = Superblock::Get(ptr);
+  local_heap.Free(superblock, ptr);
   ASSERT_FALSE(local_heap.bins_[0].IsEmpty());
+}
+
+TEST_F(LocalHeapTest, TestAllBinVisitedAlloc) {
+  auto * superblock = Superblock::Make(kBlockSize);
+  auto& header = superblock->header();
+
+  AddSuperblockToHeap(local_heap, superblock);
+
+  auto SuperblockIsInCorrectBin = [&]() {
+    return local_heap.bins_[LocalHeap::GetBinNum(header)].Contains(superblock);
+
+  };
+
+  auto visited_bins = std::vector<bool>(LocalHeap::kBinCount, false);
+  size_t prev_bin_num = 0;
+  visited_bins[prev_bin_num] = true;
+  ASSERT_TRUE(SuperblockIsInCorrectBin());
+  while (!header.full()) {
+    local_heap.Alloc();
+    ASSERT_TRUE(SuperblockIsInCorrectBin());
+    const auto current_bin = LocalHeap::GetBinNum(header);
+    ASSERT_GE(current_bin, prev_bin_num);
+    prev_bin_num = current_bin;
+    visited_bins.at(current_bin) = true;
+  }
+
+  ASSERT_EQ(0, std::count(visited_bins.begin(), visited_bins.end(), false));
+}
+
+TEST_F(LocalHeapTest, TestAllBinVisitedFree) {
+  auto * superblock = Superblock::Make(kBlockSize);
+  auto& header = superblock->header();
+
+  AddSuperblockToHeap(local_heap, superblock);
+
+  auto SuperblockIsInCorrectBin = [&]() {
+    return local_heap.bins_[LocalHeap::GetBinNum(header)].Contains(superblock);
+
+  };
+
+
+  auto allocated = std::vector<void*>();
+
+
+  while (!header.full()) {
+    allocated.push_back(local_heap.Alloc());
+  }
+
+  local_heap.CheckInvariantsOrDie();
+
+  auto visited_bins = std::vector<bool>(LocalHeap::kBinCount, false);
+  ASSERT_TRUE(SuperblockIsInCorrectBin());
+
+  size_t prev_bin_num = LocalHeap::GetBinNum(header);
+  visited_bins[prev_bin_num] = true;
+
+  std::random_shuffle(allocated.begin(), allocated.end());
+
+
+  for (auto ptr : allocated) {
+    local_heap.Free(superblock, ptr);
+    ASSERT_TRUE(SuperblockIsInCorrectBin());
+    const auto current_bin = LocalHeap::GetBinNum(header);
+    ASSERT_LE(current_bin, prev_bin_num);
+    prev_bin_num = current_bin;
+    visited_bins.at(current_bin) = true;
+  }
+
+
+  ASSERT_EQ(0, std::count(visited_bins.begin(), visited_bins.end(), false));
+}
+
+
+TEST_F(LocalHeapTest, MoveToFrontTest) {
+
+}
+
+TEST_F(LocalHeapTest, OnEmptynessThresholdSuperblockTransferTest) {
+
 }
