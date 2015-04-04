@@ -36,7 +36,7 @@ struct GlobalHeapStateTest : public ::testing::Test {
   GlobalHeap &global_heap2;
 
   GlobalHeapStateTest()
-      : global_heap1(state.global_heap_group_[0]),
+      : global_heap1(state.global_heap_group_[HoardState::GetHeapIndexByBlockSize(kBlockSize)]),
         global_heap2(state.global_heap_group_[HoardState::kDifferntBlockSizes - 1]) {
   }
 };
@@ -79,3 +79,24 @@ TEST_F(GlobalHeapStateTest, SuperblockTransferTest) {
   SuperblockLoadTest(*superblock);
 
 }
+
+TEST_F(GlobalHeapStateTest, RandomFreeFromChain) {
+  auto allocated = std::vector<void*>();
+  for(size_t iteration = 0; iteration < 100; ++iteration) {
+    auto* superblock = Superblock::Make(kBlockSize);
+    allocated.push_back(superblock->header().Alloc());
+    global_heap1.AddSuperblock(superblock);
+    global_heap1.CheckInvariantsOrDie();
+  }
+  std::random_shuffle(allocated.begin(), allocated.end());
+
+  for (void* ptr : allocated) {
+    Superblock* superblock = Superblock::Get(ptr);
+    global_heap1.Free(superblock, ptr);
+    global_heap1.CheckInvariantsOrDie();
+    ASSERT_EQ(state.superblock_manager_.GetSuperblock(), superblock);
+  }
+
+}
+
+

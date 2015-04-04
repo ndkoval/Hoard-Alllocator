@@ -11,6 +11,7 @@ class SuperblockStack : public BaseStack<Superblock> {
 
 public:
 	void Remove(Superblock *superblock) {
+    trace("stack remove");
 #ifndef NDEBUG
     // O(n) check, that superblock is in this stack
     assert(Contains(superblock) && "no such element in Stack");
@@ -29,6 +30,10 @@ public:
 		SetNext(superblock, nullptr);
 		SetPrev(superblock, nullptr);
     --size_;
+
+    CheckInvariantsOrDie();
+    trace("stack after remove");
+
 	}
 
 

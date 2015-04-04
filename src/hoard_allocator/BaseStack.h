@@ -71,10 +71,17 @@ public:
       ++current_size;
       current = Next(current);
     }
-    assert(current_size == size_);
+
+    if(current_size != size_) {
+
+      trace("current size: ", current_size);
+      trace("expecting size: ", size_);
+      assert(current_size == size_);
+    }
   }
 
 protected:
+
 	virtual void SetNext(T *t, T *value) = 0;
 
 	virtual void SetPrev(T *t, T *value) = 0;

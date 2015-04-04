@@ -9,6 +9,8 @@ using namespace hoard;
 
 namespace {
 size_t kBlockSize = 16;
+//  size_t kBlockSize = kMaxBlockSize / 4;
+
 
 void AddSuperblockToHeap(LocalHeap & heap, Superblock * superblock) {
   superblock->header().set_owner(&heap);
@@ -76,13 +78,16 @@ TEST(BinNumTest, GetBinNumMonotony) {
 }
 
 TEST_F(LocalHeapTest, HeapGetSuperblockInvariantTest) {
-  Superblock * superblock_example = Superblock::Make();
-  superblock_example->header().Init(kBlockSize);
+  auto stop_trace = StopTraceGuard();
+  Superblock * superblock_example = Superblock::Make(kBlockSize);
   for (size_t i = 0; i <= kSuperblocksInLocalHeapLowBound * 2; ++i) {
-    local_heap.GetSuperblock();
+    //local_heap.GetSuperblock();
+    for (size_t j = 0; j < superblock_example->header().size(); ++j) {
+      local_heap.Alloc();
+    }
     EXPECT_EQ(local_heap.superblock_count(), i + 1);
     EXPECT_EQ(local_heap.size(), superblock_example->header().size() * (i + 1));
-    EXPECT_EQ(local_heap.blocks_allocated(), 0);
+    EXPECT_EQ(local_heap.blocks_allocated(), superblock_example->header().size() * (i + 1));
   }
   for (SuperblockStack & bin : local_heap.bins_) {
   if(!bin.IsEmpty()) {
@@ -125,15 +130,6 @@ TEST_F(LocalHeapTest, TestMoveToNextBin) {
   }
 }
 
-// Slow test
-TEST_F(LocalHeapTest, TestStressAlloc) {
-  auto stop_trace = StopTraceGuard();
-  SuperblockHeader *header = SuperblockHeader::Get(local_heap.Alloc());
-  size_t blocksInSuperblock = header->size();
-  for (size_t i = 1; i < blocksInSuperblock * 10; i++) {
-    local_heap.Alloc();
-  }
-}
 
 TEST_F(LocalHeapTest, TestBinStateInvalidationOnFree) {
   void *ptr = local_heap.Alloc();
@@ -165,6 +161,7 @@ TEST_F(LocalHeapTest, TestAllBinVisitedAlloc) {
     ASSERT_GE(current_bin, prev_bin_num);
     prev_bin_num = current_bin;
     visited_bins.at(current_bin) = true;
+    local_heap.CheckInvariantsOrDie();
   }
 
   ASSERT_EQ(0, std::count(visited_bins.begin(), visited_bins.end(), false));
@@ -178,27 +175,18 @@ TEST_F(LocalHeapTest, TestAllBinVisitedFree) {
 
   auto SuperblockIsInCorrectBin = [&]() {
     return local_heap.bins_[LocalHeap::GetBinNum(header)].Contains(superblock);
-
   };
-
-
   auto allocated = std::vector<void*>();
-
-
   while (!header.full()) {
     allocated.push_back(local_heap.Alloc());
   }
-
   local_heap.CheckInvariantsOrDie();
 
   auto visited_bins = std::vector<bool>(LocalHeap::kBinCount, false);
   ASSERT_TRUE(SuperblockIsInCorrectBin());
-
   size_t prev_bin_num = LocalHeap::GetBinNum(header);
   visited_bins[prev_bin_num] = true;
-
   std::random_shuffle(allocated.begin(), allocated.end());
-
 
   for (auto ptr : allocated) {
     local_heap.Free(superblock, ptr);
@@ -207,17 +195,72 @@ TEST_F(LocalHeapTest, TestAllBinVisitedFree) {
     ASSERT_LE(current_bin, prev_bin_num);
     prev_bin_num = current_bin;
     visited_bins.at(current_bin) = true;
+    local_heap.CheckInvariantsOrDie();
   }
-
 
   ASSERT_EQ(0, std::count(visited_bins.begin(), visited_bins.end(), false));
 }
 
 
 TEST_F(LocalHeapTest, MoveToFrontTest) {
+  auto stop_trace = StopTraceGuard();
+  auto superblocks = std::vector<Superblock *> (8);
+  std::generate(superblocks.begin(), superblocks.end(), []() {
+    return  Superblock::Make(kBlockSize);
+  });
+  auto* const some_superblock = superblocks[superblocks.size()/ 2];
+  void* const ptr = some_superblock->header().Alloc();
+
+  for (auto* superblock :superblocks) {
+    while (superblock->header().blocks_allocated() < superblock->header().size() - 1) {
+      superblock->header().Alloc();
+    }
+    superblock->header().set_owner(&local_heap);
+    local_heap.AcceptSuperblock(superblock);
+    local_heap.CheckInvariantsOrDie();
+  }
+
+  local_heap.Free(some_superblock, ptr);
+}
+
+
+TEST_F(LocalHeapTest, TestStressAlloc) {
+  auto stop_trace = StopTraceGuard();
+  SuperblockHeader *header = SuperblockHeader::Get(local_heap.Alloc());
+  size_t blocksInSuperblock = header->size();
+  for (size_t i = 1; i < blocksInSuperblock * 10; i++) {
+    local_heap.Alloc();
+  }
+}
+
+TEST_F(LocalHeapTest, TestStressAllocFree) {
+//  auto stop_trace = StopTraceGuard();
+
+  ASSERT_EQ(local_heap.blocks_allocated(), 0);
+
+  SuperblockHeader *header = SuperblockHeader::Get(local_heap.Alloc());
+  const size_t blocksInSuperblock = header->size();
+
+
+  auto allocated = std::vector<void *>();
+  for (size_t i = 0; i < blocksInSuperblock * 5; i++) {
+    allocated.push_back(local_heap.Alloc());
+    local_heap.CheckInvariantsOrDie();
+  }
+
+  std::random_shuffle(allocated.begin(), allocated.end());
+//
+  auto allocations_moved_to_parent = std::vector<void *>();
+  for (void* ptr : allocated) {
+    auto * superblock = Superblock::Get(ptr);
+    //superblock->header().owner()->Free(superblock, ptr);
+    if (superblock->header().owner() == &local_heap) {
+      local_heap.Free(superblock, ptr);
+    } else {
+      allocations_moved_to_parent.push_back(ptr);
+    }
+    local_heap.CheckInvariantsOrDie();
+  }
 
 }
 
-TEST_F(LocalHeapTest, OnEmptynessThresholdSuperblockTransferTest) {
-
-}

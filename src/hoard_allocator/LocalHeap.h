@@ -46,26 +46,15 @@ public:
 				}
         trace("LocalHeap: ", this, ". Alloc ", allocated);
         ++blocks_allocated_;
+#ifndef NDEBUG
+        CheckInvariantsOrDie();
+#endif
 				return allocated;
 			}
 		}
 		assert(false && "no superblock choosed, shouldn't happen");
 	}
 
-	virtual void OnFreeSuperblock(Superblock *superblock) override {
-    trace("LocalHeap: ", this, ". OnFreeSuperblock: ", superblock);
-		SuperblockHeader & header = superblock->header();
-		assert(header.owner() == this);
-    assert(blocks_allocated_ > 0);
-		--blocks_allocated_;
-		const size_t old_bin_num = GetBinNum(header.blocks_allocated() + 1, header.size());
-		bins_[old_bin_num].Remove(superblock);
-		const size_t new_bin_num = GetBinNum(header);
-		bins_[new_bin_num].Push(superblock);
-		if(HeapBellowEmptynessThreshold()) {
-      TransferSuperblockToParent();
-		}
-	}
 
   size_t blocks_allocated() const {
     return blocks_allocated_;
@@ -83,6 +72,25 @@ public:
     return parent_heap_;
   }
 
+protected:
+
+  virtual void OnFreeSuperblock(Superblock *superblock) override {
+    trace("LocalHeap: ", this, ". OnFreeSuperblock: ", superblock);
+    SuperblockHeader & header = superblock->header();
+    assert(header.owner() == this);
+    assert(blocks_allocated_ > 0);
+    --blocks_allocated_;
+    const size_t old_bin_num = GetBinNum(header.blocks_allocated() + 1, header.size());
+    bins_[old_bin_num].Remove(superblock);
+    const size_t new_bin_num = GetBinNum(header);
+    bins_[new_bin_num].Push(superblock);
+    while (HeapBellowEmptynessThreshold()) {
+      TransferSuperblockToParent();
+    }
+#ifndef NDEBUG
+    CheckInvariantsOrDie();
+#endif
+  }
 
 private:
 
@@ -173,8 +181,8 @@ private:
     return superblock_count_ > kSuperblocksInLocalHeapLowBound && BellowEmptynessThreshold(blocks_allocated_, size_);
   }
 
-  static bool BellowEmptynessThreshold(size_t blocks_allocated, size_t block_size) {
-    return (blocks_allocated * kEmptynessFactor) / block_size == 0;
+  static bool BellowEmptynessThreshold(size_t blocks_allocated, size_t blocks_count) {
+    return (blocks_allocated * kEmptynessFactor) / blocks_count == 0;
   }
 
   static bool BellowEmptynessThreshold(SuperblockHeader & header) {
