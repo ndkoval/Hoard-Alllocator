@@ -39,7 +39,6 @@ public:
 
     CheckInvariantsOrDie();
     trace("stack after remove");
-
 	}
 
 protected:

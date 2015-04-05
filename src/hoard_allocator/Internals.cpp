@@ -36,12 +36,18 @@ void InitOnce() {
 
 void *InternalAlloc(size_t size, size_t alignment) {
   trace("InternalAlloc ", "size: ", size, " alignment: ", alignment);
-	InitOnce();
-	assert (IsValidAlignment(alignment));
 
-  // Ugly hack for malloc(0, alignment)
-  if (size == 0) {
-    return nullptr;
+  InitOnce();
+  assert (IsValidAlignment(alignment));
+
+  if (size < kMinBlockSize) {
+    trace("InternalAlloc , change size to ", kMinBlockSize);
+    size = kMinBlockSize;
+  }
+
+  if (alignment < kDefaultAlignment) {
+    trace("InternalAlloc , change alignment to ", kMinBlockSize);
+    alignment = kDefaultAlignment;
   }
 
 	void *result;

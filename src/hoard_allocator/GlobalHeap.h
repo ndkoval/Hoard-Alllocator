@@ -25,9 +25,7 @@ public:
 			result = superblock_stack_.Pop();
 		}
     trace("GlobalHeap: ", this, ". GetSuperblock: ", result);
-#ifndef NDEBUG
     CheckInvariantsOrDie();
-#endif
     return result;
 	}
 
@@ -45,14 +43,14 @@ public:
       CheckInvariantsOrDie();
 			superblock_stack_.Push(superblock);
 		}
-#ifndef NDEBUG
     trace("after push");
     CheckInvariantsOrDie();
-#endif
 	}
 
   void CheckInvariantsOrDie() {
+#ifndef NDEBUG
     superblock_stack_.CheckInvariantsOrDie();
+#endif
   }
 
   size_t superblock_count() {
@@ -68,9 +66,7 @@ protected:
 			superblock_stack_.Remove(superblock);
 			free_superblock_manager_.AddSuperblock(superblock);
 		}
-#ifndef NDEBUG
     CheckInvariantsOrDie();
-#endif
 	}
 
 private:

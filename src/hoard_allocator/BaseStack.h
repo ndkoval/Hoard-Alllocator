@@ -65,6 +65,7 @@ public:
   }
 
   void CheckInvariantsOrDie() {
+#ifndef NDEBUG
     size_t current_size = 0;
     auto * current = head_;
     while (current != nullptr) {
@@ -77,6 +78,7 @@ public:
       trace("current size: ", current_size, ", but ", size_, " expected");
       assert(false);
     }
+#endif
   }
 
 protected:

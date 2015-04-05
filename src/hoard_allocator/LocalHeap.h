@@ -46,9 +46,7 @@ public:
 				}
         trace("LocalHeap: ", this, ". Alloc ", allocated);
         ++blocks_allocated_;
-#ifndef NDEBUG
         CheckInvariantsOrDie();
-#endif
 				return allocated;
 			}
 		}
@@ -87,9 +85,7 @@ protected:
     while (HeapBellowEmptynessThreshold()) {
       TransferSuperblockToParent();
     }
-#ifndef NDEBUG
     CheckInvariantsOrDie();
-#endif
   }
 
 private:
@@ -153,6 +149,7 @@ private:
 
 
   void CheckInvariantsOrDie() {
+#ifndef NDEBUG
     size_t current_blocks_allocated_ = 0;
     size_t current_size_ = 0;
     size_t current_superblock_count_ = 0;
@@ -175,6 +172,7 @@ private:
     assert(current_size_ == size());
     assert(current_blocks_allocated_ == blocks_allocated());
     assert(!HeapBellowEmptynessThreshold());
+#endif
   }
 
   bool HeapBellowEmptynessThreshold() {

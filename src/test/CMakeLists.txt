@@ -62,6 +62,12 @@ add_custom_target(nano
 )
 add_dependencies(nano malloc_intercept)
 
+add_custom_target(qbittorrent
+  COMMAND LD_PRELOAD=./lib/libmalloc_intercept.so qbittorrent
+  WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+)
+add_dependencies(qbittorrent malloc_intercept)
+
 #####################################################################
 # Tests
 #####################################################################

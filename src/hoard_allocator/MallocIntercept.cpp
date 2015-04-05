@@ -34,7 +34,7 @@ extern "C"
 void *malloc(size_t size) __THROW {
 	recursionGuard rg;
 
-	trace("try malloc ", size, "\n");
+	trace("try malloc ", size);
 	void *p = InternalAlloc(size);
 	trace("malloc ", size, " ", p, "\n");
 
@@ -45,7 +45,7 @@ extern "C"
 void *calloc(size_t n, size_t size) __THROW {
 	recursionGuard rg;
 
-	trace("try calloc ", n, " ", size, "\n");
+	trace("try calloc ", n, " ", size);
 	void *p = InternalAlloc(n * size);
 	trace("calloc ", n, " ", size, " ", p, "\n");
 
@@ -65,7 +65,7 @@ extern "C"
 void *realloc(void *ptr, size_t size) __THROW {
 	recursionGuard rg;
 
-	trace("try realloc ", ptr, " ", size, "\n");
+	trace("try realloc ", ptr, " ", size);
 	void *p = InternalRealloc(ptr, size);
 	trace("realloc ", ptr, " ", size, " ", p, "\n");
 
