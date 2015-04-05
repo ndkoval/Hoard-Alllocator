@@ -22,11 +22,11 @@ void InitOnce() {
 		if(!state_is_inited.load()) {
 			hoard::lock_guard guard(init_mutex);
       if(!state_is_inited.load()) {
+        trace("INIT ONCE");
 				new (&state) HoardState();
 				state_is_inited.store(true); //after construct!
 			}
 		}
-    trace("INIT ONCE");
     thread_inited = true;
 	}
 }

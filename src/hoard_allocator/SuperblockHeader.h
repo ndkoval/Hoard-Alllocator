@@ -68,9 +68,9 @@ public:
     Block * block = reinterpret_cast<Block *>(ptr);
     block_stack_.Push(block);
     --blocks_allocated_;
+    trace("SuperblockHeader: ", "Free ", ptr);
 
     #ifndef NDEBUG
-    trace("SuperblockHeader: ", "Free ", ptr);
     Block *const end_block = block + (one_block_size_ / sizeof(Block));
     ++block;
     for (; block < end_block; ++block) {

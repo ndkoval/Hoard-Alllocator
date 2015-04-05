@@ -20,9 +20,9 @@ public:
 		Superblock *next = Next(superblock);
 
     if (head_ == superblock) {
-      Pop();
-      return;
-      //head_ = Next(head_);
+//      Pop();
+//      return;
+      head_ = Next(head_);
     }
 
 		if(prev != nullptr) {

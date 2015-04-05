@@ -4,11 +4,13 @@
 #define private public
 #include <LocalHeap.h>
 #undef private
+#include <cstring>
+#include <allocation_tester.h>
 
 using namespace hoard;
 
 namespace {
-size_t kBlockSize = 16;
+constexpr size_t kBlockSize = 16;
 //  size_t kBlockSize = kMaxBlockSize / 4;
 
 
@@ -235,25 +237,97 @@ TEST_F(LocalHeapTest, TestStressAllocFree) {
   SuperblockHeader *header = SuperblockHeader::Get(local_heap.Alloc());
   const size_t blocksInSuperblock = header->size();
 
+  AllocationTester<kBlockSize> allocation_tester;
 
   auto allocated = std::vector<void *>();
   for (size_t i = 0; i < blocksInSuperblock * 20; i++) {
     allocated.push_back(local_heap.Alloc());
     local_heap.CheckInvariantsOrDie();
+    ASSERT_TRUE(allocation_tester.WriteRandomTest(allocated.back()));
   }
+
+  std::random_shuffle(allocated.begin(), allocated.end());
+  ASSERT_TRUE(allocation_tester.TestWriteAll());
+//
+  auto allocations_moved_to_parent = std::vector<void *>();
+  for (void *ptr : allocated) {
+    auto *superblock = Superblock::Get(ptr);
+    superblock->header().owner()->Free(superblock, ptr);
+//    if (superblock->header().owner() == &local_heap) {
+//      local_heap.Free(superblock, ptr);
+//    } else {
+//      allocations_moved_to_parent.push_back(ptr);
+//    }
+    local_heap.CheckInvariantsOrDie();
+  }
+
+}
+
+TEST_F(LocalHeapTest, TestStressTwoHeapsAllocFree) {
+  auto stop_trace = StopTraceGuard();
+
+  ASSERT_EQ(local_heap.blocks_allocated(), 0);
+
+  SuperblockHeader *header = SuperblockHeader::Get(local_heap.Alloc());
+  const size_t blocksInSuperblock = header->size();
+
+
+  AllocationTester<kBlockSize> allocation_tester;
+  auto allocated = std::vector<void *>();
+  for (size_t i = 0; i < blocksInSuperblock * 5; i++) {
+    allocated.push_back(local_heap.Alloc());
+    local_heap.CheckInvariantsOrDie();
+    allocation_tester.WriteRandomTest(allocated.back());
+  }
+  for (size_t i = 0; i < blocksInSuperblock * 5; i++) {
+    allocated.push_back(another_local_heap.Alloc());
+    local_heap.CheckInvariantsOrDie();
+    allocation_tester.WriteRandomTest(allocated.back());
+  }
+
+  ASSERT_TRUE(allocation_tester.TestWriteAll());
 
   std::random_shuffle(allocated.begin(), allocated.end());
 //
   auto allocations_moved_to_parent = std::vector<void *>();
   for (void *ptr : allocated) {
+    if(std::rand() % 100 < 80){
+
     auto *superblock = Superblock::Get(ptr);
-    //superblock->header().owner()->Free(superblock, ptr);
+//    superblock->header().owner()->Free(superblock, ptr);
     if (superblock->header().owner() == &local_heap) {
       local_heap.Free(superblock, ptr);
     } else {
       allocations_moved_to_parent.push_back(ptr);
     }
     local_heap.CheckInvariantsOrDie();
+    }
   }
-}
 
+  for(void * ptr : allocations_moved_to_parent) {
+    ASSERT_TRUE(allocation_tester.WriteRandomTest(ptr));
+  }
+
+
+  allocated.resize(0);
+  for (size_t i = 0; i < blocksInSuperblock * 5; i++) {
+    allocated.push_back(local_heap.Alloc());
+    local_heap.CheckInvariantsOrDie();
+    allocation_tester.WriteRandomTest(allocated.back());
+  }
+  for (size_t i = 0; i < blocksInSuperblock * 5; i++) {
+    allocated.push_back(another_local_heap.Alloc());
+    local_heap.CheckInvariantsOrDie();
+    allocation_tester.WriteRandomTest(allocated.back());
+  }
+  ASSERT_TRUE(allocation_tester.TestWriteAll());
+
+  std::random_shuffle(allocated.begin(), allocated.end());
+
+  for (void *ptr : allocated) {
+    auto *superblock = Superblock::Get(ptr);
+    superblock->header().owner()->Free(superblock, ptr);
+    local_heap.CheckInvariantsOrDie();
+  }
+
+}
