@@ -1,6 +1,3 @@
-//
-// Created by  Vladimir Skipor on 04/04/15.
-//
 #include "BaseHeap.h"
 #include "Superblock.h"
 

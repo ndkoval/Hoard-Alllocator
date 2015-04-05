@@ -38,13 +38,7 @@ protected:
   }
 
   virtual void TearDown() override {
-  }
-
-  virtual void SetUp() override {
-  };
-
-};
-
+  } virtual void SetUp() override { }; }; 
 TEST(BinNumTest, BellowAboveDifferentBins) {
   const int total_blocks = 1024 * 1024;
   const int max_bellow = total_blocks / kEmptynessFactor;
@@ -243,7 +237,7 @@ TEST_F(LocalHeapTest, TestStressAllocFree) {
 
 
   auto allocated = std::vector<void *>();
-  for (size_t i = 0; i < blocksInSuperblock * 5; i++) {
+  for (size_t i = 0; i < blocksInSuperblock * 20; i++) {
     allocated.push_back(local_heap.Alloc());
     local_heap.CheckInvariantsOrDie();
   }

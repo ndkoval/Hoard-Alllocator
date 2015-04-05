@@ -30,6 +30,7 @@ public:
 		assert(!IsEmpty());
 		T *t = head_;
 		head_ = Next(head_);
+		SetPrev(head_, nullptr);
 		SetNext(t, nullptr);
     SetPrev(t, nullptr);
     --size_;

@@ -22,6 +22,7 @@ public:
     if (head_ == superblock) {
       Pop();
       return;
+      //head_ = Next(head_);
     }
 
 		if(prev != nullptr) {
