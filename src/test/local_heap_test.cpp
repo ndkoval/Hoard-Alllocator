@@ -251,8 +251,8 @@ TEST_F(LocalHeapTest, TestStressAllocFree) {
   std::random_shuffle(allocated.begin(), allocated.end());
 //
   auto allocations_moved_to_parent = std::vector<void *>();
-  for (void* ptr : allocated) {
-    auto * superblock = Superblock::Get(ptr);
+  for (void *ptr : allocated) {
+    auto *superblock = Superblock::Get(ptr);
     //superblock->header().owner()->Free(superblock, ptr);
     if (superblock->header().owner() == &local_heap) {
       local_heap.Free(superblock, ptr);
@@ -261,6 +261,5 @@ TEST_F(LocalHeapTest, TestStressAllocFree) {
     }
     local_heap.CheckInvariantsOrDie();
   }
-
 }
 

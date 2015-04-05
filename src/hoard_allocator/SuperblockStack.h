@@ -16,28 +16,31 @@ public:
     // O(n) check, that superblock is in this stack
     assert(Contains(superblock) && "no such element in Stack");
 #endif //debug
-		Superblock * prev = Prev(superblock);
+		Superblock *prev = Prev(superblock);
 		Superblock *next = Next(superblock);
+
     if (head_ == superblock) {
-      head_ =  next;
+      Pop();
+      return;
     }
-		if(prev) {
+
+		if(prev != nullptr) {
 			SetNext(prev, next);
 		}
-		if(next) {
+
+		if(next != nullptr) {
 			SetPrev(next, prev);
 		}
-		SetNext(superblock, nullptr);
-		SetPrev(superblock, nullptr);
+
     --size_;
+
+    superblock->header().set_next(nullptr);
+    superblock->header().set_prev(nullptr);
 
     CheckInvariantsOrDie();
     trace("stack after remove");
 
 	}
-
-
-
 
 protected:
 	virtual Superblock *Next(Superblock *superblock) override {

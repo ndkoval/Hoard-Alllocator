@@ -74,9 +74,8 @@ public:
 
     if(current_size != size_) {
 
-      trace("current size: ", current_size);
-      trace("expecting size: ", size_);
-      assert(current_size == size_);
+      trace("current size: ", current_size, ", but ", size_, " expected");
+      assert(false);
     }
   }
 
