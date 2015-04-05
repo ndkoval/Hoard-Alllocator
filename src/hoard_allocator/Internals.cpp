@@ -18,7 +18,6 @@ HoardState & state = *reinterpret_cast<HoardState *>(state_data); //ugly hack. S
 
 
 void InitOnce() {
-  trace("INIT ONCE");
 	if (!thread_inited) {
 		if(!state_is_inited.load()) {
 			hoard::lock_guard guard(init_mutex);
@@ -27,7 +26,8 @@ void InitOnce() {
 				state_is_inited.store(true); //after construct!
 			}
 		}
-		thread_inited = true;
+    trace("INIT ONCE");
+    thread_inited = true;
 	}
 }
 
