@@ -38,6 +38,12 @@ void *InternalAlloc(size_t size, size_t alignment) {
   trace("InternalAlloc ", "size: ", size, " alignment: ", alignment);
 	InitOnce();
 	assert (IsValidAlignment(alignment));
+
+  // Ugly hack for malloc(0, alignment)
+  if (size == 0) {
+    return nullptr;
+  }
+
 	void *result;
 	if (size >= kMaxBlockSize) {
 		result = BigAlloc(size, alignment);
