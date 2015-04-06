@@ -15,6 +15,7 @@ TEST(utils, IsValidAlignment) {
 TEST(uitls, RoundUp) {
     EXPECT_EQ(4, RoundUp(3, 2));
     EXPECT_EQ(4, RoundUp(4, 2));
+    EXPECT_EQ(8, RoundUp(5, 4));
 }
 
 TEST(mmap, mmapAnonymous) {

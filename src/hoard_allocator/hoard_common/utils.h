@@ -31,6 +31,7 @@ constexpr unsigned long long FloorLog2(unsigned long long x) {
 inline void *GetFirstAlignedPointer(void *ptr, size_t alignment) {
 	void *result = reinterpret_cast<void *> (RoundUp(reinterpret_cast<size_t> (ptr), alignment));
 	assert(result >= ptr);
+  assert(result < reinterpret_cast<void *>(reinterpret_cast<size_t> (ptr) + alignment));
 	return result;
 }
 
@@ -58,10 +59,14 @@ inline void *mmapAnonymous(size_t size, size_t alignment) {
 		const size_t size_to_unmap_before = reinterpret_cast<size_t>(result_ptr) - reinterpret_cast<size_t>(mmaped_ptr);
 		const size_t size_to_unmap_after = reinterpret_cast<size_t>(mmaped_size) - size_to_unmap_before - rounded_size;
 		if (size_to_unmap_before != 0) {
-			assert(munmap(mmaped_ptr, size_to_unmap_before) != -1);
+      if (munmap(mmaped_ptr, size_to_unmap_before) != 0) {
+        fatal_error("Aligned mmap, unmap before failed");
+      }
 		}
 		if (size_to_unmap_after != 0) {
-			assert(munmap(reinterpret_cast<char *>(result_ptr) + rounded_size, size_to_unmap_after) != -1);
+      if (munmap(reinterpret_cast<char*>(result_ptr) + rounded_size, size_to_unmap_after) != 0) {
+        fatal_error("Aligned mmap, unmap before failed");
+      }
 		}
 		return result_ptr;
 	}
