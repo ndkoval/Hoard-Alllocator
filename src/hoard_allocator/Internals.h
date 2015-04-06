@@ -5,6 +5,8 @@
 #include "hoard_constants.h"
 namespace hoard {
 
+void ResetState();
+
 void *InternalAlloc(size_t size, size_t alignment = kDefaultAlignment);
 
 void InternalFree(void *ptr);

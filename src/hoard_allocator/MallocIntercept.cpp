@@ -2,6 +2,7 @@
 #include <utils.h>
 #include "hoard_constants.h"
 #include "Internals.h"
+#include "cstring"
 
 using namespace hoard;
 
@@ -47,6 +48,8 @@ void *calloc(size_t n, size_t size) __THROW {
 
 	trace("try calloc ", n, " ", size);
 	void *p = InternalAlloc(n * size);
+  std::memset(p, 0, size * n);
+
 	trace("calloc ", n, " ", size, " ", p, "\n");
 
 	return p;

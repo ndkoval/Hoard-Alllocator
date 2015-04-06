@@ -95,6 +95,7 @@ private:
   }
 
   void InternalAdd(key_type key, value_type value) {
+    trace("AllocFreeHashMap ", "InternalAdd: ", key, " ", value);
 //    trace("table_entry_size: ", table_entry_size_);
     size_t current_hash = FirstHash(key);
     size_t index = Index(current_hash);
@@ -112,6 +113,7 @@ private:
   }
 
   bool InternalRemove(key_type key) { // true if key was in table
+    trace("AllocFreeHashMap ", "InternalRemove: ", key);
     size_t index = InternalFind(key);
     if (index == kNoSuchKey) {
       return false;
@@ -123,6 +125,7 @@ private:
   }
 
   size_t InternalFind(key_type key) {
+    trace("AllocFreeHashMap ", "InternalFind: ", key);
     if (HintIsValid(key)) {
       return hint_;
     }
@@ -154,6 +157,7 @@ private:
   }
 
   inline void Resize(size_t new_table_mem_size) {
+    trace("AllocFreeHashMap ", "Resize: ", new_table_mem_size);
     assert(new_table_mem_size > table_entry_num_ * sizeof(TableEntry));
     hint_ = 0;
     TableEntry *old_table = table_;
@@ -192,11 +196,13 @@ public:
   }
 
   virtual ~AllocFreeHashMap() {
+    trace("AllocFreeHashMap ", "Destruct");
     assert(munmap(table_, table_mem_size_) == 0);
     assert(munmap(deleted_, deleted_mem_size_) == 0);
   }
 
   void Add(key_type key, value_type value) {
+    trace("AllocFreeHashMap ", "Add: ", key, " ", value);
     InternalAdd(key, value);
     table_entry_num_++;
     if (table_entry_num_ >= (kFullnessThreshold * table_entry_size_) >> kFixedPointShift) {
@@ -209,11 +215,13 @@ public:
   }
 
   bool Contains(key_type key) {
+    trace("AllocFreeHashMap ", "Contains: ", key);
     return InternalFind(key) != kNoSuchKey;
 
   }
 
   void Set(key_type key, value_type value) {
+    trace("AllocFreeHashMap ", "Set: ", key, " ", value);
     assert(key && "key must not be 0");
     size_t index = InternalFind(key);
     if (index == kNoSuchKey) {
@@ -225,10 +233,13 @@ public:
 
   //returns kNoSuchKey, if value not exists
   value_type Get(key_type key) {
+    trace("AllocFreeHashMap ", "Get: ", key);
     size_t index = InternalFind(key);
     if (index == kNoSuchKey) {
+      trace("AllocFreeHashMap ", "Get Result: ", "No such key");
       return kNoSuchKey;
     } else {
+      trace("AllocFreeHashMap ", "Get Result: ", table_[index].value);
       return table_[index].value;
     }
 
@@ -236,6 +247,7 @@ public:
   }
 
   bool Remove(key_type key) { // true if key was in table
+    trace("AllocFreeHashMap ", "Remove: ", key);
     bool result = InternalRemove(key);
     if (result) {
       table_entry_num_--;

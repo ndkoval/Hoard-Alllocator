@@ -1,10 +1,12 @@
 #include "cstdlib"
 #include "ldpreload_testing.h"
 #include "AllocFreeHashMap.h"
+#include "tracing.h"
 
 int main() {
-	constexpr size_t max_val = 100000;
+	constexpr size_t max_val = 10000;
 	hoard::AllocFreeHashMap my_map{};
+  auto stop_trace = hoard::StopTraceGuard();
 
 	for (int k = 0; k < 3; k++) {
 

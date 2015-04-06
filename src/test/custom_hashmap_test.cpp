@@ -1,8 +1,10 @@
 #include <map>
 #include "gtest/gtest.h"
 #include "AllocFreeHashMap.h"
+#include "tracing.h"
 
 TEST(alloc_free_hashmap, no_alloc) {
+  auto stop_trace = hoard::StopTraceGuard();
 	constexpr size_t max_val = 1023;
 	hoard::AllocFreeHashMap my_map{};
 

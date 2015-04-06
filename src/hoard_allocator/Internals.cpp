@@ -1,6 +1,4 @@
 #include <cstring>
-#include <unordered_map>
-#include <algorithm>
 
 #include "HoardState.h"
 #include "Internals.h"
@@ -23,7 +21,7 @@ void InitOnce() {
 			hoard::lock_guard guard(init_mutex);
       if(!state_is_inited.load()) {
         trace("INIT ONCE");
-				new (&state) HoardState();
+        ResetState();
 				state_is_inited.store(true); //after construct!
 			}
 		}
@@ -33,6 +31,9 @@ void InitOnce() {
 
 } // namespace
 
+void ResetState() {
+  new(&state) HoardState();
+}
 
 void *InternalAlloc(size_t size, size_t alignment) {
   trace("InternalAlloc ", "size: ", size, " alignment: ", alignment);

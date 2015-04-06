@@ -20,6 +20,10 @@ public:
     std::memcpy(allocation_map_[ptr].data(), ptr, kBlockSize);
   }
 
+  void Remove(KeyType ptr) {
+    allocation_map_.erase(ptr);
+  }
+
   bool ReadTest(KeyType ptr) {
     return std::memcmp(allocation_map_[ptr].data(), ptr, kBlockSize) == 0;
   }
@@ -53,11 +57,6 @@ public:
     }
     return res;
   }
-
-
-
-
-
 
 
 private:
