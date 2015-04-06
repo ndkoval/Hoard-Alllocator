@@ -1,7 +1,6 @@
 #ifndef HOARD_HOARD_INTERNALS_H
 #define HOARD_HOARD_INTERNALS_H
 
-#include <cstdlib>
 #include "hoard_constants.h"
 namespace hoard {
 

@@ -52,10 +52,12 @@ bool trace_enabled();
 
 template<typename ... Ts>
 void trace(Ts ... objs) {
+  #ifndef NDEBUG
 	if (!trace_enabled())
 		return;
 
 	println(objs...);
+	#endif
 }
 template<typename ... Ts>
 void fatal_error(Ts ... objs) {

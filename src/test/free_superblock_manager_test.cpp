@@ -26,17 +26,17 @@ TEST(FreeSuperblockManagerTest, return_superblock_overflow) {
 		Superblock *superblock = Superblock::Make();
 		superblock_manager.AddSuperblock(new(superblock) Superblock);
 	}
-	ASSERT_EQ(superblock_manager.superblock_count_, kMaxFreeSuperblocks);
+	ASSERT_EQ(superblock_manager.superblock_count(), kMaxFreeSuperblocks);
 }
 
 TEST(FreeSuperblockManagerTest, return_superblock_count) {
 	FreeSuperblockManager superblock_manager;
 
-	size_t old_superblocks_count = superblock_manager.superblock_count_;
+	size_t old_superblocks_count = superblock_manager.superblock_count();
 	ASSERT_TRUE(old_superblocks_count < kMaxFreeSuperblocks);
 	size_t n_superblocks = kMaxFreeSuperblocks / 2;
 	superblock_manager.MapNewSuperblocks(n_superblocks);
-	ASSERT_EQ(superblock_manager.superblock_count_, n_superblocks + old_superblocks_count);
+	ASSERT_EQ(superblock_manager.superblock_count(), n_superblocks + old_superblocks_count);
 }
 
 TEST(FreeSuperblockManagerTest, get_superblock_from_empty) {
@@ -59,15 +59,15 @@ TEST_F(StateFreeSuperblockManagerTest, return_superblock_overflow) {
     Superblock *superblock = Superblock::Make();
     superblock_manager.AddSuperblock(new(superblock) Superblock);
   }
-  ASSERT_EQ(superblock_manager.superblock_count_, kMaxFreeSuperblocks);
+  ASSERT_EQ(superblock_manager.superblock_count(), kMaxFreeSuperblocks);
 }
 
 TEST_F(StateFreeSuperblockManagerTest, return_superblock_count) {
-  size_t old_superblocks_count = superblock_manager.superblock_count_;
+  size_t old_superblocks_count = superblock_manager.superblock_count();
   ASSERT_TRUE(old_superblocks_count < kMaxFreeSuperblocks);
   size_t n_superblocks = kMaxFreeSuperblocks / 2;
   superblock_manager.MapNewSuperblocks(n_superblocks);
-  ASSERT_EQ(superblock_manager.superblock_count_, n_superblocks + old_superblocks_count);
+  ASSERT_EQ(superblock_manager.superblock_count(), n_superblocks + old_superblocks_count);
 }
 
 TEST_F(StateFreeSuperblockManagerTest, get_superblock_from_empty) {

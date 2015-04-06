@@ -204,7 +204,8 @@ private:
 			case 8: return allocated_blocks == blocks_count ? 6 : 5;
 		}
 		assert(false && "invalid bin num");
-	}
+    std::abort();
+  }
 };
 
 }

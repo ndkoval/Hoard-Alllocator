@@ -161,7 +161,8 @@ private:
     assert(new_table_mem_size > table_entry_num_ * sizeof(TableEntry));
     hint_ = 0;
     TableEntry *old_table = table_;
-    size_t old_table_entry_size = table_entry_size_, old_table_mem_size = table_mem_size_;
+    size_t old_table_entry_size = table_entry_size_;
+    size_t old_table_mem_size = table_mem_size_;
     size_t old_deleted_mem_size = deleted_mem_size_;
     bool *old_deleted = deleted_;
     size_t old_empty_cells = empty_cells_;
@@ -184,9 +185,10 @@ private:
       hoard::print("empty cells invariant lost. Expexted: ", old_empty_cells, " founded: ", empty_cell_counter, "\n");
       assert(old_empty_cells == empty_cell_counter);
     }
-
-    assert(munmap(old_table, old_table_mem_size) == 0);
-    assert(munmap(old_deleted, old_deleted_mem_size) == 0);
+    int unmap_res = munmap(old_table, old_table_mem_size);
+    assert(unmap_res == 0 && "old table unmap");
+    unmap_res = munmap(old_deleted, old_deleted_mem_size);
+    assert(unmap_res == 0);
   }
 
 public:
