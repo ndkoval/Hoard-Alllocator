@@ -37,7 +37,10 @@ public:
 
 	void * Alloc() {
     assert(valid());
-		assert(blocks_allocated_ < size_);
+    if(full()) {
+      fatal_error("Allock from full superblock");
+    }
+//		assert(blocks_allocated_ < size_);
 		void * result;
 //		if(uninited_blocs_left_ > 0) { // another allocation strategy
     if(block_stack_.IsEmpty()) {
@@ -63,6 +66,9 @@ public:
 
 	void Free(void * ptr) {
     assert(valid());
+    if(empty()) {
+      fatal_error("Free from empty superblock");
+    }
 		assert(blocks_allocated_ > 0);
     CheckBlockValidness(ptr);
     Block * block = reinterpret_cast<Block *>(ptr);
@@ -81,7 +87,9 @@ public:
 
 
 	void Init(size_t block_size) {
-		assert(blocks_allocated_ == 0 && "only free Superblock can be inited");
+    if(blocks_allocated() != 0) {
+      fatal_error("only free Superblock can be inited");
+    }
     assert(IsPowerOf2(block_size));
     assert(block_size < kSuperblockSize && "Block must bee smaller than Superblock");
     assert(block_size >= kMinBlockSize && "Too small one_block_size");
@@ -161,10 +169,12 @@ public:
 
 protected:
   void CheckBlockValidness(void *ptr) {
+#ifndef NDEBUG
     char *byte_ptr = reinterpret_cast<char *>(ptr);
     assert(blocks_start_ <= byte_ptr && "Freed block not in valid range");
     assert(byte_ptr < noninited_blocks_start_ && "Freed block not in valid range");
     assert(reinterpret_cast<size_t>(byte_ptr) % one_block_size_ == 0 && "Invalid block allignment");
+#endif
   };
 
 private:

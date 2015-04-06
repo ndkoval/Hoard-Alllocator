@@ -44,7 +44,6 @@ public:
 
 	void AddSuperblock(Superblock *superblock) {
     trace("SuperblockManager: ", "AddSuperblock: ", superblock);
-    println("SuperblockManager: ", "AddSuperblock: ", superblock);
 		lock_guard guard(lock_);
     superblock->header().set_owner(nullptr);
 
@@ -55,9 +54,9 @@ public:
 		} else {
       trace("SuperblockManager: ", "Superblock Destroyed: ", superblock);
       --superblock_alive_;
-			munmap(superblock, sizeof(superblock));
+			munmap(superblock, sizeof(Superblock));
 		}
-    println("SuperblockManager: superblocks_alive: ", superblock_alive_);
+    trace("SuperblockManager: superblocks_alive: ", superblock_alive_);
 	}
 
 private:
@@ -72,14 +71,13 @@ private:
 
 	void MapNewSuperblocks(size_t count) {
     trace("SuperblockManager: ", "MapNewSuperblocks: ", count);
-    println("SuperblockManager: ", "MapNewSuperblocks: ", count);
-    println("SuperblockManager: superblocks_alive: ", superblock_alive_);
 		Superblock *newSuperBlocksMemory = reinterpret_cast<Superblock *>(mmapAnonymous(count * sizeof(Superblock), sizeof(Superblock)));
 		for (size_t i = 0; i < count; i++, newSuperBlocksMemory++) {
 			superblock_stack_.Push(new(newSuperBlocksMemory) Superblock);
 		}
 //		superblock_count_ += count;
 		superblock_alive_ += count;
+    trace("SuperblockManager: superblocks_alive: ", superblock_alive_);
 	}
 };
 
