@@ -199,8 +199,10 @@ public:
 
   virtual ~AllocFreeHashMap() {
     trace("AllocFreeHashMap ", "Destruct");
-    assert(munmap(table_, table_mem_size_) == 0);
-    assert(munmap(deleted_, deleted_mem_size_) == 0);
+    int unmap_res = munmap(table_, table_mem_size_);
+    assert(unmap_res == 0);
+    unmap_res = munmap(deleted_, deleted_mem_size_);
+    assert(unmap_res == 0);
   }
 
   void Add(key_type key, value_type value) {
