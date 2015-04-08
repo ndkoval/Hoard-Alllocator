@@ -51,6 +51,7 @@ public:
 			}
 		}
 		fatal_error("no superblock choosed, shouldn't happen");
+    return nullptr; // not reached
 	}
 
 

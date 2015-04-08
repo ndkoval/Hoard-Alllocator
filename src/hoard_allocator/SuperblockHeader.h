@@ -97,7 +97,7 @@ public:
 		blocks_start_ = reinterpret_cast<char *> (this) + RoundUp(sizeof(SuperblockHeader), one_block_size_);
     assert(reinterpret_cast<size_t>(blocks_start_) % one_block_size_ == 0 && "Invalid block_start allignment");
 		noninited_blocks_start_ = blocks_start_;
-		assert(size_ == (reinterpret_cast<char *>(this) + kSuperblockSize - blocks_start_) / block_size); // todo remove before release
+		assert(size_ == (reinterpret_cast<char *>(this) + kSuperblockSize - blocks_start_) / block_size);
 		blocks_allocated_ = 0;
 		uninited_blocs_left_ = size_;
 		magic_number_ = GetSuperblockMagic();
@@ -164,6 +164,7 @@ public:
       block_owner = owner();
       owner_lock = std::unique_lock<hoard::lock_t>(block_owner->lock);
     }
+    trace("SuperblockHeader: ", this, " GotOwnerLock: ", block_owner);
     return std::move(owner_lock);
   }
 

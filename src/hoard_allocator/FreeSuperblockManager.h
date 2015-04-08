@@ -11,8 +11,7 @@ namespace hoard {
 class FreeSuperblockManager {
 
 public:
-	FreeSuperblockManager()
-//      : superblock_count_(0)
+	FreeSuperblockManager() : superblock_alive_(0)
   {
 		MapNewSuperblocks(kDefaultMapNewSuperblocksCount);
     trace("SuperblockManager: ", "Construct");
@@ -37,7 +36,6 @@ public:
 		if (superblock_stack_.IsEmpty()) {
 			MapNewSuperblocks(kDefaultMapNewSuperblocksCount);
 		}
-//		superblock_count_--;
 
 		return superblock_stack_.Pop();
 	}
@@ -50,7 +48,6 @@ public:
 		if (superblock_count() < kMaxFreeSuperblocks) {
       trace("SuperblockManager: ", "Superblock Saved: ", superblock);
 			superblock_stack_.Push(superblock);
-//			superblock_count_++;
 		} else {
       trace("SuperblockManager: ", "Superblock Destroyed: ", superblock);
       --superblock_alive_;
@@ -60,14 +57,13 @@ public:
 	}
 
 private:
-	SuperblockStack superblock_stack_;
+	lock_t lock_;
+  size_t superblock_alive_;
+  SuperblockStack superblock_stack_;
+
   size_t superblock_count() {
     return superblock_stack_.Size();
   }
-	//size_t superblock_count_;
-	lock_t lock_;
-
-  size_t superblock_alive_ = 0;
 
 	void MapNewSuperblocks(size_t count) {
     trace("SuperblockManager: ", "MapNewSuperblocks: ", count);
@@ -76,7 +72,6 @@ private:
 		for (size_t i = 0; i < count; i++, newSuperBlocksMemory++) {
 			superblock_stack_.Push(new(newSuperBlocksMemory) Superblock);
 		}
-//		superblock_count_ += count;
 		superblock_alive_ += count;
     trace("SuperblockManager: superblocks_alive: ", superblock_alive_);
 	}

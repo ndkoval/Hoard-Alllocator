@@ -96,11 +96,11 @@ private:
 
 };
 
-HoardState::HoardState() : superblock_manager_(),
-                           global_heap_group_(superblock_manager_),
-                           kRealPageSize_(static_cast<size_t >(sysconf(_SC_PAGESIZE))),
+HoardState::HoardState() : kRealPageSize_(static_cast<size_t >(sysconf(_SC_PAGESIZE))),
                            kNumberOfCPU_ (static_cast<size_t>(sysconf(_SC_NPROCESSORS_ONLN))),
-                           kNumberOfHeapGroups_(kNumberOfCPU_ * 2) {
+                           kNumberOfHeapGroups_(kNumberOfCPU_ * 2),
+                           superblock_manager_(),
+                           global_heap_group_(superblock_manager_) {
   trace("HoardState: ", "Construct");
 #ifndef NDEBUG
   trace("HoardState: ", "DEBUG");
@@ -115,9 +115,8 @@ HoardState::HoardState() : superblock_manager_(),
   }
 
   local_heap_groups_ = static_cast<LocalHeapGroup *>(mmapAnonymous(sizeof(LocalHeapGroup) * kNumberOfHeapGroups_));
-  if(local_heap_groups_ == nullptr) {
-    fatal_error("can't allocate local heap groups");
-  }
+  check_fatal(local_heap_groups_ != nullptr, "can't allocate local heap groups");
+
   for (size_t i_group = 0; i_group < kNumberOfHeapGroups_; ++i_group) {
     new(local_heap_groups_ + i_group) LocalHeapGroup(global_heap_group_);
   }
@@ -128,7 +127,6 @@ LocalHeap &HoardState::GetLocalHeap(size_t block_size) {
   const size_t local_group_id = thread_id % kNumberOfHeapGroups_;
   LocalHeap& res =  local_heap_groups_[local_group_id][GetHeapIndexByBlockSize(block_size)];
   trace("GetLocalHeap ", "Thread: ", thread_id, " group_id: ", local_group_id, " got heap: ", &res, " block_size: ", res.one_block_size());
-  
   return res;
 }
 

@@ -102,7 +102,7 @@ private:
     if (table_[index].empty() || deleted_[index]) {
       InternalSet(index, key, value);
     } else {
-      size_t hash2 = SecondHash(key);
+      const size_t hash2 = SecondHash(key);
       do {
         current_hash += hash2;
         index = Index(current_hash);
@@ -114,7 +114,7 @@ private:
 
   bool InternalRemove(key_type key) { // true if key was in table
     trace("AllocFreeHashMap ", "InternalRemove: ", key);
-    size_t index = InternalFind(key);
+    const size_t index = InternalFind(key);
     if (index == kNoSuchKey) {
       return false;
     } else {
@@ -142,10 +142,10 @@ private:
 
   inline void InitNewTable(size_t new_table_mem_size) {
     trace("Table init: ", new_table_mem_size);
-    assert(IsPowerOf2(new_table_mem_size));
+    check_debug(IsPowerOf2(new_table_mem_size));
     table_mem_size_ = new_table_mem_size;
     table_entry_size_ = table_mem_size_ / sizeof(TableEntry);
-    assert(table_entry_size_ > 0);
+    check_debug(table_entry_size_ > 0);
     empty_cells_ = table_entry_size_;
     deleted_mem_size_ = RoundUp(table_entry_size_ * sizeof(bool), kPageSize);
     deleted_ = (bool *) mmapAnonymous(deleted_mem_size_);
@@ -172,23 +172,16 @@ private:
       if (!old_table[i].empty() && !old_deleted[i]) {
         entry_counter++;
         InternalAdd(old_table[i].key, old_table[i].value);
-        assert(Contains(old_table[i].key));
+//        assert(Contains(old_table[i].key));
       } else if (old_table[i].empty()) {
         empty_cell_counter++;
       }
 
     }
-    if (entry_counter != table_entry_num_) {
-      hoard::print("added in Resize: ", entry_counter, "added total: ", table_entry_num_);
-      assert(entry_counter == table_entry_num_);
-    } else if (old_empty_cells != empty_cell_counter) {
-      hoard::print("empty cells invariant lost. Expexted: ", old_empty_cells, " founded: ", empty_cell_counter, "\n");
-      assert(old_empty_cells == empty_cell_counter);
-    }
-    int unmap_res = munmap(old_table, old_table_mem_size);
-    assert(unmap_res == 0 && "old table unmap");
-    unmap_res = munmap(old_deleted, old_deleted_mem_size);
-    assert(unmap_res == 0);
+    check_fatal(entry_counter == table_entry_num_, "added in Resize: ", entry_counter, "added total: ", table_entry_num_);
+    check_fatal(old_empty_cells == empty_cell_counter, "empty cells invariant lost. Expexted: ", old_empty_cells, " founded: ", empty_cell_counter, "\n");
+    check_fatal(munmap(old_table, old_table_mem_size) == 0);
+    check_fatal(munmap(old_deleted, old_deleted_mem_size) == 0);
   }
 
 public:
@@ -199,10 +192,8 @@ public:
 
   virtual ~AllocFreeHashMap() {
     trace("AllocFreeHashMap ", "Destruct");
-    int unmap_res = munmap(table_, table_mem_size_);
-    assert(unmap_res == 0);
-    unmap_res = munmap(deleted_, deleted_mem_size_);
-    assert(unmap_res == 0);
+    check_fatal(munmap(table_, table_mem_size_) == 0);
+    check_fatal(munmap(deleted_, deleted_mem_size_) == 0);
   }
 
   void Add(key_type key, value_type value) {
@@ -238,7 +229,7 @@ public:
   //returns kNoSuchKey, if value not exists
   value_type Get(key_type key) {
     trace("AllocFreeHashMap ", "Get: ", key);
-    size_t index = InternalFind(key);
+    const size_t index = InternalFind(key);
     if (index == kNoSuchKey) {
       trace("AllocFreeHashMap ", "Get Result: ", "No such key");
       return kNoSuchKey;
@@ -252,9 +243,9 @@ public:
 
   bool Remove(key_type key) { // true if key was in table
     trace("AllocFreeHashMap ", "Remove: ", key);
-    bool result = InternalRemove(key);
+    const bool result = InternalRemove(key);
     if (result) {
-      table_entry_num_--;
+      --table_entry_num_;
       if ((table_entry_num_ <= (kEmptynessThreshold * table_entry_size_) >> kFixedPointShift) && table_mem_size_ > kMinimumTableSize) {
         Resize(table_mem_size_ / kShrinkingRate);
       }

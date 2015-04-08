@@ -52,7 +52,7 @@ void *InternalAlloc(size_t size, size_t alignment) {
   }
 
 	void *result;
-	if (size >= kMaxBlockSize) {
+	if (size > kMaxBlockSize) {
 		result = BigAlloc(size, alignment);
 	} else {
 		result = SmallAlloc(size, alignment);
