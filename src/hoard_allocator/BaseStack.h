@@ -43,7 +43,7 @@ public:
 		return head_;
 	}
 
-	bool IsEmpty() {
+	bool IsEmpty() const {
 		return head_ == nullptr;
 	}
 
@@ -63,7 +63,7 @@ public:
     return false;
   }
 
-  size_t Size() {
+  size_t Size() const {
     return size_;
   }
 

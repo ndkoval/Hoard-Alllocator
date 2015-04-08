@@ -6,7 +6,6 @@ namespace hoard {
     superblock->header().Free(ptr);
     OnFreeSuperblock(superblock);
   }
-
 }
 
 

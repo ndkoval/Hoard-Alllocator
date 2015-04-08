@@ -50,7 +50,6 @@ public:
 		if (superblock_count() < kMaxFreeSuperblocks) {
       trace("SuperblockManager: ", "Superblock Saved: ", superblock);
 			superblock_stack_.Push(superblock);
-//			superblock_count_++;
 		} else {
       trace("SuperblockManager: ", "Superblock Destroyed: ", superblock);
       --superblock_alive_;
