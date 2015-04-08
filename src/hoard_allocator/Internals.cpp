@@ -93,7 +93,7 @@ void SmallFree(void *ptr) {
 
 void *BigAlloc(size_t size, size_t alignment) {
   trace("BigAlloc ", "size: ", size, " alignment: ", alignment);
-	assert(IsValidAlignment(alignment)); //TODO remove before release
+	assert(IsValidAlignment(alignment));
 	void *result_ptr = mmapAnonymous(size, alignment);
 	if (!result_ptr) {
 		return nullptr;
@@ -143,6 +143,7 @@ void *InternalRealloc(void *ptr, size_t size) {
 
   if (is_small_allocation) {
     SuperblockHeader &header = Superblock::Get(ptr)->header();
+    //block size is valid, because can't be changed, while sb not empty
     allocation_size = header.owner()->one_block_size();
   }
 

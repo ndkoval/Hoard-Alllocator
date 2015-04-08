@@ -87,9 +87,9 @@ private:
     char data_[sizeof(LocalHeap) * kDifferntBlockSizes];
   };
 
-  size_t kRealPageSize_;
-  size_t kNumberOfCPU_;
-  size_t kNumberOfHeapGroups_;
+  const size_t kRealPageSize_;
+  const size_t kNumberOfCPU_;
+  const size_t kNumberOfHeapGroups_;
   hoard::FreeSuperblockManager superblock_manager_;
   GlobalHeapGroup global_heap_group_;
   LocalHeapGroup *local_heap_groups_; //array initialised and allocated dynamically
@@ -97,7 +97,10 @@ private:
 };
 
 HoardState::HoardState() : superblock_manager_(),
-                           global_heap_group_(superblock_manager_) {
+                           global_heap_group_(superblock_manager_),
+                           kRealPageSize_(static_cast<size_t >(sysconf(_SC_PAGESIZE))),
+                           kNumberOfCPU_ (static_cast<size_t>(sysconf(_SC_NPROCESSORS_ONLN))),
+                           kNumberOfHeapGroups_(kNumberOfCPU_ * 2) {
   trace("HoardState: ", "Construct");
 #ifndef NDEBUG
   trace("HoardState: ", "DEBUG");
@@ -106,13 +109,15 @@ HoardState::HoardState() : superblock_manager_(),
 #endif
 
 
-  kRealPageSize_ = static_cast<size_t >(sysconf(_SC_PAGESIZE));
-  kNumberOfCPU_ = static_cast<size_t>(sysconf(_SC_NPROCESSORS_ONLN));
-  kNumberOfHeapGroups_ = kNumberOfCPU_ * 2;
   trace("HoardState: ", "PageSize: ", kRealPageSize_, " CPU num: ", kNumberOfCPU_, " HeapGroupsNum: ", kNumberOfHeapGroups_);
-  assert(kPageSize == kRealPageSize_ && "change kPageSize and recompile lib for your machine");
+  if(kPageSize != kRealPageSize_) {
+    fatal_error("change kPageSize and recompile lib for your machine");
+  }
 
   local_heap_groups_ = static_cast<LocalHeapGroup *>(mmapAnonymous(sizeof(LocalHeapGroup) * kNumberOfHeapGroups_));
+  if(local_heap_groups_ == nullptr) {
+    fatal_error("can't allocate local heap groups");
+  }
   for (size_t i_group = 0; i_group < kNumberOfHeapGroups_; ++i_group) {
     new(local_heap_groups_ + i_group) LocalHeapGroup(global_heap_group_);
   }
@@ -129,7 +134,9 @@ LocalHeap &HoardState::GetLocalHeap(size_t block_size) {
 
 HoardState::~HoardState() {
   trace("HoardState: ", "Destruct");
-  munmap(local_heap_groups_, sizeof(LocalHeapGroup) * kNumberOfHeapGroups_);
+  if(munmap(local_heap_groups_, sizeof(LocalHeapGroup) * kNumberOfHeapGroups_) != 0) {
+    fatal_error("can't unmap loacal heap groups");
+  }
 }
 
 } //hoard

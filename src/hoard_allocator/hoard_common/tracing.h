@@ -61,10 +61,24 @@ void trace(Ts ... objs) {
 }
 template<typename ... Ts>
 void fatal_error(Ts ... objs) {
-  println(objs...);
+  println("Fatal Error:", objs...);
+  println("File: ", __FILE__, " Line: ", __LINE__);
   std::abort();
 }
 
+template<typename ... Ts>
+void check_fatal(bool condition, Ts ... objs) {
+  if(!condition) {
+    fatal_error(objs...);
+  }
+}
+
+template<typename ... Ts>
+void check_debug(bool condition, Ts ... objs) {
+#ifndef NDEBUG
+  check_fatal(condition, objs...);
+#endif
+}
 
 }
 #endif
