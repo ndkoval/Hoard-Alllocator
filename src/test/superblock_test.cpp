@@ -60,7 +60,7 @@ TEST_F(SuperblockInitedTest, ValidTest) {
 }
 
 TEST_F(SuperblockInitedTest, AllocTest) {
-  char *block = (char *) header.Alloc();
+  char * block = (char *) header.Alloc();
   EXPECT_NO_FATAL_FAILURE(std::memset(block, 1, kBlockSize));
   EXPECT_EQ(header.blocks_allocated(), 1);
   EXPECT_FALSE(header.empty());
