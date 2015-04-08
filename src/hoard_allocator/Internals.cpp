@@ -39,17 +39,18 @@ void *InternalAlloc(size_t size, size_t alignment) {
   trace("InternalAlloc ", "size: ", size, " alignment: ", alignment);
 
   InitOnce();
-  assert (IsValidAlignment(alignment));
+  check_fatal(IsValidAlignment(alignment), "Invalid alignment");
 
-  if (size < kMinBlockSize) {
-    trace("InternalAlloc , change size to ", kMinBlockSize);
-    size = kMinBlockSize;
-  }
+  size = std::max(size, kMaxBlockSize);
+//  if (size < kMinBlockSize) {
+//    trace("InternalAlloc , change size to ", kMinBlockSize);
+//    size = kMinBlockSize;
+//  }
 
-  if (alignment < kDefaultAlignment) {
-    trace("InternalAlloc , change alignment to ", kMinBlockSize);
-    alignment = kDefaultAlignment;
-  }
+//  if (alignment < kDefaultAlignment) {   // not needed
+//    trace("InternalAlloc , change alignment to ", kMinBlockSize);
+//    alignment = kDefaultAlignment;
+//  }
 
 	void *result;
 	if (size > kMaxBlockSize) {
@@ -63,7 +64,7 @@ void *InternalAlloc(size_t size, size_t alignment) {
 
 void *SmallAlloc(size_t size, size_t alignment) {
   trace("SmallAlloc ", "size: ", size, " alignment: ", alignment);
-  size = hoard::RoundUp(size, alignment);
+  size = std::max(size, alignment);
   LocalHeap &heap = state.GetLocalHeap(size);
   return heap.Alloc();
 }
@@ -95,7 +96,7 @@ void *BigAlloc(size_t size, size_t alignment) {
   trace("BigAlloc ", "size: ", size, " alignment: ", alignment);
 	assert(IsValidAlignment(alignment));
   size = RoundUp(size, kPageSize);// without it, can be memory leak
-	void *result_ptr = mmapAnonymous(size, alignment);
+	void * const result_ptr = mmapAligned(size, alignment);
 	if (!result_ptr) {
 		return nullptr;
 	}
@@ -111,18 +112,13 @@ bool BigFree(void *ptr) {
   trace("BigFree: ", ptr);
 	hoard::lock_guard guard(state.big_alloc_mutex);
 	const size_t size = state.big_allocates_map.Get(ptr);
-  check_fatal(size % kPageSize == 0, "invalid size");
 	if (size == AllocFreeHashMap::kNoSuchKey) {
 		return false;
 	}
-	auto unmap_result = munmap(ptr, size);
-	if (unmap_result == 0) {
-		state.big_allocates_map.Remove(ptr);
-		return true;
-	} else {
-		hoard::fatal_error("Big free unmap failed on adress: ", ptr);
-    return false;
-	}
+  check_fatal(size % kPageSize == 0, "invalid size freed"); // TODO make debug check
+	check_fatal(munmap(ptr, size) == 0, "BigFree unmap failed");
+  state.big_allocates_map.Remove(ptr);
+  return true;
 }
 
 void *InternalRealloc(void *ptr, size_t size) {
@@ -138,7 +134,7 @@ void *InternalRealloc(void *ptr, size_t size) {
 
 	size_t allocation_size = AllocFreeHashMap::kNoSuchKey;
   if(CanBeBigAllocation(ptr)) {
-    lock_guard lock(state.big_alloc_mutex);
+    hoard::lock_guard lock(state.big_alloc_mutex);
     allocation_size = state.big_allocates_map.Get(ptr);
   }
   const bool is_small_allocation = allocation_size == AllocFreeHashMap::kNoSuchKey;
@@ -149,7 +145,7 @@ void *InternalRealloc(void *ptr, size_t size) {
     allocation_size = header.owner()->one_block_size();
   }
 
-  void *result = InternalAlloc(size);
+  void * const result = InternalAlloc(size);
   if (result == nullptr) {
     return nullptr;
   }
@@ -192,7 +188,7 @@ void *InternalRealloc(void *ptr, size_t size) {
 //        state.big_allocates_map.Set(ptr, size);
 //        return ptr;
 //      } else { //> rounded_big_alloc_size
-//        void *result = mmapAnonymous(ptr, rounded_size);
+//        void *result = mmapAligned(ptr, rounded_size);
 //        if (result == nullptr) {
 //          //can't get more memory
 //          return nullptr;

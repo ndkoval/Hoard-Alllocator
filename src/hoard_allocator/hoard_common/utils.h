@@ -44,37 +44,37 @@ inline void *mmapAnonymous(size_t size) {
 	return mmapAnonymous(NULL, size);
 }
 
-inline void *mmapAnonymous(size_t size, size_t alignment) {
-	assert(IsValidAlignment(alignment));
-	//const size_t rounded_size = RoundUp(size, kPageSize);
-  check_debug(size % kPageSize == 0); //callee should know mmaped size, or that will cause memory leaks
-  auto const rounded_size = size;
-	if (alignment <= kPageSize) {
-		return mmapAnonymous(rounded_size);
-	} else { //big alignment case
-		const size_t mmaped_size = alignment + rounded_size - kPageSize;
-		void * const mmaped_ptr = mmapAnonymous(mmaped_size);
-		if (mmaped_ptr == MAP_FAILED) {
-			return nullptr;
-		}
-		void * const result_ptr = GetFirstAlignedPointer(mmaped_ptr, alignment);
-		const long long size_to_unmap_before = reinterpret_cast<size_t>(result_ptr) - reinterpret_cast<size_t>(mmaped_ptr);
-		const  long long size_to_unmap_after = reinterpret_cast<size_t>(mmaped_size) - size_to_unmap_before - rounded_size;
+inline void * mmapAligned(size_t size, size_t alignment) {
+  trace("mmapAligned: ", size, "al: ", alignment);
+  check_debug(IsValidAlignment(alignment));
+  const size_t rounded_size = RoundUp(size, kPageSize);
 
-    println(size_to_unmap_before, " ", size_to_unmap_after);
-    print_object(size_to_unmap_after);
-    check_debug(result_ptr >= mmaped_ptr, "result more or equal");
-    check_debug(size_to_unmap_before >= 0);
-    check_debug(size_to_unmap_after >= 0);
+  check_debug(rounded_size == size, "callee should know that size is rounded UP");
+
+  if (alignment <= kPageSize) {
+    return mmapAnonymous(rounded_size);
+  } else { //big alignment case
+    const size_t mmaped_size = alignment + rounded_size - kPageSize;
+    void * const mmaped_ptr = mmapAnonymous(mmaped_size);
+    if (mmaped_ptr == MAP_FAILED) {
+      return nullptr;
+    }
+    void * const result_ptr = GetFirstAlignedPointer(mmaped_ptr, alignment);
+    const size_t size_to_unmap_before = reinterpret_cast<size_t>(result_ptr) - reinterpret_cast<size_t>(mmaped_ptr);
+    const size_t size_to_unmap_after = reinterpret_cast<size_t>(mmaped_size) - size_to_unmap_before - rounded_size;
+
+    check_debug(size_to_unmap_before < mmaped_size);
+    check_debug(size_to_unmap_after < mmaped_size);
     check_debug(size_to_unmap_after + size_to_unmap_before + rounded_size == mmaped_size);
-		if (size_to_unmap_before != 0) {
+
+    if (size_to_unmap_before != 0) {
       check_fatal(munmap(mmaped_ptr, size_to_unmap_before) == 0, "Aligned mmap, unmap before failed");
     }
-		if (size_to_unmap_after != 0) {
+    if (size_to_unmap_after != 0) {
       check_fatal(munmap(reinterpret_cast<char*>(result_ptr) + rounded_size, size_to_unmap_after) == 0, "Aligned mmap, unmap after failed");
     }
-		return result_ptr;
-	}
+    return result_ptr;
+  }
 }
 
 }

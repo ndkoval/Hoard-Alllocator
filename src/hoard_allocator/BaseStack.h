@@ -75,12 +75,7 @@ public:
       ++current_size;
       current = Next(current);
     }
-
-    if(current_size != size_) {
-
-      trace("current size: ", current_size, ", but ", size_, " expected");
-      assert(false);
-    }
+    check_fatal(current_size == size_, "current size: ", current_size, ", but ", size_, " expected");
 #endif
   }
 

@@ -25,7 +25,7 @@ public:
 	}
 
   static Superblock *Make() {
-    return new (mmapAnonymous(kSuperblockSize, kSuperblockSize)) Superblock();
+    return new (mmapAligned(kSuperblockSize, kSuperblockSize)) Superblock();
   }
 
   static Superblock *Make(size_t kBlockSize) {

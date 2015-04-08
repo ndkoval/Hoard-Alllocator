@@ -67,7 +67,8 @@ private:
 
 	void MapNewSuperblocks(size_t count) {
     trace("SuperblockManager: ", "MapNewSuperblocks: ", count);
-		Superblock *newSuperBlocksMemory = reinterpret_cast<Superblock *>(mmapAnonymous(count * sizeof(Superblock), sizeof(Superblock)));
+		Superblock *newSuperBlocksMemory = reinterpret_cast<Superblock *>(mmapAligned(count * sizeof(Superblock), sizeof(Superblock)));
+
     check_fatal(newSuperBlocksMemory != nullptr, "MapNewSuperbloks");
 		for (size_t i = 0; i < count; i++, newSuperBlocksMemory++) {
 			superblock_stack_.Push(new(newSuperBlocksMemory) Superblock);

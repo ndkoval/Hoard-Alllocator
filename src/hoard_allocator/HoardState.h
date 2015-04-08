@@ -98,7 +98,7 @@ private:
 
 HoardState::HoardState() : kRealPageSize_(static_cast<size_t >(sysconf(_SC_PAGESIZE))),
                            kNumberOfCPU_ (static_cast<size_t>(sysconf(_SC_NPROCESSORS_ONLN))),
-                           kNumberOfHeapGroups_(kNumberOfCPU_ * 2),
+                           kNumberOfHeapGroups_(kNumberOfCPU_ * kHeapsPerCPU),
                            superblock_manager_(),
                            global_heap_group_(superblock_manager_) {
   trace("HoardState: ", "Construct");
