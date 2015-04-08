@@ -7,7 +7,7 @@
 using namespace hoard;
 
 namespace {
-thread_local bool insideMalloc = false;
+__thread bool insideMalloc = false;
 
 struct recursionGuard {
 	recursionGuard() {

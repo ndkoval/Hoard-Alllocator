@@ -50,7 +50,7 @@ public:
 				return allocated;
 			}
 		}
-		assert(false && "no superblock choosed, shouldn't happen");
+		fatal_error("no superblock choosed, shouldn't happen");
 	}
 
 
@@ -144,7 +144,7 @@ private:
                 return;
 			}
 		}
-		assert(false && "no nonempty bins");
+		fatal_error("no nonempty bins");
 	}
 
 

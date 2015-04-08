@@ -27,7 +27,7 @@ public:
     superblock_alive_ -= superblock_stack_.Size();
 		while (!superblock_stack_.IsEmpty()) {
 			Superblock *ptr = superblock_stack_.Pop();
-			munmap(ptr, sizeof(Superblock));
+			check_fatal(munmap(ptr, sizeof(Superblock)) == 0, "FreeSuperblockManager destruct, superblock unmap");
 		}
 	}
 
@@ -54,7 +54,7 @@ public:
 		} else {
       trace("SuperblockManager: ", "Superblock Destroyed: ", superblock);
       --superblock_alive_;
-			munmap(superblock, sizeof(Superblock));
+			check_fatal(munmap(superblock, sizeof(Superblock)) == 0, "Superblock Manager, superblock unmap");
 		}
     trace("SuperblockManager: superblocks_alive: ", superblock_alive_);
 	}
@@ -72,6 +72,7 @@ private:
 	void MapNewSuperblocks(size_t count) {
     trace("SuperblockManager: ", "MapNewSuperblocks: ", count);
 		Superblock *newSuperBlocksMemory = reinterpret_cast<Superblock *>(mmapAnonymous(count * sizeof(Superblock), sizeof(Superblock)));
+    check_fatal(newSuperBlocksMemory != nullptr, "MapNewSuperbloks");
 		for (size_t i = 0; i < count; i++, newSuperBlocksMemory++) {
 			superblock_stack_.Push(new(newSuperBlocksMemory) Superblock);
 		}

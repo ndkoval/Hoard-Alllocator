@@ -36,13 +36,11 @@ public:
 	}
 
 	void * Alloc() {
-    assert(valid());
+    check_debug(valid(), "Supreblock invalid: ", this);
     if(full()) {
       fatal_error("Allock from full superblock");
     }
-//		assert(blocks_allocated_ < size_);
 		void * result;
-//		if(uninited_blocs_left_ > 0) { // another allocation strategy
     if(block_stack_.IsEmpty()) {
 			result = noninited_blocks_start_;
 			noninited_blocks_start_ += one_block_size_;
@@ -61,20 +59,20 @@ public:
 		}
     CheckBlockValidness(result);
     ++blocks_allocated_;
+    trace("SuperblockHeader: ", this, " Alloc: ", result);
 		return result;
 	}
 
 	void Free(void * ptr) {
-    assert(valid());
+    trace("SuperblockHeader: ", this, "Free ", ptr);
+    check_debug(valid(), "Supreblock invalid: ", this);
     if(empty()) {
       fatal_error("Free from empty superblock");
     }
-		assert(blocks_allocated_ > 0);
     CheckBlockValidness(ptr);
     Block * block = reinterpret_cast<Block *>(ptr);
     block_stack_.Push(block);
     --blocks_allocated_;
-    trace("SuperblockHeader: ", "Free ", ptr);
 
     #ifndef NDEBUG
     Block *const end_block = block + (one_block_size_ / sizeof(Block));
@@ -87,6 +85,7 @@ public:
 
 
 	void Init(size_t block_size) {
+    trace("SuperblockHeader: ",this,  " Init");
     if(blocks_allocated() != 0) {
       fatal_error("only free Superblock can be inited");
     }
@@ -158,11 +157,12 @@ public:
 
   std::unique_lock<hoard::lock_t> GetOwnerLock() {
     BaseHeap *block_owner = owner();
-    std::unique_lock<hoard::lock_t> owner_lock(block_owner->lock, std::defer_lock_t());
+    trace("SuperblockHeader: ", this, " GetOwnerLock: ", owner());
+    std::unique_lock<hoard::lock_t> owner_lock(block_owner->lock);
 
     while (block_owner != owner()) {
       block_owner = owner();
-      owner_lock = std::unique_lock<hoard::lock_t>(block_owner->lock, std::defer_lock_t());
+      owner_lock = std::unique_lock<hoard::lock_t>(block_owner->lock);
     }
     return std::move(owner_lock);
   }
