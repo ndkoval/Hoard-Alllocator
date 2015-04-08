@@ -35,7 +35,7 @@ public:
   }
 
   static void Destroy(Superblock * superblock )  {
-    check_fatal(munmap(superblock, sizeof(Superblock))) == 0, "Superblock Destroy");
+    check_fatal(munmap(superblock, sizeof(Superblock)) == 0, "Superblock Destroy");
   }
 
 	SuperblockHeader &header() {
