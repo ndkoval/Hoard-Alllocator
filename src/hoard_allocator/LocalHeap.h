@@ -54,6 +54,11 @@ public:
     return nullptr; // not reached
 	}
 
+  virtual void Free(Superblock * superblock, void * ptr) override {
+    trace("LocalHeap: ", this, ". Free: ", superblock);
+    superblock->header().Free(ptr);
+    OnFreeSuperblock(superblock);
+  }
 
   size_t blocks_allocated() const {
     return blocks_allocated_;
@@ -73,9 +78,8 @@ public:
 
 protected:
 
-  virtual void OnFreeSuperblock(Superblock *superblock) override {
-    trace("LocalHeap: ", this, ". OnFreeSuperblock: ", superblock);
-    SuperblockHeader & header = superblock->header();
+  virtual void OnFreeSuperblock(Superblock* superblock) {
+    SuperblockHeader& header = superblock->header();
     assert(header.owner() == this);
     assert(blocks_allocated_ > 0);
     --blocks_allocated_;

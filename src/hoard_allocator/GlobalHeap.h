@@ -15,6 +15,12 @@ public:
     trace("GlobalHeap: ", this, ". Construct.");
 	}
 
+  virtual void Free(Superblock * superblock, void * ptr) override {
+    trace("GlobalHeap: ", this, ". Free: ", superblock);
+    superblock->header().Free(ptr);
+    OnFreeSuperblock(superblock);
+  }
+
 	Superblock *GetSuperblock() { // callee must take lock
     Superblock * result = nullptr;
 		if (superblock_stack_.IsEmpty()) {
@@ -57,9 +63,7 @@ public:
     return superblock_stack_.Size();
   }
 
-protected:
-	virtual void OnFreeSuperblock(Superblock *superblock) override {
-    trace("GlobalHeap: ", this, ". OnFreeSuperblock: ", superblock);
+	void OnFreeSuperblock(Superblock* superblock) {
 		assert(superblock->header().owner() == this);
 		if (superblock->header().empty()) {
       trace("Superblock: ", superblock, " is empty");

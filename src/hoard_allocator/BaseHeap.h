@@ -17,7 +17,6 @@ public:
 	BaseHeap(const BaseHeap &) = delete;
 	BaseHeap & operator=(const BaseHeap &) = delete;
 
-  void Free(Superblock * superblock, void * ptr);
 
 	bool operator==(const BaseHeap &another) const {
 		return this == &another;
@@ -29,8 +28,7 @@ public:
     return one_block_size_;
   }
 
-protected:
-  virtual void OnFreeSuperblock(Superblock *superblock) = 0;
+  virtual void Free(Superblock* superblock, void* ptr) = 0;
 
   const size_t one_block_size_;
 

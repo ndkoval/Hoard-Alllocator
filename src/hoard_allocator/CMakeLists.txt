@@ -6,7 +6,6 @@ include_directories(hoard_common/)
 add_library(hoard_core
   hoard_common/AllocFreeHashMap.h
   BaseHeap.h
-  BaseHeap.cpp
   Block.h
   BlockStack.h
   FreeSuperblockManager.h
