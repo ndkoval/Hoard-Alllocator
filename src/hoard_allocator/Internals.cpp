@@ -94,6 +94,7 @@ void SmallFree(void *ptr) {
 void *BigAlloc(size_t size, size_t alignment) {
   trace("BigAlloc ", "size: ", size, " alignment: ", alignment);
 	assert(IsValidAlignment(alignment));
+  size = RoundUp(size, kPageSize);// without it, can be memory leak
 	void *result_ptr = mmapAnonymous(size, alignment);
 	if (!result_ptr) {
 		return nullptr;
@@ -109,7 +110,8 @@ void *BigAlloc(size_t size, size_t alignment) {
 bool BigFree(void *ptr) {
   trace("BigFree: ", ptr);
 	hoard::lock_guard guard(state.big_alloc_mutex);
-	size_t size = state.big_allocates_map.Get(ptr);
+	const size_t size = state.big_allocates_map.Get(ptr);
+  check_fatal(size % kPageSize == 0, "invalid size");
 	if (size == AllocFreeHashMap::kNoSuchKey) {
 		return false;
 	}
