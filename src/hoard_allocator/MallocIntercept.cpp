@@ -11,10 +11,12 @@ __thread bool insideMalloc = false;
 
 struct recursionGuard {
 	recursionGuard() {
+#ifdef NDEBUG
 		if (insideMalloc) {
 			print("recursive call\n");
 			std::abort();
 		}
+#endif
 
 		insideMalloc = true;
 	}
