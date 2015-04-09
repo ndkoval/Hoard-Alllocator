@@ -2,6 +2,7 @@
 #define FREE_SUPERBLOCK_MANAGER_H
 
 #include <utils.h>
+#include "hoard_constants.h"
 #include "BaseHeap.h"
 #include "Superblock.h"
 #include "SuperblockStack.h"
@@ -9,7 +10,21 @@
 namespace hoard {
 
 class FreeSuperblockManager {
+#ifndef HOARD_USE_SUPERBLOCK_MANAGER
+public:
+  FreeSuperblockManager() = default;
+	FreeSuperblockManager(const FreeSuperblockManager &) = delete;
+	FreeSuperblockManager & operator=(const FreeSuperblockManager &) = delete;
 
+	Superblock *GetSuperblock() {
+	  return Superblock::Make();
+  }
+
+  void AddSuperblock(Superblock *superblock) {
+    Superblock::Destroy(superblock);
+  }
+
+#else
 public:
 	FreeSuperblockManager() : superblock_alive_(0)
   {
@@ -25,8 +40,8 @@ public:
 		lock_guard guard(lock_);
     superblock_alive_ -= superblock_stack_.Size();
 		while (!superblock_stack_.IsEmpty()) {
-			Superblock *ptr = superblock_stack_.Pop();
-			check_fatal(munmap(ptr, sizeof(Superblock)) == 0, "FreeSuperblockManager destruct, superblock unmap");
+			Superblock * const ptr = superblock_stack_.Pop();
+      Superblock::Destroy(ptr);
 		}
 	}
 
@@ -51,7 +66,7 @@ public:
 		} else {
       trace("SuperblockManager: ", "Superblock Destroyed: ", superblock);
       --superblock_alive_;
-			check_fatal(munmap(superblock, sizeof(Superblock)) == 0, "Superblock Manager, superblock unmap");
+      Superblock::Destroy(superblock);
 		}
     trace("SuperblockManager: superblocks_alive: ", superblock_alive_);
 	}
@@ -76,6 +91,8 @@ private:
 		superblock_alive_ += count;
     trace("SuperblockManager: superblocks_alive: ", superblock_alive_);
 	}
+
+#endif // else ifndef HOARD_USE_SUPERBLOCK_MANAGER
 };
 
 }

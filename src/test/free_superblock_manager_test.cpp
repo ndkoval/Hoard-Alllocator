@@ -12,6 +12,7 @@
 using namespace hoard;
 
 
+#ifdef HOARD_USE_SUPERBLOCK_MANAGER
 struct StateFreeSuperblockManagerTest : public ::testing::Test {
   HoardState state;
   FreeSuperblockManager & superblock_manager;
@@ -81,4 +82,6 @@ TEST_F(StateFreeSuperblockManagerTest, memory_is_aligned) {
   superblock_manager.MapNewSuperblocks(1);
   ASSERT_TRUE(reinterpret_cast<size_t>(superblock_manager.superblock_stack_.Pop()) % sizeof(Superblock) == 0);
 }
+
+#endif // HOARD_USE_SUPERBLOCK_MANAGER
 

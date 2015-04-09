@@ -72,11 +72,14 @@ TEST_F(GlobalHeapStateTest, SuperblockTransferTest) {
 
   global_heap1.Free(superblock, ptr);
   println("After OnFree");
+
+#ifdef HOARD_USE_SUPERBLOCK_MANAGER
   EXPECT_EQ(superblock->header().owner(), nullptr);
 //
   Superblock *transfered_superblock = global_heap2.GetSuperblock();
   EXPECT_EQ(superblock, transfered_superblock);
   SuperblockLoadTest(*superblock);
+#endif
 
 }
 
@@ -94,7 +97,9 @@ TEST_F(GlobalHeapStateTest, RandomFreeFromChain) {
     Superblock* superblock = Superblock::Get(ptr);
     global_heap1.Free(superblock, ptr);
     global_heap1.CheckInvariantsOrDie();
+#ifdef HOARD_USE_SUPERBLOCK_MANAGER
     ASSERT_EQ(state.superblock_manager_.GetSuperblock(), superblock);
+#endif
   }
 
 }
