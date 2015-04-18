@@ -111,10 +111,10 @@ bool BigFree(void *ptr) {
   trace("BigFree: ", ptr);
 	hoard::lock_guard guard(state.big_alloc_mutex);
 	const size_t size = state.big_allocates_map.Get(ptr);
-  check_fatal(size % kPageSize == 0, "invalid size");
 	if (size == AllocFreeHashMap::kNoSuchKey) {
 		return false;
 	}
+  check_fatal(size % kPageSize == 0, "invalid size");
 	auto unmap_result = munmap(ptr, size);
 	if (unmap_result == 0) {
 		state.big_allocates_map.Remove(ptr);
