@@ -12,7 +12,7 @@
 using namespace hoard;
 
 namespace {
-  constexpr size_t kBlockSize = 257;
+  constexpr size_t kBlockSize = 256;
 //  size_t kBlockSize = kMaxBlockSize / 4;
   constexpr size_t kIterationNum = 10000;
 

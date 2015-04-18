@@ -63,6 +63,7 @@ void *InternalAlloc(size_t size, size_t alignment) {
 
 void *SmallAlloc(size_t size, size_t alignment) {
   trace("SmallAlloc ", "size: ", size, " alignment: ", alignment);
+  check_debug(IsValidAlignment(alignment));
   size = hoard::RoundUp(size, alignment);
   LocalHeap &heap = state.GetLocalHeap(size);
   return heap.Alloc();
@@ -109,15 +110,18 @@ void *BigAlloc(size_t size, size_t alignment) {
 //returns true if ptr was big allocation
 bool BigFree(void *ptr) {
   trace("BigFree: ", ptr);
-	hoard::lock_guard guard(state.big_alloc_mutex);
-	const size_t size = state.big_allocates_map.Get(ptr);
-	if (size == AllocFreeHashMap::kNoSuchKey) {
-		return false;
-	}
+  size_t size;
+  {
+    hoard::lock_guard guard(state.big_alloc_mutex);
+    size = state.big_allocates_map.Get(ptr);
+    if (size == AllocFreeHashMap::kNoSuchKey) {
+      return false;
+    }
+    state.big_allocates_map.Remove(ptr);
+  }
   check_fatal(size % kPageSize == 0, "invalid size");
 	auto unmap_result = munmap(ptr, size);
 	if (unmap_result == 0) {
-		state.big_allocates_map.Remove(ptr);
 		return true;
 	} else {
 		hoard::fatal_error("Big free unmap failed on adress: ", ptr);

@@ -62,7 +62,7 @@ void trace(Ts ... objs) {
 template<typename ... Ts>
 void fatal_error(Ts ... objs) {
   println("Fatal Error:", objs...);
-  println("File: ", __FILE__, " Line: ", __LINE__);
+  println("File: ", __BASE_FILE__, " Line: ", __LINE__);
   std::abort();
 }
 

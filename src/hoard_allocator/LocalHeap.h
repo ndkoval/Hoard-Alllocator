@@ -180,7 +180,7 @@ private:
   }
 
   static bool BellowEmptynessThreshold(size_t blocks_allocated, size_t blocks_count) {
-    return (blocks_allocated * kEmptynessFactor) / blocks_count == 0;
+    return (blocks_allocated < blocks_count / kEmptynessFactor);
   }
 
   static bool BellowEmptynessThreshold(SuperblockHeader & header) {
@@ -192,19 +192,13 @@ private:
   }
 
 	static size_t GetBinNum(size_t allocated_blocks, size_t blocks_count) {
-		switch (RoundUp(allocated_blocks * 8, blocks_count) / blocks_count) {
-			case 0: return 0; // e == 0
-			case 1: return 1; // x <= 1/8
-			case 2: return 2; // <= 1/4
-			case 3:
-			case 4: return 3; // <= 2/4
-			case 5:
-			case 6: return 4; // <= 3/4
-			case 7:
-			case 8: return allocated_blocks == blocks_count ? 6 : 5;
-		}
-		assert(false && "invalid bin num");
-    std::abort();
+    if(allocated_blocks == 0) return 0;
+    if(8 * allocated_blocks <= blocks_count) return 1;
+    if(4 * allocated_blocks <= blocks_count) return 2;
+    if(2 * allocated_blocks <= blocks_count) return 3;
+    if(4 * allocated_blocks <= blocks_count * 3) return 4;
+    if(allocated_blocks != blocks_count) return 5;
+    return 6;
   }
 };
 

@@ -16,8 +16,10 @@ constexpr bool IsValidAlignment(size_t alignment) {
 	return (alignment % sizeof(void *)) != 0 ? false : IsPowerOf2(alignment);
 }
 
-constexpr size_t RoundUp(size_t what, size_t to) {
-	return (what + to - 1) / to * to;
+
+inline size_t RoundUp(size_t what, size_t to) { // to is pow of two
+  assert(IsPowerOf2(to));
+	return (what + to - 1) & (~(to - 1));
 }
 
 //constexpr unsigned int FloorLog2(unsigned int x) {

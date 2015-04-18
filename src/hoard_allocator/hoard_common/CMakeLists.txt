@@ -4,7 +4,7 @@ add_library(hoard_common
   tracing.h
   tracing.cpp
   AllocFreeHashMap.h
-)
+../mmap_std_allocator.h)
 target_include_directories(hoard_common PUBLIC
  ${CMAKE_CURRENT_SOURCE_DIR}
 )
